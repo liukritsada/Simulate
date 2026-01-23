@@ -1,0 +1,300 @@
+[14-Jan-2026 14:40:40 Asia/Bangkok] ====================================
+[14-Jan-2026 14:40:40 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-14 14:40:40
+[14-Jan-2026 14:40:40 Asia/Bangkok] ====================================
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📥 Import Request - Station ID: 27, Staff Type: Staff
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📄 File: tech.csv, Ext: csv, Tmp: C:\xampp\tmp\php3D66.tmp
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📖 Reading CSV file...
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📊 File size: 548 bytes
+[14-Jan-2026 14:40:40 Asia/Bangkok] ⚠️ Detected non-UTF8, converting from TIS-620
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Total lines: 10
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 1 (len: 88): 68001,สมชาย,สุขสวัสดิ�...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68001 | Name=สมชาย สุขสวัสดิ์
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 2 (len: 83): 68002,วัชรา,พิบูลสุข,15:...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68002 | Name=วัชรา พิบูลสุข
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 3 (len: 71): 68003,ธิดา,ศรีสุข,8:00,9:00,13...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68003 | Name=ธิดา ศรีสุข
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 4 (len: 57): 68004,ดำ,แดง, 8:00,9:00,13:00,17:00, 14/...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68004 | Name=ดำ แดง
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 5 (len: 67): 68005,เขียว,ขาว,8:00,12:00,17:00, ...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68005 | Name=เขียว ขาว
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 6 (len: 88): 68001,สมชาย,สุขสวัสดิ�...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68001 | Name=สมชาย สุขสวัสดิ์
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 7 (len: 83): 68002,วัชรา,พิบูลสุข,15:...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68002 | Name=วัชรา พิบูลสุข
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 8 (len: 71): 68003,ธิดา,ศรีสุข,8:00,9:00,13...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68003 | Name=ธิดา ศรีสุข
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 9 (len: 57): 68004,ดำ,แดง, 8:00,9:00,13:00,17:00, 15/...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68004 | Name=ดำ แดง
+[14-Jan-2026 14:40:40 Asia/Bangkok] Line 10 (len: 67): 68005,เขียว,ขาว,8:00,12:00,17:00, ...
+[14-Jan-2026 14:40:40 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ✅ ACCEPTED: ID=68005 | Name=เขียว ขาว
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Total valid rows: 10
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📊 Total rows after reading: 10
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 1:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68001' | Name='สมชาย สุขสวัสดิ์'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 12:00:00 - 13:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: available (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 1 IMPORTED with status=available
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 2:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68002' | Name='วัชรา พิบูลสุข'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 15:00:00 - 20:00:00 | Break: 16:00:00 - 17:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: waiting_to_start (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 2 IMPORTED with status=waiting_to_start
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 3:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68003' | Name='ธิดา ศรีสุข'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 09:00:00 - 13:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: available (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 3 IMPORTED with status=available
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 4:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68004' | Name='ดำ แดง'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 09:00:00 - 13:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: available (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 4 IMPORTED with status=available
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 5:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68005' | Name='เขียว ขาว'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 08:00:00 - 20:00:00 | Break: 12:00:00 - 17:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: on_break (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 5 IMPORTED with status=on_break
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 6:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68001' | Name='สมชาย สุขสวัสดิ์'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 12:00:00 - 13:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: available (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 6 IMPORTED with status=available
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 7:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68002' | Name='วัชรา พิบูลสุข'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 15:00:00 - 20:00:00 | Break: 16:00:00 - 17:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: waiting_to_start (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 7 IMPORTED with status=waiting_to_start
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 8:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68003' | Name='ธิดา ศรีสุข'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 09:00:00 - 13:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: available (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 8 IMPORTED with status=available
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 9:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68004' | Name='ดำ แดง'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 09:00:00 - 13:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: available (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 9 IMPORTED with status=available
+[14-Jan-2026 14:40:40 Asia/Bangkok] Row 10:
+[14-Jan-2026 14:40:40 Asia/Bangkok]   ID='68005' | Name='เขียว ขาว'
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Time: 08:00:00 - 20:00:00 | Break: 12:00:00 - 17:00:00
+[14-Jan-2026 14:40:40 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 14:40:40 Asia/Bangkok] 📋 Calculated status: on_break (current time: 14:40:40)
+[14-Jan-2026 14:40:40 Asia/Bangkok] ✅ Row 10 IMPORTED with status=on_break
+[14-Jan-2026 15:43:26 Asia/Bangkok] ====================================
+[14-Jan-2026 15:43:26 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-14 15:43:26
+[14-Jan-2026 15:43:26 Asia/Bangkok] ====================================
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📥 Import Request - Station ID: 27, Staff Type: Staff
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📄 File: tech.csv, Ext: csv, Tmp: C:\xampp\tmp\phpB35D.tmp
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📖 Reading CSV file...
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📊 File size: 548 bytes
+[14-Jan-2026 15:43:26 Asia/Bangkok] ⚠️ Detected non-UTF8, converting from TIS-620
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Total lines: 10
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 1 (len: 88): 68001,สมชาย,สุขสวัสดิ�...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68001 | Name=สมชาย สุขสวัสดิ์
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 2 (len: 83): 68002,วัชรา,พิบูลสุข,15:...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68002 | Name=วัชรา พิบูลสุข
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 3 (len: 71): 68003,ธิดา,ศรีสุข,8:00,9:00,13...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68003 | Name=ธิดา ศรีสุข
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 4 (len: 57): 68004,ดำ,แดง, 8:00,9:00,13:00,17:00, 14/...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68004 | Name=ดำ แดง
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 5 (len: 67): 68005,เขียว,ขาว,8:00,12:00,17:00, ...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68005 | Name=เขียว ขาว
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 6 (len: 88): 68001,สมชาย,สุขสวัสดิ�...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68001 | Name=สมชาย สุขสวัสดิ์
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 7 (len: 83): 68002,วัชรา,พิบูลสุข,15:...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68002 | Name=วัชรา พิบูลสุข
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 8 (len: 71): 68003,ธิดา,ศรีสุข,8:00,9:00,13...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68003 | Name=ธิดา ศรีสุข
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 9 (len: 57): 68004,ดำ,แดง, 8:00,9:00,13:00,17:00, 15/...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68004 | Name=ดำ แดง
+[14-Jan-2026 15:43:26 Asia/Bangkok] Line 10 (len: 67): 68005,เขียว,ขาว,8:00,12:00,17:00, ...
+[14-Jan-2026 15:43:26 Asia/Bangkok]   → Parsed: 8 columns
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ✅ ACCEPTED: ID=68005 | Name=เขียว ขาว
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Total valid rows: 10
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📊 Total rows after reading: 10
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 1:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68001' | Name='สมชาย สุขสวัสดิ์'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 12:00:00 - 13:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: available (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 1 IMPORTED with status=available
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 2:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68002' | Name='วัชรา พิบูลสุข'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 15:00:00 - 20:00:00 | Break: 16:00:00 - 17:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: available (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 2 IMPORTED with status=available
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 3:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68003' | Name='ธิดา ศรีสุข'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 09:00:00 - 13:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: available (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 3 IMPORTED with status=available
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 4:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68004' | Name='ดำ แดง'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 09:00:00 - 13:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: available (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 4 IMPORTED with status=available
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 5:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68005' | Name='เขียว ขาว'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 08:00:00 - 20:00:00 | Break: 12:00:00 - 17:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '14/01/2569' -> '2026-01-14'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: on_break (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 5 IMPORTED with status=on_break
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 6:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68001' | Name='สมชาย สุขสวัสดิ์'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 12:00:00 - 13:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: available (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 6 IMPORTED with status=available
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 7:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68002' | Name='วัชรา พิบูลสุข'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 15:00:00 - 20:00:00 | Break: 16:00:00 - 17:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: available (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 7 IMPORTED with status=available
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 8:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68003' | Name='ธิดา ศรีสุข'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 09:00:00 - 13:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: available (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 8 IMPORTED with status=available
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 9:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68004' | Name='ดำ แดง'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 08:00:00 - 17:00:00 | Break: 09:00:00 - 13:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: available (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 9 IMPORTED with status=available
+[14-Jan-2026 15:43:26 Asia/Bangkok] Row 10:
+[14-Jan-2026 15:43:26 Asia/Bangkok]   ID='68005' | Name='เขียว ขาว'
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Time: 08:00:00 - 20:00:00 | Break: 12:00:00 - 17:00:00
+[14-Jan-2026 15:43:26 Asia/Bangkok]   Date: '15/01/2569' -> '2026-01-15'
+[14-Jan-2026 15:43:26 Asia/Bangkok] 📋 Calculated status: on_break (current time: 15:43:26)
+[14-Jan-2026 15:43:26 Asia/Bangkok] ✅ Row 10 IMPORTED with status=on_break
+[20-Jan-2026 16:15:06 Asia/Bangkok] ====================================
+[20-Jan-2026 16:15:06 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:15:06
+[20-Jan-2026 16:15:06 Asia/Bangkok] ====================================
+[20-Jan-2026 16:15:06 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:15:21 Asia/Bangkok] ====================================
+[20-Jan-2026 16:15:21 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:15:21
+[20-Jan-2026 16:15:21 Asia/Bangkok] ====================================
+[20-Jan-2026 16:15:21 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:17:00 Asia/Bangkok] ====================================
+[20-Jan-2026 16:17:00 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:17:00
+[20-Jan-2026 16:17:00 Asia/Bangkok] ====================================
+[20-Jan-2026 16:17:00 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:19:44 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:44 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:19:44
+[20-Jan-2026 16:19:44 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:44 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:19:45 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:45 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:19:45
+[20-Jan-2026 16:19:45 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:45 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:19:45 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:45 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:19:45
+[20-Jan-2026 16:19:45 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:45 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:19:45 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:45 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:19:45
+[20-Jan-2026 16:19:45 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:45 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:19:46 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:46 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:19:46
+[20-Jan-2026 16:19:46 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:46 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:19:46 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:46 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:19:46
+[20-Jan-2026 16:19:46 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:46 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:19:46 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:46 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:19:46
+[20-Jan-2026 16:19:46 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:46 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:19:46 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:46 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:19:46
+[20-Jan-2026 16:19:46 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:46 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:19:55 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:55 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:19:55
+[20-Jan-2026 16:19:55 Asia/Bangkok] ====================================
+[20-Jan-2026 16:19:55 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:35
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 35
+[20-Jan-2026 16:22:08 Asia/Bangkok] ====================================
+[20-Jan-2026 16:22:08 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:22:08
+[20-Jan-2026 16:22:08 Asia/Bangkok] ====================================
+[20-Jan-2026 16:22:08 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:37
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 37
+[20-Jan-2026 16:24:17 Asia/Bangkok] ====================================
+[20-Jan-2026 16:24:17 Asia/Bangkok] 🚀 IMPORT STARTED: 2026-01-20 16:24:17
+[20-Jan-2026 16:24:17 Asia/Bangkok] ====================================
+[20-Jan-2026 16:24:17 Asia/Bangkok] PHP Fatal error:  Uncaught Error: Call to undefined method DBConfig::getConnection() in C:\xampp\htdocs\hospital\api\import_monthly_staff.php:36
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\hospital\api\import_monthly_staff.php on line 36

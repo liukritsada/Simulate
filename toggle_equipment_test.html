@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toggle Equipment Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #007bff;
+            font-size: 18px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.success:hover {
+            background: #218838;
+        }
+        .console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #333;
+        }
+        .console-log {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        .log-info { color: #89d185; }
+        .log-warn { color: #dcdcaa; }
+        .log-error { color: #f48771; }
+        .log-success { color: #4ec9b0; }
+        .toggle-switch {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #28a745;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status-badge.on {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-badge.off {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Toggle Equipment Test Page</h1>
+        
+        <div class="info-box">
+            <strong>📝 How to use:</strong>
+            <br>1. Enter equipment ID (try 9 or any valid ID)
+            <br>2. Enter room ID (try 46)
+            <br>3. Click "Test Toggle" to switch equipment on/off
+            <br>4. Watch the console below for detailed logs
+        </div>
+
+        <div class="test-section">
+            <h2>⚙️ Configuration</h2>
+            <div class="form-group">
+                <label for="apiUrl">API Base URL:</label>
+                <input type="text" id="apiUrl" value="http://localhost/hospital/api" placeholder="e.g., http://localhost/api">
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Equipment Toggle Test</h2>
+            <div class="form-group">
+                <label for="roomId">Room ID:</label>
+                <input type="number" id="roomId" value="46" placeholder="e.g., 46">
+            </div>
+            <div class="form-group">
+                <label for="equipmentId">Equipment ID:</label>
+                <input type="number" id="equipmentId" value="9" placeholder="e.g., 9">
+            </div>
+            <div class="form-group">
+                <label for="equipmentName">Equipment Name (for reference):</label>
+                <input type="text" id="equipmentName" value="test" placeholder="e.g., ECG Machine">
+            </div>
+            <div class="form-group">
+                <label>Toggle Status:</label>
+                <div class="toggle-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="statusToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span id="statusText">ON</span>
+                    <span class="status-badge on" id="statusBadge">Active</span>
+                </div>
+            </div>
+            <button class="success" onclick="testToggle()">
+                <i class="fas fa-play"></i> Test Toggle Equipment
+            </button>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Response Data</h2>
+            <div id="responseData" style="display: none; background: white; padding: 15px; border-radius: 4px;">
+                <pre id="responsePre" style="margin: 0; font-family: 'Courier New'; font-size: 12px; overflow-x: auto;"></pre>
+            </div>
+            <p id="responseEmpty" style="color: #999;">No response yet. Click "Test Toggle" to see response here.</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Console Output</h2>
+            <div class="console" id="console"></div>
+            <button onclick="clearConsole()" style="margin-top: 10px; background: #6c757d;">Clear Console</button>
+        </div>
+    </div>
+
+    <script>
+        // Simple console logger
+        const consoleElement = document.getElementById('console');
+        
+        function addLog(message, type = 'info') {
+            const logDiv = document.createElement('div');
+            logDiv.className = `console-log log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent = `[${timestamp}] ${message}`;
+            consoleElement.appendChild(logDiv);
+            consoleElement.scrollTop = consoleElement.scrollHeight;
+        }
+        
+        function clearConsole() {
+            consoleElement.innerHTML = '';
+        }
+        
+        // Override console.log, console.error, etc
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog(args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+        
+        // Status toggle UI
+        document.getElementById('statusToggle').addEventListener('change', function() {
+            const statusText = document.getElementById('statusText');
+            const statusBadge = document.getElementById('statusBadge');
+            if (this.checked) {
+                statusText.textContent = 'ON';
+                statusBadge.textContent = 'Active';
+                statusBadge.className = 'status-badge on';
+            } else {
+                statusText.textContent = 'OFF';
+                statusBadge.textContent = 'Inactive';
+                statusBadge.className = 'status-badge off';
+            }
+        });
+        
+        // Main test function
+        async function testToggle() {
+            try {
+                const apiUrl = document.getElementById('apiUrl').value;
+                const roomId = parseInt(document.getElementById('roomId').value);
+                const equipmentId = parseInt(document.getElementById('equipmentId').value);
+                const isActive = document.getElementById('statusToggle').checked;
+                
+                console.log('=== TOGGLE EQUIPMENT TEST ===');
+                console.log('📍 API URL:', apiUrl);
+                console.log('🏥 Room ID:', roomId);
+                console.log('🔧 Equipment ID:', equipmentId);
+                console.log('⚡ Status to set:', isActive ? 'ON' : 'OFF');
+                
+                const payload = {
+                    action: 'toggle',
+                    equipment_id: equipmentId,
+                    is_active: isActive,
+                    room_id: roomId
+                };
+                
+                console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+                console.log('🚀 Sending request...');
+                
+                const response = await fetch(`${apiUrl}/manage_room_equipment.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                console.log('📡 Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ HTTP Error:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ Response received');
+                console.log('Success:', result.success);
+                console.log('Message:', result.message);
+                console.log('Data:', JSON.stringify(result.data, null, 2));
+                
+                // Display response
+                document.getElementById('responseEmpty').style.display = 'none';
+                document.getElementById('responseData').style.display = 'block';
+                document.getElementById('responsePre').textContent = JSON.stringify(result, null, 2);
+                
+                if (result.success) {
+                    console.log('🎉 Toggle successful!');
+                    if (result.data.auto_blocked) {
+                        console.warn('⚠️ Auto-blocked: Equipment requires staff but none available');
+                    }
+                } else {
+                    console.error('❌ Toggle failed:', result.message);
+                }
+                
+            } catch (error) {
+                console.error('💥 Error:', error.message);
+                console.error('Stack:', error.stack);
+            }
+        }
+        
+        console.log('✅ Test page loaded successfully');
+        console.log('Ready to test toggle equipment');
+    </script>
+</body>
+</html>

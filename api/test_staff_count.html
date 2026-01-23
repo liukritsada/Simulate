@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 ตรวจสอบ Staff Count</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0056b3;
+            padding-bottom: 10px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .status.loading {
+            background: #e3f2fd;
+            color: #0056b3;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #0056b3;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .badge.zero {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        .badge.ok {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        .console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .console-line {
+            margin: 5px 0;
+        }
+        .console-success { color: #4ec9b0; }
+        .console-error { color: #f48771; }
+        .console-info { color: #9cdcfe; }
+        button {
+            background: #0056b3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #003d82;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 ตรวจสอบ Staff Count จากฐานข้อมูล</h1>
+        
+        <div id="status" class="status loading">⏳ กำลังโหลดข้อมูล...</div>
+        
+        <button onclick="loadData()">🔄 โหลดใหม่</button>
+        <button onclick="clearConsole()">🗑️ เคลียร์ Console</button>
+        
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>สถานี</th>
+                        <th>รหัส</th>
+                        <th>ชั้น</th>
+                        <th>Staff Count</th>
+                        <th>ห้อง</th>
+                        <th>แพทย์</th>
+                        <th>สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: #999;">
+                            โปรดรอสักครู่...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="console">
+            <div class="console-line console-info">📋 Console Output:</div>
+            <div id="console"></div>
+        </div>
+    </div>
+
+    <script>
+        // ตั้งค่า API Base URL - เปลี่ยนตามระบบของคุณ
+        const API_BASE_URL = 'http://localhost/hospital/api'; // เปลี่ยนตามเส้นทาง API ของคุณ
+
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const line = document.createElement('div');
+            line.className = `console-line console-${type}`;
+            line.textContent = `> ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '';
+            log('📋 Console cleared');
+        }
+
+        async function loadData() {
+            const statusDiv = document.getElementById('status');
+            const tableBody = document.getElementById('tableBody');
+            
+            statusDiv.className = 'status loading';
+            statusDiv.textContent = '⏳ กำลังโหลดข้อมูล...';
+            tableBody.innerHTML = '';
+
+            log('🚀 เริ่มโหลดข้อมูลสถานี');
+
+            try {
+                // ลองใช้ API ใหม่ก่อน
+                let url = `${API_BASE_URL}/get_stations_with_staff.php`;
+                log(`📡 ลองใช้ API: ${url}`);
+
+                let response = await fetch(url);
+
+                if (!response.ok) {
+                    log(`⚠️ API ใหม่ไม่พบ (${response.status}), ใช้ API เดิม`, 'info');
+                    url = `${API_BASE_URL}/get_stations.php`;
+                    log(`📡 ใช้ API: ${url}`);
+                    response = await fetch(url);
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                log(`✅ ได้รับข้อมูลจาก API`, 'success');
+
+                if (!result.success) {
+                    throw new Error(result.message || 'API returned error');
+                }
+
+                let stations = result.data || [];
+                if (Array.isArray(stations) === false) {
+                    if (Array.isArray(result.data?.stations)) {
+                        stations = result.data.stations;
+                    } else {
+                        throw new Error('ไม่พบข้อมูลสถานี');
+                    }
+                }
+
+                log(`📊 พบสถานี: ${stations.length} แห่ง`, 'success');
+
+                // ตรวจสอบ staff_count
+                const hasStaffCount = stations.some(s => s.staff_count);
+                if (hasStaffCount) {
+                    log('✅ Staff Count มีค่า', 'success');
+                } else {
+                    log('⚠️ Staff Count เป็น 0 หรือไม่มีค่า', 'error');
+                }
+
+                // แสดงในตาราง
+                tableBody.innerHTML = '';
+                stations.forEach((station, idx) => {
+                    const row = document.createElement('tr');
+                    const staffStatus = station.staff_count > 0 ? 'ok' : 'zero';
+                    
+                    row.innerHTML = `
+                        <td>${idx + 1}</td>
+                        <td>${station.station_name || '-'}</td>
+                        <td>${station.station_code || '-'}</td>
+                        <td>${station.floor || '-'}</td>
+                        <td>
+                            <span class="badge ${staffStatus}">
+                                ${station.staff_count || 0}
+                            </span>
+                        </td>
+                        <td>${station.room_count || 0}</td>
+                        <td>${station.doctor_count || 0}</td>
+                        <td>${station.staff_count > 0 ? '✅' : '❌'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                // สรุป
+                const totalStaff = stations.reduce((sum, s) => sum + (parseInt(s.staff_count) || 0), 0);
+                log(`📈 รวมพนักงาน: ${totalStaff} คน`, totalStaff > 0 ? 'success' : 'error');
+
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `✅ โหลดสำเร็จ - พบ ${stations.length} สถานี, รวมพนักงาน ${totalStaff} คน`;
+
+            } catch (error) {
+                log(`❌ เกิดข้อผิดพลาด: ${error.message}`, 'error');
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ เกิดข้อผิดพลาด: ${error.message}`;
+                
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="color: red; text-align: center;">
+                            ❌ ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // โหลดข้อมูลเมื่อหน้าเปิด
+        window.addEventListener('load', loadData);
+    </script>
+</body>
+</html>

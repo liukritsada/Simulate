@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Modal</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test-btn { padding: 10px 20px; background: #667eea; color: white; cursor: pointer; border: none; border-radius: 5px; }
+        .test-btn:hover { background: #764ba2; }
+        #log { background: #f5f5f5; padding: 15px; margin-top: 20px; max-height: 400px; overflow-y: auto; border: 1px solid #ddd; font-size: 12px; white-space: pre-wrap; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Modal Rendering</h1>
+    <button class="test-btn" onclick="testModal()">Test Modal</button>
+    <div id="log"></div>
+
+    <script>
+        function log(msg) {
+            console.log(msg);
+            document.getElementById('log').innerHTML += msg + '\n';
+        }
+
+        function testModal() {
+            log('📌 Starting test...');
+
+            // Simulated API response
+            const apiResponse = {
+                success: true,
+                data: {
+                    patient_id: "5",
+                    patient_info: {
+                        hn: "5678901",
+                        patient_name: "ชวลิต ภูมิศักดิ์",
+                        appointment_date: "2026-01-13",
+                        doctor_code: "3602",
+                        status: "waiting"
+                    },
+                    procedures: [
+                        { id: "20", running_number: "1", procedures: "Registration", time_start: "12:00:00", status: "waiting", patient_id: "5" },
+                        { id: "21", running_number: "2", procedures: "Screening", time_start: "12:00:00", status: "waiting", patient_id: "5" },
+                        { id: "22", running_number: "3", procedures: "Blood Test", time_start: "12:10:00", status: "waiting", patient_id: "5" },
+                        { id: "23", running_number: "4", procedures: "Finance", time_start: "12:20:00", status: "waiting", patient_id: "5" }
+                    ]
+                }
+            };
+
+            const procedures = apiResponse.data.procedures;
+            const patientInfo = apiResponse.data.patient_info;
+            const patientId = apiResponse.data.patient_id;
+
+            log(`💉 Found ${procedures.length} procedures`);
+            log(`👤 Patient: ${patientInfo.patient_name}, ID: ${patientId}`);
+
+            // Create modal
+            showTestModal(patientInfo, procedures, patientId);
+        }
+
+        function showTestModal(patientInfo, procedures, patientId) {
+            log('\n📌 showTestModal called');
+            
+            // Remove old modal
+            const oldModal = document.getElementById('proceduresModal');
+            if (oldModal) oldModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'proceduresModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: white;
+                border-radius: 15px;
+                width: 100%;
+                max-width: 900px;
+                height: 80vh;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                overflow: hidden;
+            `;
+
+            // Header
+            const header = document.createElement('div');
+            header.style.cssText = `
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 25px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-shrink: 0;
+            `;
+            header.innerHTML = `
+                <div>
+                    <div style="font-size: 20px; font-weight: 700;">
+                        👤 ${patientInfo.patient_name}
+                    </div>
+                    <div style="font-size: 13px; opacity: 0.9;">
+                        HN: ${patientInfo.hn}
+                    </div>
+                </div>
+                <button onclick="document.getElementById('proceduresModal').remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; width: 40px; height: 40px; border-radius: 50%;">×</button>
+            `;
+
+            // Body
+            const body = document.createElement('div');
+            body.style.cssText = `
+                padding: 25px;
+                overflow-y: auto;
+                flex: 1;
+                height: 400px;
+                background: #ffffff;
+                display: flex;
+                flex-direction: column;
+            `;
+
+            body.innerHTML = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                    <strong>📋 ลำดับหัตถการ</strong>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                        รวม ${procedures.length} หัตถการ
+                    </div>
+                </div>
+                <div id="proceduresList" style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    flex: 1;
+                    overflow-y: auto;
+                    background: white;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8px;
+                    padding: 10px;
+                ">
+                </div>
+            `;
+
+            content.appendChild(header);
+            content.appendChild(body);
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            log('📌 Modal DOM created');
+            log(`📌 proceduresList element: ${document.getElementById('proceduresList') ? '✓ FOUND' : '✗ NOT FOUND'}`);
+
+            // Add procedures
+            const proceduresList = document.getElementById('proceduresList');
+            log(`📌 proceduresList offsetHeight: ${proceduresList.offsetHeight}`);
+
+            procedures.forEach((proc, index) => {
+                log(`🔧 Creating item ${index + 1}: ${proc.procedures}`);
+                const item = document.createElement('div');
+                item.style.cssText = `
+                    background: white;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 10px;
+                    padding: 15px;
+                    cursor: move;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                `;
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #667eea; color: white; border-radius: 50%; font-weight: 700;">
+                        ${proc.running_number}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600;">${proc.procedures}</div>
+                        <div style="font-size: 12px; color: #666;">เวลา: ${proc.time_start}</div>
+                    </div>
+                `;
+                proceduresList.appendChild(item);
+            });
+
+            log(`✅ Added ${procedures.length} items`);
+            log(`📌 Final offsetHeight: ${proceduresList.offsetHeight}`);
+            log('\n✅ Modal should be visible now!');
+        }
+    </script>
+</body>
+</html>

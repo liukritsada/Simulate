@@ -1,0 +1,682 @@
+[13-Jan-2026 02:40:40 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:40 Europe/Berlin] Input data: {"station_id":92}
+[13-Jan-2026 02:40:40 Europe/Berlin] Starting transaction for station ID: 92
+[13-Jan-2026 02:40:40 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:40 Europe/Berlin] Found station: {"station_name":"EXAM_1","station_code":"EXA-F2-092"}
+[13-Jan-2026 02:40:40 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:40:40 Europe/Berlin] Found 1 rooms: [2]
+[13-Jan-2026 02:40:40 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:40:40 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:40:40 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:40:40 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:40:40 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:40:40 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:40:40 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:40:40 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:40:40 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:40:40 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:40:40 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:40:40 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:40:40 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:40:40 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:40:40 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:40:40 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:40:40 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:40:40 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:40:40 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:40:40 Europe/Berlin] Deleted 1 station procedures records
+[13-Jan-2026 02:40:40 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:40:40 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:40:40 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:40:40 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:40:40 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:40:43 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:43 Europe/Berlin] Input data: {"station_id":93}
+[13-Jan-2026 02:40:43 Europe/Berlin] Starting transaction for station ID: 93
+[13-Jan-2026 02:40:43 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:43 Europe/Berlin] Found station: {"station_name":"EXAM_2","station_code":"EXA-F2-093"}
+[13-Jan-2026 02:40:43 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:40:43 Europe/Berlin] Found 1 rooms: [3]
+[13-Jan-2026 02:40:43 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:40:43 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:40:43 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:40:43 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:40:43 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:40:43 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:40:43 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:40:43 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:40:43 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:40:43 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:40:43 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:40:43 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:40:43 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:40:43 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:40:43 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:40:43 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:40:43 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:40:43 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:40:43 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:40:43 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:40:43 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:40:43 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:40:43 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:40:43 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:40:43 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:40:46 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:46 Europe/Berlin] Input data: {"station_id":94}
+[13-Jan-2026 02:40:46 Europe/Berlin] Starting transaction for station ID: 94
+[13-Jan-2026 02:40:46 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:46 Europe/Berlin] Found station: {"station_name":"EXAM_3","station_code":"EXA-F2-094"}
+[13-Jan-2026 02:40:46 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:40:46 Europe/Berlin] Found 1 rooms: [4]
+[13-Jan-2026 02:40:46 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:40:46 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:40:46 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:40:46 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:40:46 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:40:46 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:40:46 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:40:46 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:40:46 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:40:46 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:40:46 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:40:46 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:40:46 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:40:46 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:40:46 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:40:46 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:40:46 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:40:46 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:40:46 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:40:46 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:40:46 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:40:46 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:40:46 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:40:46 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:40:46 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:40:48 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:48 Europe/Berlin] Input data: {"station_id":95}
+[13-Jan-2026 02:40:48 Europe/Berlin] Starting transaction for station ID: 95
+[13-Jan-2026 02:40:48 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:48 Europe/Berlin] Found station: {"station_name":"EXAM_4","station_code":"EXA-F2-095"}
+[13-Jan-2026 02:40:48 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:40:48 Europe/Berlin] Found 1 rooms: [5]
+[13-Jan-2026 02:40:48 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:40:48 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:40:48 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:40:48 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:40:48 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:40:48 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:40:48 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:40:48 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:40:48 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:40:48 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:40:48 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:40:48 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:40:48 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:40:48 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:40:48 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:40:48 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:40:48 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:40:48 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:40:48 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:40:48 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:40:48 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:40:48 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:40:48 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:40:48 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:40:48 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:40:49 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:49 Europe/Berlin] Input data: {"station_id":95}
+[13-Jan-2026 02:40:49 Europe/Berlin] Starting transaction for station ID: 95
+[13-Jan-2026 02:40:49 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:49 Europe/Berlin] Station not found: 95
+[13-Jan-2026 02:40:50 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:50 Europe/Berlin] Input data: {"station_id":96}
+[13-Jan-2026 02:40:50 Europe/Berlin] Starting transaction for station ID: 96
+[13-Jan-2026 02:40:50 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:50 Europe/Berlin] Found station: {"station_name":"EXAM_5","station_code":"EXA-F2-096"}
+[13-Jan-2026 02:40:50 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:40:50 Europe/Berlin] Found 1 rooms: [6]
+[13-Jan-2026 02:40:50 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:40:50 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:40:50 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:40:50 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:40:50 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:40:50 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:40:50 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:40:50 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:40:50 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:40:50 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:40:51 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:40:51 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:40:51 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:40:51 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:40:51 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:40:51 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:40:51 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:40:51 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:40:51 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:40:51 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:40:51 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:40:51 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:40:51 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:40:51 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:40:51 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:40:53 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:53 Europe/Berlin] Input data: {"station_id":97}
+[13-Jan-2026 02:40:53 Europe/Berlin] Starting transaction for station ID: 97
+[13-Jan-2026 02:40:53 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:53 Europe/Berlin] Found station: {"station_name":"EXAM_6","station_code":"EXA-F2-097"}
+[13-Jan-2026 02:40:53 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:40:53 Europe/Berlin] Found 1 rooms: [7]
+[13-Jan-2026 02:40:53 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:40:53 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:40:53 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:40:53 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:40:53 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:40:53 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:40:53 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:40:53 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:40:53 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:40:53 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:40:53 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:40:53 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:40:53 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:40:53 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:40:53 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:40:53 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:40:53 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:40:53 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:40:53 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:40:53 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:40:53 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:40:53 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:40:53 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:40:53 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:40:53 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:40:54 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:54 Europe/Berlin] Input data: {"station_id":97}
+[13-Jan-2026 02:40:54 Europe/Berlin] Starting transaction for station ID: 97
+[13-Jan-2026 02:40:54 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:54 Europe/Berlin] Station not found: 97
+[13-Jan-2026 02:40:56 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:56 Europe/Berlin] Input data: {"station_id":98}
+[13-Jan-2026 02:40:56 Europe/Berlin] Starting transaction for station ID: 98
+[13-Jan-2026 02:40:56 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:56 Europe/Berlin] Found station: {"station_name":"EXAM_7","station_code":"EXA-F2-098"}
+[13-Jan-2026 02:40:56 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:40:56 Europe/Berlin] Found 1 rooms: [8]
+[13-Jan-2026 02:40:56 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:40:56 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:40:56 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:40:56 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:40:56 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:40:56 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:40:56 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:40:56 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:40:56 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:40:56 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:40:56 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:40:56 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:40:56 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:40:56 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:40:56 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:40:56 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:40:56 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:40:56 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:40:56 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:40:56 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:40:56 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:40:56 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:40:56 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:40:56 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:40:56 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:40:58 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:40:58 Europe/Berlin] Input data: {"station_id":99}
+[13-Jan-2026 02:40:58 Europe/Berlin] Starting transaction for station ID: 99
+[13-Jan-2026 02:40:58 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:40:58 Europe/Berlin] Found station: {"station_name":"EXAM_8","station_code":"EXA-F2-099"}
+[13-Jan-2026 02:40:58 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:40:58 Europe/Berlin] Found 1 rooms: [9]
+[13-Jan-2026 02:40:58 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:40:58 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:40:58 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:40:58 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:40:58 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:40:58 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:40:58 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:40:58 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:40:58 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:40:58 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:40:58 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:40:58 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:40:58 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:40:58 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:40:58 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:40:58 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:40:58 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:40:58 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:40:58 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:40:58 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:40:58 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:40:58 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:40:58 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:40:58 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:40:58 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:41:02 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:41:02 Europe/Berlin] Input data: {"station_id":100}
+[13-Jan-2026 02:41:02 Europe/Berlin] Starting transaction for station ID: 100
+[13-Jan-2026 02:41:02 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:41:02 Europe/Berlin] Found station: {"station_name":"EXAM_9","station_code":"EXA-F2-100"}
+[13-Jan-2026 02:41:02 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:41:02 Europe/Berlin] Found 1 rooms: [10]
+[13-Jan-2026 02:41:02 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:41:02 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:41:02 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:41:02 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:41:02 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:41:02 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:41:02 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:41:02 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:41:02 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:41:02 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:41:02 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:41:02 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:41:02 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:41:02 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:41:02 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:41:02 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:41:02 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:41:02 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:41:02 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:41:02 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:41:02 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:41:02 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:41:02 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:41:02 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:41:02 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:41:04 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:41:04 Europe/Berlin] Input data: {"station_id":101}
+[13-Jan-2026 02:41:04 Europe/Berlin] Starting transaction for station ID: 101
+[13-Jan-2026 02:41:04 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:41:04 Europe/Berlin] Found station: {"station_name":"EXAM_10","station_code":"EXA-F2-101"}
+[13-Jan-2026 02:41:04 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:41:04 Europe/Berlin] Found 1 rooms: [11]
+[13-Jan-2026 02:41:04 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:41:04 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:41:04 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:41:04 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:41:04 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:41:04 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:41:04 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:41:04 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:41:04 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:41:04 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:41:04 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:41:04 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:41:04 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:41:04 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:41:04 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:41:04 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:41:04 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:41:04 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:41:04 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:41:04 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:41:04 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:41:04 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:41:04 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:41:04 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:41:04 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:41:07 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:41:07 Europe/Berlin] Input data: {"station_id":102}
+[13-Jan-2026 02:41:07 Europe/Berlin] Starting transaction for station ID: 102
+[13-Jan-2026 02:41:07 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:41:07 Europe/Berlin] Found station: {"station_name":"EXAM_11","station_code":"EXA-F2-102"}
+[13-Jan-2026 02:41:07 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:41:07 Europe/Berlin] Found 1 rooms: [12]
+[13-Jan-2026 02:41:07 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:41:07 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:41:07 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:41:07 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:41:07 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:41:07 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:41:07 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:41:07 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:41:07 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:41:07 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:41:07 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:41:07 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:41:07 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:41:07 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:41:07 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:41:07 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:41:07 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:41:07 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:41:07 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:41:07 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:41:07 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:41:07 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:41:07 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:41:07 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:41:07 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:41:10 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:41:10 Europe/Berlin] Input data: {"station_id":103}
+[13-Jan-2026 02:41:10 Europe/Berlin] Starting transaction for station ID: 103
+[13-Jan-2026 02:41:10 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:41:10 Europe/Berlin] Found station: {"station_name":"EXAM_12","station_code":"EXA-F2-103"}
+[13-Jan-2026 02:41:10 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:41:10 Europe/Berlin] Found 1 rooms: [13]
+[13-Jan-2026 02:41:10 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:41:10 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:41:10 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:41:10 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:41:10 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:41:10 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:41:10 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:41:10 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:41:10 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:41:10 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:41:10 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:41:10 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:41:10 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:41:10 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:41:10 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:41:10 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:41:10 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:41:10 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:41:10 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:41:10 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:41:10 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:41:10 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:41:10 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:41:10 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:41:10 Europe/Berlin] Transaction committed successfully ✅
+[13-Jan-2026 02:41:15 Europe/Berlin] Database connected successfully
+[13-Jan-2026 02:41:15 Europe/Berlin] Input data: {"station_id":104}
+[13-Jan-2026 02:41:15 Europe/Berlin] Starting transaction for station ID: 104
+[13-Jan-2026 02:41:15 Europe/Berlin] STEP 1: Getting station info
+[13-Jan-2026 02:41:15 Europe/Berlin] Found station: {"station_name":"ROOM_UTHAI","station_code":"ROO-F2-104"}
+[13-Jan-2026 02:41:15 Europe/Berlin] STEP 2: Getting rooms for station
+[13-Jan-2026 02:41:15 Europe/Berlin] Found 1 rooms: [16]
+[13-Jan-2026 02:41:15 Europe/Berlin] STEP 3: Processing 1 rooms
+[13-Jan-2026 02:41:15 Europe/Berlin] 3.1: Clearing staff assignments
+[13-Jan-2026 02:41:15 Europe/Berlin] Cleared 0 staff assignments
+[13-Jan-2026 02:41:15 Europe/Berlin] 3.2: Clearing doctor assignments
+[13-Jan-2026 02:41:15 Europe/Berlin] Cleared 0 doctor assignments
+[13-Jan-2026 02:41:15 Europe/Berlin] 3.3: Deleting room equipment
+[13-Jan-2026 02:41:15 Europe/Berlin] Deleted 0 room equipment records
+[13-Jan-2026 02:41:15 Europe/Berlin] 3.4: Deleting room procedures
+[13-Jan-2026 02:41:15 Europe/Berlin] Deleted 0 room procedures
+[13-Jan-2026 02:41:15 Europe/Berlin] 3.5: Deleting station patients
+[13-Jan-2026 02:41:15 Europe/Berlin] Deleted 0 station patients
+[13-Jan-2026 02:41:15 Europe/Berlin] 3.6: Deleting station rooms
+[13-Jan-2026 02:41:15 Europe/Berlin] Deleted 1 station rooms
+[13-Jan-2026 02:41:15 Europe/Berlin] STEP 4: Deleting station data
+[13-Jan-2026 02:41:15 Europe/Berlin] 4.1: Deleting station_staff
+[13-Jan-2026 02:41:15 Europe/Berlin] Deleted 0 station staff records
+[13-Jan-2026 02:41:15 Europe/Berlin] 4.2: Deleting station_doctors
+[13-Jan-2026 02:41:15 Europe/Berlin] Deleted 0 station doctors records
+[13-Jan-2026 02:41:15 Europe/Berlin] 4.3: Deleting station_procedures
+[13-Jan-2026 02:41:15 Europe/Berlin] Deleted 0 station procedures records
+[13-Jan-2026 02:41:15 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[13-Jan-2026 02:41:15 Europe/Berlin] 4.5: Deleting station from stations table
+[13-Jan-2026 02:41:15 Europe/Berlin] Deleted 1 station record
+[13-Jan-2026 02:41:15 Europe/Berlin] Committing transaction
+[13-Jan-2026 02:41:15 Europe/Berlin] Transaction committed successfully ✅
+[14-Jan-2026 04:42:32 Europe/Berlin] Database connected successfully
+[14-Jan-2026 04:42:32 Europe/Berlin] Input data: {"station_id":20}
+[14-Jan-2026 04:42:32 Europe/Berlin] Starting transaction for station ID: 20
+[14-Jan-2026 04:42:32 Europe/Berlin] STEP 1: Getting station info
+[14-Jan-2026 04:42:32 Europe/Berlin] Found station: {"station_name":"EXAM CHL 1","station_code":"EXA-F5-020"}
+[14-Jan-2026 04:42:32 Europe/Berlin] STEP 2: Getting rooms for station
+[14-Jan-2026 04:42:32 Europe/Berlin] Found 1 rooms: [20]
+[14-Jan-2026 04:42:32 Europe/Berlin] STEP 3: Processing 1 rooms
+[14-Jan-2026 04:42:32 Europe/Berlin] 3.1: Clearing staff assignments
+[14-Jan-2026 04:42:32 Europe/Berlin] Cleared 0 staff assignments
+[14-Jan-2026 04:42:32 Europe/Berlin] 3.2: Clearing doctor assignments
+[14-Jan-2026 04:42:32 Europe/Berlin] Cleared 0 doctor assignments
+[14-Jan-2026 04:42:32 Europe/Berlin] 3.3: Deleting room equipment
+[14-Jan-2026 04:42:32 Europe/Berlin] Deleted 0 room equipment records
+[14-Jan-2026 04:42:32 Europe/Berlin] 3.4: Deleting room procedures
+[14-Jan-2026 04:42:32 Europe/Berlin] Deleted 0 room procedures
+[14-Jan-2026 04:42:32 Europe/Berlin] 3.5: Deleting station patients
+[14-Jan-2026 04:42:32 Europe/Berlin] Deleted 0 station patients
+[14-Jan-2026 04:42:32 Europe/Berlin] 3.6: Deleting station rooms
+[14-Jan-2026 04:42:32 Europe/Berlin] Deleted 1 station rooms
+[14-Jan-2026 04:42:32 Europe/Berlin] STEP 4: Deleting station data
+[14-Jan-2026 04:42:32 Europe/Berlin] 4.1: Deleting station_staff
+[14-Jan-2026 04:42:32 Europe/Berlin] Deleted 0 station staff records
+[14-Jan-2026 04:42:32 Europe/Berlin] 4.2: Deleting station_doctors
+[14-Jan-2026 04:42:32 Europe/Berlin] Deleted 0 station doctors records
+[14-Jan-2026 04:42:32 Europe/Berlin] 4.3: Deleting station_procedures
+[14-Jan-2026 04:42:32 Europe/Berlin] Deleted 0 station procedures records
+[14-Jan-2026 04:42:32 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[14-Jan-2026 04:42:32 Europe/Berlin] 4.5: Deleting station from stations table
+[14-Jan-2026 04:42:32 Europe/Berlin] Deleted 1 station record
+[14-Jan-2026 04:42:32 Europe/Berlin] Committing transaction
+[14-Jan-2026 04:42:32 Europe/Berlin] Transaction committed successfully ✅
+[14-Jan-2026 07:30:03 Europe/Berlin] Database connected successfully
+[14-Jan-2026 07:30:03 Europe/Berlin] Input data: {"station_id":5}
+[14-Jan-2026 07:30:03 Europe/Berlin] Starting transaction for station ID: 5
+[14-Jan-2026 07:30:03 Europe/Berlin] STEP 1: Getting station info
+[14-Jan-2026 07:30:03 Europe/Berlin] Found station: {"station_name":"MAS_1","station_code":"MAS-F2-005"}
+[14-Jan-2026 07:30:03 Europe/Berlin] STEP 2: Getting rooms for station
+[14-Jan-2026 07:30:03 Europe/Berlin] Found 1 rooms: [5]
+[14-Jan-2026 07:30:03 Europe/Berlin] STEP 3: Processing 1 rooms
+[14-Jan-2026 07:30:03 Europe/Berlin] 3.1: Clearing staff assignments
+[14-Jan-2026 07:30:03 Europe/Berlin] Cleared 0 staff assignments
+[14-Jan-2026 07:30:03 Europe/Berlin] 3.2: Clearing doctor assignments
+[14-Jan-2026 07:30:03 Europe/Berlin] Cleared 0 doctor assignments
+[14-Jan-2026 07:30:03 Europe/Berlin] 3.3: Deleting room equipment
+[14-Jan-2026 07:30:03 Europe/Berlin] Deleted 0 room equipment records
+[14-Jan-2026 07:30:03 Europe/Berlin] 3.4: Deleting room procedures
+[14-Jan-2026 07:30:03 Europe/Berlin] Deleted 137 room procedures
+[14-Jan-2026 07:30:03 Europe/Berlin] 3.5: Deleting station patients
+[14-Jan-2026 07:30:03 Europe/Berlin] Deleted 0 station patients
+[14-Jan-2026 07:30:03 Europe/Berlin] 3.6: Deleting station rooms
+[14-Jan-2026 07:30:03 Europe/Berlin] Deleted 1 station rooms
+[14-Jan-2026 07:30:03 Europe/Berlin] STEP 4: Deleting station data
+[14-Jan-2026 07:30:03 Europe/Berlin] 4.1: Deleting station_staff
+[14-Jan-2026 07:30:03 Europe/Berlin] Deleted 0 station staff records
+[14-Jan-2026 07:30:03 Europe/Berlin] 4.2: Deleting station_doctors
+[14-Jan-2026 07:30:03 Europe/Berlin] Deleted 0 station doctors records
+[14-Jan-2026 07:30:03 Europe/Berlin] 4.3: Deleting station_procedures
+[14-Jan-2026 07:30:03 Europe/Berlin] Deleted 137 station procedures records
+[14-Jan-2026 07:30:03 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[14-Jan-2026 07:30:03 Europe/Berlin] 4.5: Deleting station from stations table
+[14-Jan-2026 07:30:03 Europe/Berlin] Deleted 1 station record
+[14-Jan-2026 07:30:03 Europe/Berlin] Committing transaction
+[14-Jan-2026 07:30:03 Europe/Berlin] Transaction committed successfully ✅
+[14-Jan-2026 07:30:09 Europe/Berlin] Database connected successfully
+[14-Jan-2026 07:30:09 Europe/Berlin] Input data: {"station_id":6}
+[14-Jan-2026 07:30:09 Europe/Berlin] Starting transaction for station ID: 6
+[14-Jan-2026 07:30:09 Europe/Berlin] STEP 1: Getting station info
+[14-Jan-2026 07:30:09 Europe/Berlin] Found station: {"station_name":"MAS_2","station_code":"MAS-F2-006"}
+[14-Jan-2026 07:30:09 Europe/Berlin] STEP 2: Getting rooms for station
+[14-Jan-2026 07:30:09 Europe/Berlin] Found 1 rooms: [6]
+[14-Jan-2026 07:30:09 Europe/Berlin] STEP 3: Processing 1 rooms
+[14-Jan-2026 07:30:09 Europe/Berlin] 3.1: Clearing staff assignments
+[14-Jan-2026 07:30:09 Europe/Berlin] Cleared 0 staff assignments
+[14-Jan-2026 07:30:09 Europe/Berlin] 3.2: Clearing doctor assignments
+[14-Jan-2026 07:30:09 Europe/Berlin] Cleared 0 doctor assignments
+[14-Jan-2026 07:30:09 Europe/Berlin] 3.3: Deleting room equipment
+[14-Jan-2026 07:30:09 Europe/Berlin] Deleted 0 room equipment records
+[14-Jan-2026 07:30:09 Europe/Berlin] 3.4: Deleting room procedures
+[14-Jan-2026 07:30:09 Europe/Berlin] Deleted 137 room procedures
+[14-Jan-2026 07:30:09 Europe/Berlin] 3.5: Deleting station patients
+[14-Jan-2026 07:30:09 Europe/Berlin] Deleted 0 station patients
+[14-Jan-2026 07:30:09 Europe/Berlin] 3.6: Deleting station rooms
+[14-Jan-2026 07:30:09 Europe/Berlin] Deleted 1 station rooms
+[14-Jan-2026 07:30:09 Europe/Berlin] STEP 4: Deleting station data
+[14-Jan-2026 07:30:09 Europe/Berlin] 4.1: Deleting station_staff
+[14-Jan-2026 07:30:09 Europe/Berlin] Deleted 0 station staff records
+[14-Jan-2026 07:30:09 Europe/Berlin] 4.2: Deleting station_doctors
+[14-Jan-2026 07:30:09 Europe/Berlin] Deleted 0 station doctors records
+[14-Jan-2026 07:30:09 Europe/Berlin] 4.3: Deleting station_procedures
+[14-Jan-2026 07:30:09 Europe/Berlin] Deleted 137 station procedures records
+[14-Jan-2026 07:30:09 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[14-Jan-2026 07:30:09 Europe/Berlin] 4.5: Deleting station from stations table
+[14-Jan-2026 07:30:09 Europe/Berlin] Deleted 1 station record
+[14-Jan-2026 07:30:09 Europe/Berlin] Committing transaction
+[14-Jan-2026 07:30:09 Europe/Berlin] Transaction committed successfully ✅
+[14-Jan-2026 07:30:14 Europe/Berlin] Database connected successfully
+[14-Jan-2026 07:30:14 Europe/Berlin] Input data: {"station_id":26}
+[14-Jan-2026 07:30:14 Europe/Berlin] Starting transaction for station ID: 26
+[14-Jan-2026 07:30:14 Europe/Berlin] STEP 1: Getting station info
+[14-Jan-2026 07:30:14 Europe/Berlin] Found station: {"station_name":"TREATMENT","station_code":"TRE-F2-026"}
+[14-Jan-2026 07:30:14 Europe/Berlin] STEP 2: Getting rooms for station
+[14-Jan-2026 07:30:14 Europe/Berlin] Found 1 rooms: [26]
+[14-Jan-2026 07:30:14 Europe/Berlin] STEP 3: Processing 1 rooms
+[14-Jan-2026 07:30:14 Europe/Berlin] 3.1: Clearing staff assignments
+[14-Jan-2026 07:30:14 Europe/Berlin] Cleared 0 staff assignments
+[14-Jan-2026 07:30:14 Europe/Berlin] 3.2: Clearing doctor assignments
+[14-Jan-2026 07:30:14 Europe/Berlin] Cleared 0 doctor assignments
+[14-Jan-2026 07:30:14 Europe/Berlin] 3.3: Deleting room equipment
+[14-Jan-2026 07:30:14 Europe/Berlin] Deleted 0 room equipment records
+[14-Jan-2026 07:30:14 Europe/Berlin] 3.4: Deleting room procedures
+[14-Jan-2026 07:30:14 Europe/Berlin] Deleted 39 room procedures
+[14-Jan-2026 07:30:14 Europe/Berlin] 3.5: Deleting station patients
+[14-Jan-2026 07:30:14 Europe/Berlin] Deleted 0 station patients
+[14-Jan-2026 07:30:14 Europe/Berlin] 3.6: Deleting station rooms
+[14-Jan-2026 07:30:14 Europe/Berlin] Deleted 1 station rooms
+[14-Jan-2026 07:30:14 Europe/Berlin] STEP 4: Deleting station data
+[14-Jan-2026 07:30:14 Europe/Berlin] 4.1: Deleting station_staff
+[14-Jan-2026 07:30:14 Europe/Berlin] Deleted 0 station staff records
+[14-Jan-2026 07:30:14 Europe/Berlin] 4.2: Deleting station_doctors
+[14-Jan-2026 07:30:14 Europe/Berlin] Deleted 0 station doctors records
+[14-Jan-2026 07:30:14 Europe/Berlin] 4.3: Deleting station_procedures
+[14-Jan-2026 07:30:14 Europe/Berlin] Deleted 39 station procedures records
+[14-Jan-2026 07:30:14 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[14-Jan-2026 07:30:14 Europe/Berlin] 4.5: Deleting station from stations table
+[14-Jan-2026 07:30:14 Europe/Berlin] Deleted 1 station record
+[14-Jan-2026 07:30:14 Europe/Berlin] Committing transaction
+[14-Jan-2026 07:30:14 Europe/Berlin] Transaction committed successfully ✅
+[14-Jan-2026 07:30:22 Europe/Berlin] Database connected successfully
+[14-Jan-2026 07:30:22 Europe/Berlin] Input data: {"station_id":24}
+[14-Jan-2026 07:30:22 Europe/Berlin] Starting transaction for station ID: 24
+[14-Jan-2026 07:30:22 Europe/Berlin] STEP 1: Getting station info
+[14-Jan-2026 07:30:22 Europe/Berlin] Found station: {"station_name":"MAS CHL","station_code":"MAS-F5-024"}
+[14-Jan-2026 07:30:22 Europe/Berlin] STEP 2: Getting rooms for station
+[14-Jan-2026 07:30:22 Europe/Berlin] Found 1 rooms: [24]
+[14-Jan-2026 07:30:22 Europe/Berlin] STEP 3: Processing 1 rooms
+[14-Jan-2026 07:30:22 Europe/Berlin] 3.1: Clearing staff assignments
+[14-Jan-2026 07:30:22 Europe/Berlin] Cleared 0 staff assignments
+[14-Jan-2026 07:30:22 Europe/Berlin] 3.2: Clearing doctor assignments
+[14-Jan-2026 07:30:22 Europe/Berlin] Cleared 0 doctor assignments
+[14-Jan-2026 07:30:22 Europe/Berlin] 3.3: Deleting room equipment
+[14-Jan-2026 07:30:22 Europe/Berlin] Deleted 0 room equipment records
+[14-Jan-2026 07:30:22 Europe/Berlin] 3.4: Deleting room procedures
+[14-Jan-2026 07:30:22 Europe/Berlin] Deleted 0 room procedures
+[14-Jan-2026 07:30:22 Europe/Berlin] 3.5: Deleting station patients
+[14-Jan-2026 07:30:22 Europe/Berlin] Deleted 0 station patients
+[14-Jan-2026 07:30:22 Europe/Berlin] 3.6: Deleting station rooms
+[14-Jan-2026 07:30:22 Europe/Berlin] Deleted 1 station rooms
+[14-Jan-2026 07:30:22 Europe/Berlin] STEP 4: Deleting station data
+[14-Jan-2026 07:30:22 Europe/Berlin] 4.1: Deleting station_staff
+[14-Jan-2026 07:30:22 Europe/Berlin] Deleted 0 station staff records
+[14-Jan-2026 07:30:22 Europe/Berlin] 4.2: Deleting station_doctors
+[14-Jan-2026 07:30:22 Europe/Berlin] Deleted 0 station doctors records
+[14-Jan-2026 07:30:22 Europe/Berlin] 4.3: Deleting station_procedures
+[14-Jan-2026 07:30:22 Europe/Berlin] Deleted 0 station procedures records
+[14-Jan-2026 07:30:22 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[14-Jan-2026 07:30:22 Europe/Berlin] 4.5: Deleting station from stations table
+[14-Jan-2026 07:30:22 Europe/Berlin] Deleted 1 station record
+[14-Jan-2026 07:30:22 Europe/Berlin] Committing transaction
+[14-Jan-2026 07:30:22 Europe/Berlin] Transaction committed successfully ✅
+[14-Jan-2026 07:30:25 Europe/Berlin] Database connected successfully
+[14-Jan-2026 07:30:25 Europe/Berlin] Input data: {"station_id":25}
+[14-Jan-2026 07:30:25 Europe/Berlin] Starting transaction for station ID: 25
+[14-Jan-2026 07:30:25 Europe/Berlin] STEP 1: Getting station info
+[14-Jan-2026 07:30:25 Europe/Berlin] Found station: {"station_name":"LAB","station_code":"LAB-F5-025"}
+[14-Jan-2026 07:30:25 Europe/Berlin] STEP 2: Getting rooms for station
+[14-Jan-2026 07:30:25 Europe/Berlin] Found 1 rooms: [25]
+[14-Jan-2026 07:30:25 Europe/Berlin] STEP 3: Processing 1 rooms
+[14-Jan-2026 07:30:25 Europe/Berlin] 3.1: Clearing staff assignments
+[14-Jan-2026 07:30:25 Europe/Berlin] Cleared 0 staff assignments
+[14-Jan-2026 07:30:25 Europe/Berlin] 3.2: Clearing doctor assignments
+[14-Jan-2026 07:30:25 Europe/Berlin] Cleared 0 doctor assignments
+[14-Jan-2026 07:30:25 Europe/Berlin] 3.3: Deleting room equipment
+[14-Jan-2026 07:30:25 Europe/Berlin] Deleted 0 room equipment records
+[14-Jan-2026 07:30:25 Europe/Berlin] 3.4: Deleting room procedures
+[14-Jan-2026 07:30:25 Europe/Berlin] Deleted 5 room procedures
+[14-Jan-2026 07:30:25 Europe/Berlin] 3.5: Deleting station patients
+[14-Jan-2026 07:30:25 Europe/Berlin] Deleted 0 station patients
+[14-Jan-2026 07:30:25 Europe/Berlin] 3.6: Deleting station rooms
+[14-Jan-2026 07:30:25 Europe/Berlin] Deleted 1 station rooms
+[14-Jan-2026 07:30:25 Europe/Berlin] STEP 4: Deleting station data
+[14-Jan-2026 07:30:25 Europe/Berlin] 4.1: Deleting station_staff
+[14-Jan-2026 07:30:25 Europe/Berlin] Deleted 0 station staff records
+[14-Jan-2026 07:30:25 Europe/Berlin] 4.2: Deleting station_doctors
+[14-Jan-2026 07:30:25 Europe/Berlin] Deleted 0 station doctors records
+[14-Jan-2026 07:30:25 Europe/Berlin] 4.3: Deleting station_procedures
+[14-Jan-2026 07:30:25 Europe/Berlin] Deleted 5 station procedures records
+[14-Jan-2026 07:30:25 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[14-Jan-2026 07:30:25 Europe/Berlin] 4.5: Deleting station from stations table
+[14-Jan-2026 07:30:25 Europe/Berlin] Deleted 1 station record
+[14-Jan-2026 07:30:25 Europe/Berlin] Committing transaction
+[14-Jan-2026 07:30:25 Europe/Berlin] Transaction committed successfully ✅
+[20-Jan-2026 10:10:21 Europe/Berlin] Database connected successfully
+[20-Jan-2026 10:10:21 Europe/Berlin] Input data: {"station_id":90}
+[20-Jan-2026 10:10:21 Europe/Berlin] Starting transaction for station ID: 90
+[20-Jan-2026 10:10:21 Europe/Berlin] STEP 1: Getting station info
+[20-Jan-2026 10:10:21 Europe/Berlin] Found station: {"station_name":"LID_SPA","station_code":"LID-F4-090"}
+[20-Jan-2026 10:10:21 Europe/Berlin] STEP 2: Getting rooms for station
+[20-Jan-2026 10:10:21 Europe/Berlin] Found 1 rooms: [74]
+[20-Jan-2026 10:10:21 Europe/Berlin] STEP 3: Processing 1 rooms
+[20-Jan-2026 10:10:21 Europe/Berlin] 3.1: Clearing staff assignments
+[20-Jan-2026 10:10:21 Europe/Berlin] Cleared 0 staff assignments
+[20-Jan-2026 10:10:21 Europe/Berlin] 3.2: Clearing doctor assignments
+[20-Jan-2026 10:10:21 Europe/Berlin] Cleared 0 doctor assignments
+[20-Jan-2026 10:10:21 Europe/Berlin] 3.3: Deleting room equipment
+[20-Jan-2026 10:10:21 Europe/Berlin] Deleted 0 room equipment records
+[20-Jan-2026 10:10:21 Europe/Berlin] 3.4: Deleting room procedures
+[20-Jan-2026 10:10:21 Europe/Berlin] Deleted 2 room procedures
+[20-Jan-2026 10:10:21 Europe/Berlin] 3.5: Deleting station patients
+[20-Jan-2026 10:10:21 Europe/Berlin] Deleted 0 station patients
+[20-Jan-2026 10:10:21 Europe/Berlin] 3.6: Deleting station rooms
+[20-Jan-2026 10:10:21 Europe/Berlin] Deleted 1 station rooms
+[20-Jan-2026 10:10:21 Europe/Berlin] STEP 4: Deleting station data
+[20-Jan-2026 10:10:21 Europe/Berlin] 4.1: Deleting station_staff
+[20-Jan-2026 10:10:21 Europe/Berlin] Deleted 0 station staff records
+[20-Jan-2026 10:10:21 Europe/Berlin] 4.2: Deleting station_doctors
+[20-Jan-2026 10:10:21 Europe/Berlin] Deleted 0 station doctors records
+[20-Jan-2026 10:10:21 Europe/Berlin] 4.3: Deleting station_procedures
+[20-Jan-2026 10:10:21 Europe/Berlin] Deleted 2 station procedures records
+[20-Jan-2026 10:10:21 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[20-Jan-2026 10:10:21 Europe/Berlin] 4.5: Deleting station from stations table
+[20-Jan-2026 10:10:21 Europe/Berlin] Deleted 1 station record
+[20-Jan-2026 10:10:21 Europe/Berlin] Committing transaction
+[20-Jan-2026 10:10:21 Europe/Berlin] Transaction committed successfully ✅
+[21-Jan-2026 05:43:04 Europe/Berlin] Database connected successfully
+[21-Jan-2026 05:43:04 Europe/Berlin] Input data: {"station_id":91}
+[21-Jan-2026 05:43:04 Europe/Berlin] Starting transaction for station ID: 91
+[21-Jan-2026 05:43:04 Europe/Berlin] STEP 1: Getting station info
+[21-Jan-2026 05:43:04 Europe/Berlin] Found station: {"station_name":"MAS_3","station_code":"MAS-F2-091"}
+[21-Jan-2026 05:43:04 Europe/Berlin] STEP 2: Getting rooms for station
+[21-Jan-2026 05:43:04 Europe/Berlin] Found 1 rooms: [76]
+[21-Jan-2026 05:43:04 Europe/Berlin] STEP 3: Processing 1 rooms
+[21-Jan-2026 05:43:04 Europe/Berlin] 3.1: Clearing staff assignments
+[21-Jan-2026 05:43:04 Europe/Berlin] Cleared 0 staff assignments
+[21-Jan-2026 05:43:04 Europe/Berlin] 3.2: Clearing doctor assignments
+[21-Jan-2026 05:43:04 Europe/Berlin] Cleared 0 doctor assignments
+[21-Jan-2026 05:43:04 Europe/Berlin] 3.3: Deleting room equipment
+[21-Jan-2026 05:43:04 Europe/Berlin] Deleted 0 room equipment records
+[21-Jan-2026 05:43:04 Europe/Berlin] 3.4: Deleting room procedures
+[21-Jan-2026 05:43:04 Europe/Berlin] Deleted 137 room procedures
+[21-Jan-2026 05:43:04 Europe/Berlin] 3.5: Deleting station patients
+[21-Jan-2026 05:43:04 Europe/Berlin] Deleted 0 station patients
+[21-Jan-2026 05:43:04 Europe/Berlin] 3.6: Deleting station rooms
+[21-Jan-2026 05:43:04 Europe/Berlin] Deleted 1 station rooms
+[21-Jan-2026 05:43:04 Europe/Berlin] STEP 4: Deleting station data
+[21-Jan-2026 05:43:04 Europe/Berlin] 4.1: Deleting station_staff
+[21-Jan-2026 05:43:04 Europe/Berlin] Deleted 0 station staff records
+[21-Jan-2026 05:43:04 Europe/Berlin] 4.2: Deleting station_doctors
+[21-Jan-2026 05:43:04 Europe/Berlin] Deleted 0 station doctors records
+[21-Jan-2026 05:43:04 Europe/Berlin] 4.3: Deleting station_procedures
+[21-Jan-2026 05:43:04 Europe/Berlin] Deleted 137 station procedures records
+[21-Jan-2026 05:43:04 Europe/Berlin] 4.4: Skipping 'staff' table - it doesn't exist in database
+[21-Jan-2026 05:43:04 Europe/Berlin] 4.5: Deleting station from stations table
+[21-Jan-2026 05:43:04 Europe/Berlin] Deleted 1 station record
+[21-Jan-2026 05:43:04 Europe/Berlin] Committing transaction
+[21-Jan-2026 05:43:04 Europe/Berlin] Transaction committed successfully ✅

@@ -1,0 +1,515 @@
+2026-01-22 05:00:38 [Station 62] Starting auto-assign...
+❌ Error: Doctor query prepare failed: Table 'hospitalstation.doctors' doesn't exist
+
+2026-01-22 05:00:43 [Station 62] Starting auto-assign...
+❌ Error: Doctor query prepare failed: Table 'hospitalstation.doctors' doesn't exist
+
+2026-01-22 05:01:34 [Station 62] Starting auto-assign...
+❌ Error: Doctor query prepare failed: Table 'hospitalstation.doctors' doesn't exist
+
+2026-01-22 05:06:59 [Station 62] Starting auto-assign...
+   Found 0 unassigned doctors
+❌ Error: Room query prepare failed: Table 'hospitalstation.rooms' doesn't exist
+
+2026-01-22 05:07:03 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+❌ Error: Room query prepare failed: Table 'hospitalstation.rooms' doesn't exist
+
+2026-01-22 05:07:08 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+❌ Error: Room query prepare failed: Table 'hospitalstation.rooms' doesn't exist
+
+2026-01-22 05:07:22 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+❌ Error: Room query prepare failed: Table 'hospitalstation.rooms' doesn't exist
+
+2026-01-22 05:12:28 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+❌ Error: Room query prepare failed: Unknown column 'sr.is_active' in 'where clause'
+
+2026-01-22 05:12:32 [Station 62] Starting auto-assign...
+   Found 0 unassigned doctors
+❌ Error: Room query prepare failed: Unknown column 'sr.is_active' in 'where clause'
+
+2026-01-22 05:13:03 [Station 62] Starting auto-assign...
+   Found 0 unassigned doctors
+❌ Error: Room query prepare failed: Unknown column 'sr.is_active' in 'where clause'
+
+2026-01-22 05:13:08 [Station 62] Starting auto-assign...
+   Found 0 unassigned doctors
+❌ Error: Room query prepare failed: Unknown column 'sr.is_active' in 'where clause'
+
+2026-01-22 05:13:39 [Station 62] Starting auto-assign...
+   Found 0 unassigned doctors
+❌ Error: Room query prepare failed: Unknown column 'sr.is_active' in 'where clause'
+
+2026-01-22 05:13:53 [Station 62] Starting auto-assign...
+   Found 2 unassigned doctors
+   Found 1 available rooms
+   ✅ PARNCHAT PUKRUSHPAN M.D. (5101-1) → Room 1
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 05:13:58 [Station 62] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:14:02 [Station 60] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ PATTARAMON BUNNAPRADIST, M.D. (4401) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 05:14:07 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:14:12 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:14:14 [Station 66] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ NARAKORN VIMOLCHALAO, M.D. (5403) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 05:14:17 [Station 70] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ Tanatnun Tunshevavong, M.D. (6803) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 05:14:20 [Station 70] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:14:23 [Station 66] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:14:26 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:15:27 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:15:32 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:15:37 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:16:31 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:16:36 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:16:41 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:16:46 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:16:54 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:16:59 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:17:04 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 05:17:09 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:21:39 [Station 61] Starting auto-assign...
+   Found 2 unassigned doctors
+   Found 1 available rooms
+   Found 1 available rooms
+   ✅ NUJIT PANICH, M.D. (3704) → Room 1
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 1 doctors assigned
+
+   ✅ NUJIT PANICH, M.D. (3704) → Room 1
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 07:21:44 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:21:49 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:21:52 [Station 62] Starting auto-assign...
+   Found 2 unassigned doctors
+   Found 1 available rooms
+   ✅ PARNCHAT PUKRUSHPAN M.D. (5101-1) → Room 1
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 07:21:57 [Station 62] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:21:59 [Station 60] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ PATTARAMON BUNNAPRADIST, M.D. (4401) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 07:22:03 [Station 67] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:22:08 [Station 71] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ TIDARAT PRECHANOND, MD. (5601) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 07:22:13 [Station 71] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:22:23 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:22:28 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:22:33 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:22:38 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 07:22:42 [Station 63] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ HATHAIRAT PIPITVIJITKORN, MD. (4402) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 09:33:18 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:33:21 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:33:27 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:33:31 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:33:37 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:33:40 [Station 62] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:33:43 [Station 63] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:33:48 [Station 63] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:33:54 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:33:59 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:34:04 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:34:06 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ Worapot Srimanan,M.D. (6701) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 09:34:11 [Station 61] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:34:16 [Station 61] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 09:34:18 [Station 64] Starting auto-assign...
+   Found 3 unassigned doctors
+   Found 1 available rooms
+   ✅ PISIT PREECHAWAT,M.D. (5102) → Room 1
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-22 12:37:30 [Station 61] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 12:37:33 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 12:37:38 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-22 12:37:44 [Station 72] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 02:04:07 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 02:04:12 [Station 70] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:41:05 [Station 60] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ TIDARAT PRECHANOND, MD. (5601) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:41:10 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:41:16 [Station 62] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ CHAISIRI JUMROENDARARASAME, M.D. (6301) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:41:21 [Station 62] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:41:24 [Station 61] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ KALAYANEE ROJANAPORN,.M.D. (2701) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:41:27 [Station 62] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:41:32 [Station 62] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:41:37 [Station 62] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:41:42 [Station 63] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ ROY CHUMDERMPADETSUK, MD,BS (4202) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:41:47 [Station 63] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:41:49 [Station 64] Starting auto-assign...
+   Found 2 unassigned doctors
+   Found 1 available rooms
+   ✅ PIYADA CHITSUTHIPAKORN , M.D. (6203) → Room 1
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:41:54 [Station 64] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:41:55 [Station 65] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ Thitiporn Thongborisuth, M.D. (6801) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:41:59 [Station 66] Starting auto-assign...
+   Found 2 unassigned doctors
+   Found 1 available rooms
+   ✅ NARAKORN VIMOLCHALAO, M.D. (5403) → Room 1
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:42:04 [Station 66] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 0 available rooms
+   ⚠️ No more rooms available
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:42:05 [Station 73] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ POKPONG PRANEEPRACHACHON.M.D. (3901) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:42:10 [Station 73] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:42:15 [Station 72] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:42:18 [Station 70] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ APIRADI PRECHANOND,M.D. (4806) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:42:23 [Station 70] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:42:28 [Station 70] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:42:29 [Station 73] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:42:32 [Station 71] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ NOPARAT SUJARITCHAN, M.D. (4006) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:42:37 [Station 69] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:42:42 [Station 68] Starting auto-assign...
+   Found 1 unassigned doctors
+   Found 1 available rooms
+   ✅ CHAIWAT  TEEKHASAENEE, M.D. (2839) → Room 1
+✅ Auto-assign completed: 1 doctors assigned
+
+2026-01-23 09:42:46 [Station 67] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 1 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:42:49 [Station 60] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
+2026-01-23 09:42:52 [Station 61] Starting auto-assign...
+   Found 0 unassigned doctors
+   Found 0 available rooms
+✅ Auto-assign completed: 0 doctors assigned
+
