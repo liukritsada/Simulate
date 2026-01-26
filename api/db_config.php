@@ -12,7 +12,7 @@ class DBConfig
     private static $host = '127.0.0.1';
     private static $port = 3306;
     private static $dbname = 'hospitalstation';
-    private static $username = 'sa';
+    private static $username = 'root';  // Fixed: Changed from 'sa' to 'root' for XAMPP
     private static $password = '';
 
     /* ===================== PDO ===================== */

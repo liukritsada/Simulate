@@ -248,7 +248,7 @@
         .stations-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-            gap: 16px;
+            gap: 32px;
         }
         .station-icon-card {
             background: var(--text-inverse);
@@ -2612,6 +2612,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
             <button class="nav-tab" onclick="switchTab('floor5')">Floor 5</button>
             <button class="nav-tab" onclick="switchTab('floor6')">🏥 ห้องตรวจ</button>
             <button class="nav-tab" onclick="switchTab('patients')">👥 Patients</button>
+            <button class="nav-tab" onclick="switchTab('realtime')">🔄 Live Dashboard</button>
             
         </div>
 
@@ -2669,6 +2670,87 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
             <div id="floor4" class="tab-content"><div class="stations-container"><div class="stations-header"><div class="floor-title">Floor 4</div><button class="btn btn-success" onclick="openWizard(4)"><i class="fas fa-plus"></i> Add Station</button></div><div class="stations-grid" id="floor4-stations"></div></div></div>
             <div id="floor5" class="tab-content"><div class="stations-container"><div class="stations-header"><div class="floor-title">Floor 5</div><button class="btn btn-success" onclick="openWizard(5)"><i class="fas fa-plus"></i> Add Station</button></div><div class="stations-grid" id="floor5-stations"></div></div></div>
             <div id="floor6" class="tab-content"><div class="stations-container"><div class="stations-header"><div class="floor-title">🏥 ห้องตรวจ</div><button class="btn btn-success" onclick="openWizard(6)"><i class="fas fa-plus"></i> Add Station</button></div><div class="stations-grid" id="floor6-stations"></div></div></div>
+            
+            <!-- REALTIME DASHBOARD TAB -->
+            <div id="realtime" class="tab-content">
+                <div style="background: linear-gradient(135deg, #F5FAFF 0%, #E0EEFF 50%, #F0F5FF 100%); min-height: calc(100vh - 200px); padding: 30px 20px; border-radius: 12px;">
+                    <div style="max-width: 1400px; margin: 0 auto;">
+                        <div style="text-align: center; margin-bottom: 40px;">
+                            <h2 style="font-size: 2rem; color: var(--primary); margin-bottom: 8px;">🔄 Live Real-time Dashboard</h2>
+                            <p style="font-size: 1rem; color: var(--text-light);">Real-time data integration จาก API endpoints</p>
+                        </div>
+
+                        <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--success); animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
+                                <span>API Status: <strong>Online</strong></span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Update Interval: <strong>5s</strong></span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;">
+                                <i class="fas fa-chart-line"></i>
+                                <span id="chartCount">Charts: <strong>0</strong></span>
+                            </div>
+                        </div>
+
+                        <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
+                            <button class="btn btn-primary" onclick="realtimeDashboard.startAllCharts()" style="display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-play"></i> Start All Charts
+                            </button>
+                            <button class="btn btn-danger" onclick="realtimeDashboard.stopAllCharts()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #EF4444 0%, #F87171 100%); color: white; border: none;">
+                                <i class="fas fa-stop"></i> Stop All Charts
+                            </button>
+                            <button class="btn btn-primary" onclick="realtimeDashboard.updateCharts()" style="display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-sync-alt"></i> Manual Refresh
+                            </button>
+                            <span style="margin-left: auto; font-size: 0.9rem; color: var(--text-light);">
+                                <i class="fas fa-info-circle"></i>
+                                Charts update automatically every 5 seconds
+                            </span>
+                        </div>
+
+                        <div style="background: #F9FAFB; border-left: 4px solid var(--primary); padding: 16px; border-radius: 8px; margin-bottom: 24px; font-size: 0.9rem; color: var(--text);">
+                            <strong>📌 หมายเหตุ:</strong> ในการใช้งานจริง ให้แทนที่ API endpoints ด้วย endpoints ที่แท้จริง เช่น 
+                            <code style="background: white; padding: 2px 6px; border-radius: 3px;">/hospital/api/get_stations.php</code>,
+                            <code style="background: white; padding: 2px 6px; border-radius: 3px;">/hospital/api/get_station_stats.php</code> เป็นต้น
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 40px; margin-bottom: 40px;">
+                            <!-- Live Metrics -->
+                            <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">📈 Patient Metrics (Live)</div>
+                                <div id="metricsChart"></div>
+                            </div>
+
+                            <!-- Live Bar Chart -->
+                            <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">📊 Station Occupancy (Live)</div>
+                                <div id="barChart"></div>
+                            </div>
+
+                            <!-- Live Donut Chart -->
+                            <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">🍩 Status Distribution (Live)</div>
+                                <div id="donutChart"></div>
+                            </div>
+
+                            <!-- Live Progress -->
+                            <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">⏳ Room Occupancy (Live)</div>
+                                <div id="progressChart"></div>
+                            </div>
+
+                            <!-- Live Stats Table -->
+                            <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08); grid-column: 1 / -1;">
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">📋 Station Statistics (Live)</div>
+                                <div id="tableChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- PATIENTS TAB -->
             <div id="patients" class="tab-content">
@@ -6815,6 +6897,7 @@ document.head.appendChild(allFloorsStyle);
     <script src="js/modules/13-auto_update_staff_status.js"></script>
     <script src="js/modules/14-Station-Drag&Drop.js"></script>
     <script src="js/modules/15-data-visualization.js"></script>
+    <script src="js/modules/16-realtime-integration.js"></script>
     <script src="js/modules/patient-wrapper.js"></script>
     <script src="js/modules/daily-reset.js"></script>
 
@@ -7057,6 +7140,221 @@ document.head.appendChild(allFloorsStyle);
         // Display status อ่านจาก database โดยตรง (ผ่าน loadAllFloorsEnhancedNew)
         
 
+        // =====================================================
+        // 🔄 REALTIME DASHBOARD - PATIENT + STATION + TIME
+        // =====================================================
+        
+        // Helper: Calculate wait time in minutes
+        function calculateWaitTime(arrivalTime, currentTime) {
+            try {
+                const arrival = new Date('2026-01-26 ' + (arrivalTime || '00:00:00').split(' ')[1]);
+                const current = new Date('2026-01-26 ' + (currentTime || '14:50:00'));
+                const diffMs = current - arrival;
+                return Math.max(0, Math.round(diffMs / 1000 / 60));
+            } catch (e) {
+                return 0;
+            }
+        }
+        
+        // Data Transformers for Real Patient + Time Data
+        const realDataTransformers = {
+            // Patient metrics (waiting, in process, completed)
+            patientMetrics(response) {
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const waiting = patients.filter(p => p.status === 'waiting').length;
+                const processing = patients.filter(p => p.status === 'in_process').length;
+                const completed = patients.filter(p => p.status === 'completed').length;
+                const total = patients.length;
+                
+                return [
+                    { label: 'Total Patients', value: total, change: 0, icon: '👥', color: '#0066CC' },
+                    { label: 'Waiting', value: waiting, change: 0, icon: '⏳', color: '#F59E0B' },
+                    { label: 'In Process', value: processing, change: 0, icon: '🏥', color: '#3B82F6' },
+                    { label: 'Completed', value: completed, change: 0, icon: '✅', color: '#10B981' },
+                    { label: 'Avg Wait Time', value: patients.length > 0 ? Math.round(patients.reduce((sum, p) => sum + calculateWaitTime(p.arrival_time, '14:50:00'), 0) / patients.length) : 0, change: 0, icon: '⏱️', color: '#EC4899' },
+                    { label: 'Max Wait Time', value: patients.length > 0 ? Math.max(...patients.map(p => calculateWaitTime(p.arrival_time, '14:50:00'))) : 0, change: 0, icon: '⛔', color: '#EF4444' }
+                ];
+            },
+            
+            // Station efficiency by procedure count
+            stationEfficiency(response) {
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const stationMap = {};
+                patients.forEach(p => {
+                    if (!stationMap[p.station_id]) {
+                        stationMap[p.station_id] = { name: p.station_id, count: 0, avgWait: 0, totalWait: 0 };
+                    }
+                    stationMap[p.station_id].count++;
+                    const wait = calculateWaitTime(p.arrival_time, '14:50:00');
+                    stationMap[p.station_id].totalWait += wait;
+                });
+                
+                return Object.values(stationMap)
+                    .map(s => ({
+                        label: 'Station ' + s.name,
+                        value: s.count,
+                        max: Math.max(...Object.values(stationMap).map(x => x.count)) + 5,
+                        color: s.count > 20 ? '#EF4444' : s.count > 10 ? '#F59E0B' : '#10B981'
+                    }))
+                    .slice(0, 10);
+            },
+            
+            // Patient waiting status
+            patientWaitingStatus(response) {
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const waiting = patients
+                    .filter(p => p.status === 'waiting')
+                    .map(p => ({
+                        patient_name: p.patient_name || 'Unknown',
+                        hn: p.hn || '-',
+                        wait_time: calculateWaitTime(p.arrival_time, '14:50:00'),
+                        station: p.station_id,
+                        procedure: p.procedure_code || '-'
+                    }))
+                    .sort((a, b) => b.wait_time - a.wait_time)
+                    .slice(0, 15);
+                
+                return waiting;
+            },
+            
+            // Status distribution
+            statusDistribution(response) {
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const waiting = patients.filter(p => p.status === 'waiting').length;
+                const processing = patients.filter(p => p.status === 'in_process').length;
+                const completed = patients.filter(p => p.status === 'completed').length;
+                
+                return [
+                    { label: 'Waiting', value: waiting, color: '#F59E0B' },
+                    { label: 'Processing', value: processing, color: '#3B82F6' },
+                    { label: 'Completed', value: completed, color: '#10B981' }
+                ];
+            },
+            
+            // Service time progress
+            serviceProgress(response) {
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const avgWait = patients.length > 0 ? Math.round(patients.reduce((sum, p) => sum + calculateWaitTime(p.arrival_time, '14:50:00'), 0) / patients.length) : 0;
+                const maxWait = patients.length > 0 ? Math.max(...patients.map(p => calculateWaitTime(p.arrival_time, '14:50:00'))) : 0;
+                const waiting = patients.filter(p => p.status === 'waiting').length;
+                
+                return [
+                    {
+                        label: 'Avg Wait Time (min)',
+                        value: avgWait,
+                        max: 60,
+                        color: 'var(--warning)'
+                    },
+                    {
+                        label: 'Max Wait Time (min)',
+                        value: maxWait,
+                        max: 240,
+                        color: 'var(--danger)'
+                    },
+                    {
+                        label: 'Waiting Patients',
+                        value: waiting,
+                        max: Math.max(waiting + 10, 30),
+                        color: 'var(--primary)'
+                    }
+                ];
+            }
+        };
+        
+        const realtimeDashboard = {
+            charts: {},
+            
+            startAllCharts() {
+                console.log('🚀 Starting live patient + station + time dashboard...');
+                
+                if (!liveChartManager) {
+                    console.error('❌ liveChartManager not available');
+                    return;
+                }
+                
+                try {
+                    // 1️⃣ Patient Metrics - Waiting, Processing, Completed
+                    liveChartManager.createLiveMetrics(
+                        'metricsChart',
+                        'api/get_station_today_patients.php?station_id=60',
+                        realDataTransformers.patientMetrics
+                    );
+
+                    // 2️⃣ Station Efficiency - Patient count per station
+                    liveChartManager.createLiveBarChart(
+                        'barChart',
+                        'api/get_station_today_patients.php?station_id=60',
+                        realDataTransformers.stationEfficiency,
+                        '📊 Patients per Station'
+                    );
+
+                    // 3️⃣ Status Distribution - Waiting vs Processing vs Completed
+                    liveChartManager.createLiveDonut(
+                        'donutChart',
+                        'api/get_station_today_patients.php?station_id=60',
+                        realDataTransformers.statusDistribution,
+                        '📈 Patient Status'
+                    );
+
+                    // 4️⃣ Service Progress - Wait times
+                    liveChartManager.createLiveProgress(
+                        'progressChart',
+                        'api/get_station_today_patients.php?station_id=60',
+                        realDataTransformers.serviceProgress
+                    );
+
+                    // 5️⃣ Waiting Patients - Longest wait times
+                    const patientTable = realDataTransformers.patientWaitingStatus;
+                    liveChartManager.createLiveTable(
+                        'tableChart',
+                        'api/get_station_today_patients.php?station_id=60',
+                        [
+                            { title: 'Patient Name', key: 'patient_name' },
+                            { title: 'HN', key: 'hn' },
+                            { title: 'Wait Time (min)', key: 'wait_time' },
+                            { title: 'Station', key: 'station' },
+                            { title: 'Procedure', key: 'procedure' }
+                        ],
+                        patientTable,
+                        '⏳ Longest Waiting Patients'
+                    );
+                    
+                    this.updateChartCount();
+                    console.log('✅ All live patient/station/time charts initialized');
+                } catch (error) {
+                    console.error('❌ Error starting charts:', error);
+                }
+            },
+            
+            stopAllCharts() {
+                console.log('🛑 Stopping all live charts...');
+                if (liveChartManager) {
+                    liveChartManager.stopAll();
+                }
+                this.updateChartCount();
+            },
+            
+            updateCharts() {
+                console.log('🔄 Manual refresh...');
+                this.stopAllCharts();
+                setTimeout(() => this.startAllCharts(), 500);
+            },
+            
+            updateChartCount() {
+                const count = liveChartManager ? Object.keys(liveChartManager.charts).length : 0;
+                document.getElementById('chartCount').textContent = `Charts: ${count}`;
+            }
+        };
 
        
         

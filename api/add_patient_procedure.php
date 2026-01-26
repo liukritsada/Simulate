@@ -38,21 +38,15 @@ if ($patientId <= 0 || $procedureId <= 0) {
 }
 
 try {
+    // Use centralized database configurations
+    require_once __DIR__ . '/db_config.php';
+    require_once __DIR__ . '/external_db_config.php';
+
     // Connect to hospitalstation DB
-    $pdo = new PDO(
-        "mysql:host=127.0.0.1;port=3306;dbname=hospitalstation;charset=utf8mb4",
-        'sa',
-        '',
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+    $pdo = DBConfig::getPDO();
 
     // Connect to pdp DB for procedure name
-    $pdpPdo = new PDO(
-        "mysql:host=172.25.41.30;port=3306;dbname=pdp;charset=utf8",
-        'root',
-        'abzolute',
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+    $pdpPdo = ExternalDBConfig::getPDPConnection();
 
     // --- Start Transaction ---
     $pdo->beginTransaction();

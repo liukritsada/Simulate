@@ -1,9 +1,6 @@
 /**
- * ✅ 12-auto-assignment-system.js - FIXED v3 (NO WebSocket)
- * ใช้ Polling โดยตรง ไม่ลอง WebSocket
- * 
- * ✅ FIX: ปิด WebSocket attempt ไม่ให้ error
- * ไปเข้า Polling เลย
+ * ✅ 11-auto-assignment-system.js - FIXED
+ * ใช้ auto_assign_doctor.php แทน get_unassigned_doctors.php
  */
 
 // ✅ Variables
@@ -11,261 +8,383 @@ let autoAssignDoctorTimer = null;
 let autoUpdateStatusTimer = null;
 let resetCheckTimer = null;
 
-// ✅ ใช้จากไฟล์ 11-auto-assign-doctor.js แล้ว
-// AUTO_ASSIGN_DOCTOR_INTERVAL ถูกประกาศใน 11-auto-assign-doctor.js
-
-// ตัวแปรอื่นๆ ที่ไม่ซ้ำ
+const AUTO_ASSIGN_DOCTOR_INTERVAL = 5 * 1000; // 5 seconds (เร็วขึ้น)
+const AUTO_UPDATE_STATUS_INTERVAL = 5 * 1000; // 5 seconds (เร็วขึ้น)
 const RESET_TIME = "00:00:00"; // Reset at midnight
 
-/**
- * ✅ Helper: Get active station ID
- * ตรวจสอบหลายตัวแปร
- */
-function getActiveStationId() {
-    // ✅ ตรวจสอบ window.currentStationId
-    if (window.currentStationId && window.currentStationId > 0) {
-        return window.currentStationId;
-    }
-    
-    // ✅ ตรวจสอบ stationId
-    if (typeof stationId !== 'undefined' && stationId > 0) {
-        return stationId;
-    }
-    
-    // ✅ ตรวจสอบ currentStation
-    if (typeof currentStation !== 'undefined' && currentStation && currentStation.station_id > 0) {
-        return currentStation.station_id;
-    }
-    
-    return 0; // ❌ ไม่มี station ID
-}
+// 🔴 WebSocket Real-time Configuration (ยังไม่มี WebSocket server ให้ใช้ interval แล้ว)
+let wsConnection = null;
+const WS_URL = "ws://localhost:8080"; // เปลี่ยนเป็น wss:// ใน production
 
 /**
- * ✅ Initialize Polling (ไม่ลอง WebSocket)
- * ใช้เมื่อหลัก
+ * 🔴 WEBSOCKET SUPPORT (Future Implementation)
+ * เตรียมไว้สำหรับการเชื่อมต่อ WebSocket server
  */
-function initializePolling() {
-    console.log("📍 Initializing Polling System...");
-    
-    // ใช้ AUTO_ASSIGN_DOCTOR_INTERVAL จาก 11-auto-assign-doctor.js
-    // ค่า default: 30 * 1000 (30 seconds)
-    
-    if (autoAssignDoctorTimer) clearInterval(autoAssignDoctorTimer);
-    if (autoUpdateStatusTimer) clearInterval(autoUpdateStatusTimer);
-    if (resetCheckTimer) clearInterval(resetCheckTimer);
-
-    // Start auto-assign doctor polling
-    triggerAutoAssignDoctor();
-    autoAssignDoctorTimer = setInterval(() => {
-        triggerAutoAssignDoctor();
-    }, AUTO_ASSIGN_DOCTOR_INTERVAL || 30000); // Use global or default 30s
-
-    // Start auto-update status polling
-    triggerUpdateDoctorStatus();
-    autoUpdateStatusTimer = setInterval(() => {
-        triggerUpdateDoctorStatus();
-    }, 10 * 1000); // Every 10 seconds
-
-    // Daily reset check
-    resetCheckTimer = setInterval(() => {
-        checkAndResetDaily();
-    }, 60 * 1000); // Every minute
-
-    console.log("✅ Polling System Initialized");
-}
-
-/**
- * ✅ Trigger auto-assign doctor
- * ✅ FIX: ใช้ getActiveStationId() แทน currentStationId
- */
-async function triggerAutoAssignDoctor() {
-    // ✅ ตรวจสอบ station ID ก่อน
-    const stationId = getActiveStationId();
-    if (!stationId || stationId === 0) {
-        // ข้าม API call ถ้าไม่มี station_id (ปกติในหน้า All Floors)
-        return;
-    }
-
-    console.log(`🏥 [Polling] Auto-assign doctor trigger... (Station ${stationId})`);
-    
+function initializeWebSocket() {
     try {
-        const apiUrl = typeof getApiUrl === 'function'
-            ? getApiUrl('auto_assign_doctor.php')
-            : `/hospital/api/auto_assign_doctor.php`;
-
-        const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                station_id: stationId,  // ✅ ใช้ getActiveStationId() ที่ได้
-                current_date: new Date().toISOString().split('T')[0],
-                current_time: new Date().toTimeString().split(' ')[0]
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (result.success && result.data.assignments && result.data.assignments.length > 0) {
-            console.log(`✅ Auto-assigned: ${result.data.assignments.length} doctor(s)`);
-            
-            // Reload UI
-            if (typeof loadStationDetail === 'function') {
-                setTimeout(() => loadStationDetail(stationId), 500);
-            }
-        }
-    } catch (error) {
-        console.warn("⚠️ Auto-assign doctor error:", error.message);
-    }
-}
-
-/**
- * ✅ Trigger update doctor status by time
- * ✅ FIX: ใช้ getActiveStationId() แทน currentStationId
- */
-async function triggerUpdateDoctorStatus() {
-    const stationId = getActiveStationId();
-    if (!stationId || stationId === 0) {
-        // ข้าม update ถ้าไม่มี station_id
-        return;
-    }
-
-    console.log(`🔄 [Polling] Update doctor status by time... (Station ${stationId})`);
-    
-    try {
-        const apiUrl = typeof getApiUrl === 'function'
-            ? getApiUrl('update_doctor_status_by_time.php')
-            : `/hospital/api/update_doctor_status_by_time.php`;
-
-        const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                station_id: stationId,  // ✅ ใช้ getActiveStationId() ที่ได้
-                current_date: new Date().toISOString().split('T')[0],
-                current_time: new Date().toTimeString().split(' ')[0]
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (result.success && result.data.updated_count > 0) {
-            console.log(`✅ Status updated: ${result.data.updated_count} change(s)`);
-            
-            // Check if rooms were cleared
-            const hasRoomClear = result.data.updates.some(u => u.room_cleared);
-            if (hasRoomClear) {
-                console.log("🏪 Room cleared - Triggering auto-assign...");
-                setTimeout(() => triggerAutoAssignDoctor(), 500);
-            }
-        }
-    } catch (error) {
-        console.warn("⚠️ Update doctor status error:", error.message);
-    }
-}
-
-/**
- * ✅ Check and reset daily data
- */
-async function checkAndResetDaily() {
-    const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
-    
-    if (timeStr === RESET_TIME) {
-        console.log("🔄 Resetting daily data...");
+        wsConnection = new WebSocket(WS_URL);
         
-        try {
-            const apiUrl = typeof getApiUrl === 'function'
-                ? getApiUrl('reset_daily_data.php')
-                : `/hospital/api/reset_daily_data.php`;
+        wsConnection.onopen = () => {
+            console.log("✅ WebSocket Connected!");
+            wsConnection.send(JSON.stringify({
+                type: "subscribe",
+                station_id: currentStationId
+            }));
+        };
+        
+        wsConnection.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log("📡 WebSocket Message:", data);
+            
+            if (data.type === "status_update") {
+                // อัพเดท UI ทันที
+                handleStatusUpdate(data);
+            } else if (data.type === "doctor_assigned") {
+                // ตีความ Doctor ถูก assign
+                handleDoctorAssignment(data);
+            }
+        };
+        
+        wsConnection.onerror = (error) => {
+            console.warn("⚠️ WebSocket Error:", error);
+            console.log("📍 ใช้ Polling แทน (fallback)");
+        };
+        
+        wsConnection.onclose = () => {
+            console.log("❌ WebSocket Closed - reconnecting in 5s...");
+            setTimeout(initializeWebSocket, 5000);
+        };
+    } catch (error) {
+        console.warn("⚠️ WebSocket not available:", error);
+        console.log("📍 ใช้ Polling แทน (fallback)");
+    }
+}
 
-            const response = await fetch(apiUrl, {
+/**
+ * ✅ Auto Assign Doctors to Rooms (FIXED - use auto_assign_doctor.php)
+ */
+async function autoAssignDoctorsToRooms() {
+    try {
+        console.log("🏥 เริ่มเพิ่มแพทย์เข้าห้องอัตโนมัติ...");
+
+        if (!currentStationId) {
+            console.log("⏭️ ยังไม่ได้เลือก Station - ข้ามการทำงาน");
+            return {
+                success: false,
+                error: "ยังไม่ได้เลือก Station",
+                skipped: true,
+            };
+        }
+
+        const currentDate = new Date().toISOString().split("T")[0];
+        const currentTime = new Date().toTimeString().split(" ")[0];
+
+        // ✅ FIXED: Use auto_assign_doctor.php instead of get_unassigned_doctors.php
+        const assignResponse = await fetch(
+            getApiUrl("auto_assign_doctor.php"),
+            {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    reset_date: new Date().toISOString().split('T')[0]
+                    station_id: currentStationId,
+                    current_date: currentDate,
+                    current_time: currentTime,
                 }),
-            });
-
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const result = await response.json();
-            if (result.success) {
-                console.log("✅ Daily reset completed");
-                
-                // Reload page
-                if (typeof location !== 'undefined') {
-                    setTimeout(() => location.reload(), 1000);
-                }
             }
-        } catch (error) {
-            console.error("❌ Reset error:", error.message);
+        );
+
+        const result = await assignResponse.json();
+
+        if (!assignResponse.ok) {
+            console.error("❌ API Error:", result);
+            throw new Error(result.message || `HTTP ${assignResponse.status}`);
         }
+
+        if (!result.success) {
+            console.warn("⚠️ Auto-assign failed:", result.message);
+            return false;
+        }
+
+        console.log("✅ Auto-assign doctor completed");
+        console.log(
+            `📊 Empty rooms: ${result.data.empty_rooms_count}, Auto assigned: ${result.data.auto_assigned_count}`
+        );
+
+        // Log each assignment
+        if (result.data.assignments && result.data.assignments.length > 0) {
+            result.data.assignments.forEach((assignment) => {
+                console.log(`   ${assignment.message}`);
+            });
+        } else {
+            console.log("   ⏭️ ไม่มีห้องว่างหรือแพทย์ว่าง");
+        }
+
+        return true;
+
+    } catch (error) {
+        console.error("❌ ข้อผิดพลาดในการเพิ่มแพทย์อัตโนมัติ:", error);
+        return false;
     }
 }
 
 /**
- * ✅ Stop all timers
+ * ✅ Start Auto Assign Doctor Timer
  */
-function stopAllPolling() {
-    console.log("🛑 Stopping all polling...");
-    
-    if (autoAssignDoctorTimer) clearInterval(autoAssignDoctorTimer);
-    if (autoUpdateStatusTimer) clearInterval(autoUpdateStatusTimer);
-    if (resetCheckTimer) clearInterval(resetCheckTimer);
-    
-    console.log("✅ All polling stopped");
+function startAutoAssignDoctorTimer() {
+    console.log("⏰ เปิดตัวจับเวลาเพิ่มแพทย์อัตโนมัติ");
+
+    // Clear existing timer
+    if (autoAssignDoctorTimer) {
+        clearInterval(autoAssignDoctorTimer);
+    }
+
+    // Run immediately
+    autoAssignDoctorsToRooms();
+
+    // Run every 30 seconds
+    autoAssignDoctorTimer = setInterval(() => {
+        autoAssignDoctorsToRooms();
+    }, AUTO_ASSIGN_DOCTOR_INTERVAL);
+
+    console.log("✅ ตัวจับเวลาเพิ่มแพทย์ทำงานแล้ว");
 }
 
 /**
- * ✅ Initialize on page load
- * ✅ FIX: ไม่ลอง WebSocket เลย ไปเข้า Polling เลย
+ * ✅ Stop Auto Assign Doctor Timer
  */
-window.addEventListener('load', () => {
-    console.log("📡 Page loaded - Initializing auto-assignment system (Polling mode)...");
-    
-    setTimeout(() => {
-        // ✅ ไปเข้า Polling เลย ไม่ลอง WebSocket
-        console.log("📍 Using Polling System directly...");
-        initializePolling();
+function stopAutoAssignDoctorTimer() {
+    if (autoAssignDoctorTimer) {
+        clearInterval(autoAssignDoctorTimer);
+        autoAssignDoctorTimer = null;
+        console.log("⏹️ ตัวจับเวลาเพิ่มแพทย์หยุดแล้ว");
+    }
+}
 
-        console.log("✅ Auto-assignment system initialized (Polling)");
-    }, 1000);
+/**
+ * ✅ Auto Update Status
+ */
+async function autoUpdateStatus() {
+    console.log("🔄 เริ่มตัวอัพเดต status อัตโนมัติ (ทุก 60 วิ)");
+
+    try {
+        const statusResponse = await fetch(
+            getApiUrl("update_staff_status_by_time.php"),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    station_id: currentStationId || 0,
+                    current_date: new Date().toISOString().split("T")[0],
+                    current_time: new Date().toTimeString().split(" ")[0],
+                }),
+            }
+        );
+
+        if (statusResponse.ok) {
+            const result = await statusResponse.json();
+            if (result.success) {
+                console.log(
+                    `✅ Status updated: ${result.data.updated_count} staff at ${new Date().toLocaleTimeString()}`
+                );
+            }
+        }
+    } catch (error) {
+        console.warn("⚠️ Status update error:", error);
+    }
+}
+
+/**
+ * ✅ Start Status Update Timer
+ */
+function startAutoUpdateStatusTimer() {
+    console.log("⏰ เปิดตัวจับเวลาอัพเดต status");
+
+    if (autoUpdateStatusTimer) {
+        clearInterval(autoUpdateStatusTimer);
+    }
+
+    autoUpdateStatus();
+
+    autoUpdateStatusTimer = setInterval(() => {
+        autoUpdateStatus();
+    }, AUTO_UPDATE_STATUS_INTERVAL);
+
+    console.log("✅ Interval status update ทำงาน (ทุก 60วิ)");
+}
+
+/**
+ * ✅ Stop Status Update Timer
+ */
+function stopAutoUpdateStatusTimer() {
+    if (autoUpdateStatusTimer) {
+        clearInterval(autoUpdateStatusTimer);
+        autoUpdateStatusTimer = null;
+    }
+}
+
+/**
+ * ✅ Set Station ID
+ */
+function setCurrentStationId(stationId) {
+    currentStationId = stationId;
+    console.log(`✅ Set current station to: ${stationId}`);
+
+    // Restart timers
+    stopAutoAssignDoctorTimer();
+    startAutoAssignDoctorTimer();
+}
+
+/**
+ * ✅ Get Current Station ID
+ */
+function getCurrentStationId() {
+    return currentStationId;
+}
+
+/**
+ * ✅ Reset Daily Data
+ */
+async function resetDailyData() {
+    console.log("🔄 รีเซ็ตข้อมูลประจำวัน");
+
+    try {
+        const response = await fetch(getApiUrl("reset_daily_data.php"), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                current_date: new Date().toISOString().split("T")[0],
+            }),
+        });
+
+        if (response.ok) {
+            console.log("✅ รีเซ็ตข้อมูลประจำวันสำเร็จ");
+        }
+    } catch (error) {
+        console.warn("⚠️ Reset daily data error:", error);
+    }
+}
+
+/**
+ * ✅ Check Reset Time
+ */
+function checkResetTime() {
+    const now = new Date();
+    const currentTime =
+        String(now.getHours()).padStart(2, "0") +
+        ":" +
+        String(now.getMinutes()).padStart(2, "0") +
+        ":" +
+        String(now.getSeconds()).padStart(2, "0");
+
+    // Store reset date in localStorage
+    const today = new Date().toISOString().split("T")[0];
+    const storedResetDate = localStorage.getItem("lastResetDate") || today;
+
+    const needsReset = storedResetDate !== today;
+
+    console.log(
+        `📅 ตรวจสอบรีเซ็ต: {currentDate: '${today}', storedResetDate: '${storedResetDate}', needsReset: ${needsReset}}`
+    );
+
+    if (needsReset) {
+        console.log("🔄 ต้องรีเซ็ตข้อมูล");
+        resetDailyData();
+        localStorage.setItem("lastResetDate", today);
+    }
+
+    // Schedule next reset at midnight
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    const msUntilMidnight = tomorrow - now;
+    console.log(
+        `⏰ ตั้งค่า reset ให้ทำงานในอีก ${(msUntilMidnight / 1000 / 3600).toFixed(2)} ชั่วโมง`
+    );
+
+    if (resetCheckTimer) {
+        clearTimeout(resetCheckTimer);
+    }
+
+    resetCheckTimer = setTimeout(() => {
+        checkResetTime();
+    }, msUntilMidnight);
+}
+
+/**
+ * ✅ Handle Status Update from WebSocket
+ */
+function handleStatusUpdate(data) {
+    console.log("✅ Status Updated via WebSocket:", data);
+    // ต้องเขียน logic เพื่อ update DOM
+    // เช่น update room card, staff status color, etc.
+}
+
+/**
+ * ✅ Handle Doctor Assignment from WebSocket
+ */
+function handleDoctorAssignment(data) {
+    console.log("✅ Doctor Assigned via WebSocket:", data);
+    // ต้องเขียน logic เพื่อ update DOM
+    // เช่น show notification, update room list, etc.
+}
+
+/**
+ * ✅ Initialize System
+ */
+function initializeSystem() {
+    console.log("📱 หน้าโหลดเสร็จ - เริ่มระบบอัตโนมัติ");
+
+    // 🔴 สั่ง WebSocket ถ้ามี (ยังไม่มี server)
+    // initializeWebSocket();
+    
+    checkResetTime();
+    startAutoAssignDoctorTimer();
+    startAutoUpdateStatusTimer();
+}
+
+/**
+ * ✅ Auto initialize on page load
+ */
+window.addEventListener("load", () => {
+    setTimeout(() => {
+        initializeSystem();
+    }, 2000);
 });
 
 /**
  * ✅ Cleanup on page unload
  */
-window.addEventListener('beforeunload', () => {
-    console.log("🧹 Page unloading - Stopping all timers");
-    stopAllPolling();
+window.addEventListener("beforeunload", () => {
+    stopAutoAssignDoctorTimer();
+    stopAutoUpdateStatusTimer();
+    if (resetCheckTimer) {
+        clearTimeout(resetCheckTimer);
+    }
+    // 🔴 Close WebSocket if exists
+    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+        wsConnection.close();
+    }
 });
 
 /**
- * ✅ Stop polling when leaving station
+ * ✅ Handle visibility change
  */
-function stopAutoAssignment() {
-    console.log("⏹️ Stopping auto-assignment...");
-    stopAllPolling();
-}
-
-/**
- * ✅ Start polling when entering station
- */
-function startAutoAssignment() {
-    console.log("▶️ Starting auto-assignment...");
-    initializePolling();
-}
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        console.log("👁️ Page hidden - pausing updates");
+        stopAutoAssignDoctorTimer();
+        stopAutoUpdateStatusTimer();
+    } else {
+        console.log("👁️ กลับมาดูหน้าแล้ว - ตรวจสอบระบบอัตโนมัติ");
+        checkResetTime();
+        startAutoAssignDoctorTimer();
+        startAutoUpdateStatusTimer();
+    }
+});

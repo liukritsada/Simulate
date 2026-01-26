@@ -32,7 +32,7 @@ let autoDoctorStatusInterval = null;
 async function loadDoctorsForStation(stationId) {
   try {
     // ✅ FIXED: SET STATION ID FOR AUTO-ASSIGN!
-    currentStationId = stationId;
+    setCurrentStationId(stationId);
     
     const apiUrl = `${API_BASE_URL}/get_station_doctors.php?station_id=${stationId}`.replace(/\/+/g, '/').replace(':/', '://');
     console.log("Fetching from:", apiUrl);
@@ -49,16 +49,6 @@ async function loadDoctorsForStation(stationId) {
       console.error("Failed to load doctors:", result.message);
       displayStationDoctors([]);
     }
-    
-    // ✅ SET UP AUTO-REFRESH EVERY 1 MINUTE
-    if (autoDoctorStatusInterval) {
-      clearInterval(autoDoctorStatusInterval);
-    }
-    autoDoctorStatusInterval = setInterval(() => {
-      console.log("🔄 Auto-refreshing doctor status...");
-      loadDoctorsForStation(currentStationId);
-    }, 60000); // Refresh every 60 seconds
-    
   } catch (error) {
     console.error("Error loading doctors:", error);
     displayStationDoctors([]);
@@ -119,92 +109,124 @@ function displayStationDoctors(doctors) {
   `;
 
   const now = new Date();
-  const currentTime =
-    String(now.getHours()).padStart(2, "0") +
-    ":" +
-    String(now.getMinutes()).padStart(2, "0");
+  const currentTime = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
 
   doctors.forEach((doctor) => {
-    // ✅ แปลงเวลา
-    const workStart = doctor.work_start_time
-      ? doctor.work_start_time.substring(0, 5)
-      : "08:00";
-    const workEnd = doctor.work_end_time
-      ? doctor.work_end_time.substring(0, 5)
-      : "17:00";
-    const breakStart = doctor.break_start_time
-      ? doctor.break_start_time.substring(0, 5)
-      : "12:00";
-    const breakEnd = doctor.break_end_time
-      ? doctor.break_end_time.substring(0, 5)
-      : "13:00";
+    // ✅ ตรวจสอบสถานะตามลอจิก
+    const hasWorkStartTime = doctor.work_start_time && doctor.work_start_time !== null;
+    const hasWorkEndTime = doctor.work_end_time && doctor.work_end_time !== null;
+    const hasAssignedRoom = doctor.assigned_room_id && doctor.assigned_room_id !== null;
 
-    // ✅ ตรวจสอบว่ามี room ที่ assign หรือไม่
-    const hasAssignedRoom =
-      doctor.assigned_room_id && doctor.assigned_room_id !== null;
-
-    // ============================================
-    // ✅ Logic ตรวจสอบสถานะของแพทย์ (Auto by Time)
-    // ============================================
-    let status, statusColor, statusIcon, statusText, statusBgColor, borderColor;
-
-    // ✅ ตรวจสอบว่าได้กำหนด work_start_time หรือยัง
-    if (!doctor.work_start_time || doctor.work_start_time === "00:00:00") {
-      // ⏰ ยังไม่เริ่มเวลาทำงาน (ไม่มี start time)
-      status = "not_started";
-      statusColor = "#9ca3af";
-      statusIcon = "fa-clock";
-      statusText = "ยังไม่เริ่ม";
-      statusBgColor = "#f3f4f6";
-      borderColor = "#d1d5db";
-    } else if (currentTime >= workEnd) {
-      // ⏰ เลิกตรวจแล้ว (เกินเวลา end time)
-      status = "off_duty";
-      statusColor = "#6c757d";
-      statusIcon = "fa-power-off";
-      statusText = "เลิกตรวจแล้ว";
-      statusBgColor = "#f8f9fa";
-      borderColor = "#d0d7e0";
-    } else if (currentTime >= workStart && currentTime < workEnd) {
-      // ⏰ กำลังตรวจ (อยู่ในเวลา start-end)
-      if (hasAssignedRoom) {
-        status = "working";
-        statusColor = "#0066cc";
-        statusIcon = "fa-briefcase";
-        statusText = "กำลังตรวจ";
-        statusBgColor = "#f0f4ff";
-        borderColor = "#c6e0ff";
-      } else {
-        status = "available";
-        statusColor = "#1E8449";
-        statusIcon = "fa-check-circle";
-        statusText = "ว่าง";
-        statusBgColor = "#f0f8f4";
-        borderColor = "#90EE90";
-      }
-    } else {
-      // ⏰ ยังไม่ถึงเวลาทำงาน (ก่อน start time)
-      status = "not_started";
-      statusColor = "#9ca3af";
-      statusIcon = "fa-clock";
-      statusText = "ยังไม่เริ่ม";
-      statusBgColor = "#f3f4f6";
-      borderColor = "#d1d5db";
-    }
-
-    // ✅ ข้อมูลห้อง
     const roomInfo = hasAssignedRoom
       ? `<div style="font-size: 11px; color: #0066cc; margin-top: 4px; font-weight: 600;">🚪 ${doctor.room_name || "Room " + doctor.assigned_room_id}</div>`
       : `<div style="font-size: 11px; color: #d32f2f; margin-top: 4px; font-weight: 600;">❌ N/A</div>`;
 
-    // ✅ ลบปุ่ม Start/Break/End เนื่องจากเป็นอัตโนมัติตามเวลา
+    let statusSection = '';
+    let borderColor = '#e0e6ed';
+    let borderLeftColor = '#6c757d';
 
-    // ✅ HTML Card - Modern Design
+    // ✅ ตรวจสอบสถานะตามลอจิกของคุณ
+    if (!hasWorkStartTime) {
+      // ❌ work_start_time = null → ยังไม่ออกตรวจ
+      statusSection = `
+        <div colspan="2" style="text-align: center;">
+          <span style="
+            background: #f8f9fa;
+            color: #666;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid #dee2e6;
+          ">
+            <i class="fas fa-clock"></i>ยังไม่ออกตรวจ
+          </span>
+        </div>
+      `;
+      borderColor = '#f5f5f5';
+      borderLeftColor = '#6c757d';
+    } else if (hasWorkStartTime && !hasWorkEndTime) {
+      // ✅ work_start_time มีค่า + work_end_time = null → กำลังตรวจ
+      const workStart = doctor.work_start_time.substring(0, 5);
+      
+      statusSection = `
+        <div style="text-align: center;">
+          <div style="font-size: 10px; color: #666; margin-bottom: 4px; font-weight: 500;">เวลาเริ่มต้น</div>
+          <div style="background: #f0f4ff; color: #0066cc; padding: 6px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">
+            ${workStart}
+          </div>
+        </div>
+
+        <div>
+          <span style="background: #0066cc; color: white; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
+            <i class="fas fa-briefcase"></i>กำลังตรวจ
+          </span>
+        </div>
+      `;
+      borderColor = '#c6e0ff';
+      borderLeftColor = '#0066cc';
+    } else if (hasWorkStartTime && hasWorkEndTime) {
+      // ✅ work_start_time มีค่า + work_end_time มีค่า → ต้องตรวจสอบเวลาปัจจุบัน
+      const workStart = doctor.work_start_time.substring(0, 5);
+      const workEnd = doctor.work_end_time.substring(0, 5);
+
+      // 🔧 แปลงเวลาเป็นตัวเลขสำหรับเปรียบเทียบที่ถูกต้อง
+      const currentTimeNum = parseInt(currentTime.replace(":", ""));
+      const workStartNum = parseInt(workStart.replace(":", ""));
+      const workEndNum = parseInt(workEnd.replace(":", ""));
+
+      let statusColor, statusIcon, statusText;
+
+      if (currentTimeNum >= workEndNum) {
+        // เกินเวลาเลิกงาน → เลิกงาน
+        statusColor = "#6c757d";
+        statusIcon = "fa-power-off";
+        statusText = "เลิกงาน";
+      } else if (currentTimeNum >= workStartNum && currentTimeNum < workEndNum) {
+        // อยู่ในเวลาทำงาน → กำลังตรวจ
+        statusColor = "#0066cc";
+        statusIcon = "fa-briefcase";
+        statusText = "กำลังตรวจ";
+      } else {
+        // ยังไม่ถึงเวลา → ว่าง
+        statusColor = "#1E8449";
+        statusIcon = "fa-check-circle";
+        statusText = "ว่าง";
+      }
+
+      statusSection = `
+        <div style="text-align: center;">
+          <div style="font-size: 10px; color: #666; margin-bottom: 4px; font-weight: 500;">เวลาทำงาน</div>
+          <div style="background: #f0f4ff; color: #0066cc; padding: 6px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">
+            ${workStart} <span style="color: #999;">-</span> ${workEnd}
+          </div>
+        </div>
+
+        <div>
+          <span style="background: ${statusColor}; color: white; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
+            <i class="fas ${statusIcon}"></i>${statusText}
+          </span>
+        </div>
+      `;
+      
+      if (currentTimeNum >= workEndNum) {
+        borderColor = '#e0e0e0';
+        borderLeftColor = '#6c757d';
+      } else {
+        borderColor = '#c6e0ff';
+        borderLeftColor = '#0066cc';
+      }
+    }
+
     html += `
       <div style="
         background: white;
         border: 2px solid ${borderColor};
-        border-left: 4px solid ${statusColor};
+        border-left: 4px solid ${borderLeftColor};
         border-radius: 10px;
         padding: 14px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -217,7 +239,6 @@ function displayStationDoctors(doctors) {
       onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)'"
       onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'">
         
-        <!-- ข้อมูลแพทย์ -->
         <div>
           <div style="font-weight: 700; font-size: 13px; color: #000; margin-bottom: 4px;">
             👨‍⚕️ ${doctor.doctor_name}
@@ -228,121 +249,40 @@ function displayStationDoctors(doctors) {
           ${roomInfo}
         </div>
 
-        <!-- เวลาทำงาน -->
-        <div style="text-align: center;">
-          <div style="font-size: 10px; color: #666; margin-bottom: 4px; font-weight: 500;">เวลาทำงาน</div>
-          <div style="background: #f0f4ff; color: #0066cc; padding: 6px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">
-            ${workStart} <span style="color: #999;">-</span> ${workEnd}
-          </div>
-        </div>
-
-        <!-- สถานะ Badge -->
-        <div>
-          <span style="
-            background: ${statusColor};
-            color: white;
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: nowrap;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-          ">
-            <i class="fas ${statusIcon}"></i>${statusText}
-          </span>
-        </div>
+        ${statusSection}
         
-        <!-- ปุ่มจัดการ -->
         <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
-          
-          <!-- มอบหมายห้อง -->
           ${
             !hasAssignedRoom
-              ? `
-          <button 
-            onclick="openAssignDoctorRoomModal(${doctor.station_doctor_id})"
-            style="
-              background: #0066cc;
-              color: white;
-              border: none;
-              padding: 6px 10px;
-              border-radius: 6px;
-              font-weight: 600;
-              cursor: pointer;
-              font-size: 12px;
-              transition: all 0.2s;
-            "
-            onmouseover="this.style.background='#0052a3'; this.style.transform='translateY(-2px)'"
-            onmouseout="this.style.background='#0066cc'; this.style.transform='translateY(0)'"
-            title="มอบหมายห้อง"
-          >
-            <i class="fas fa-door-open"></i>
-          </button>
-          `
-              : `
-          <button 
-            onclick="unassignDoctorRoom(${doctor.station_doctor_id})"
-            style="
-              background: #6C757D;
-              color: white;
-              border: none;
-              padding: 6px 10px;
-              border-radius: 6px;
-              font-weight: 600;
-              cursor: pointer;
-              font-size: 12px;
-              transition: all 0.2s;
-            "
-            onmouseover="this.style.background='#555'; this.style.transform='translateY(-2px)'"
-            onmouseout="this.style.background='#6C757D'; this.style.transform='translateY(0)'"
-            title="ยกเลิกการมอบหมายห้อง"
-          >
-            <i class="fas fa-times"></i>
-          </button>
-          `
+              ? `<button onclick="openAssignDoctorRoomModal(${doctor.station_doctor_id})"
+                  style="background: #0066cc; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.2s;"
+                  onmouseover="this.style.background='#0052a3'; this.style.transform='translateY(-2px)'"
+                  onmouseout="this.style.background='#0066cc'; this.style.transform='translateY(0)'"
+                  title="มอบหมายห้อง">
+                  <i class="fas fa-door-open"></i>
+                </button>`
+              : `<button onclick="unassignDoctorRoom(${doctor.station_doctor_id})"
+                  style="background: #6C757D; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.2s;"
+                  onmouseover="this.style.background='#555'; this.style.transform='translateY(-2px)'"
+                  onmouseout="this.style.background='#6C757D'; this.style.transform='translateY(0)'"
+                  title="ยกเลิกการมอบหมายห้อง">
+                  <i class="fas fa-times"></i>
+                </button>`
           }
 
-          <!-- แก้ไขเวลา -->
-          <button 
-            onclick="editDoctor(${doctor.station_doctor_id})"
-            style="
-              background: #F39C12;
-              color: white;
-              border: none;
-              padding: 6px 10px;
-              border-radius: 6px;
-              font-weight: 600;
-              cursor: pointer;
-              font-size: 12px;
-              transition: all 0.2s;
-            "
-            onmouseover="this.style.background='#E67E22'; this.style.transform='translateY(-2px)'"
-            onmouseout="this.style.background='#F39C12'; this.style.transform='translateY(0)'"
-            title="แก้ไขเวลาทำงาน"
-          >
+          <button onclick="editDoctor(${doctor.station_doctor_id})"
+                  style="background: #F39C12; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.2s;"
+                  onmouseover="this.style.background='#E67E22'; this.style.transform='translateY(-2px)'"
+                  onmouseout="this.style.background='#F39C12'; this.style.transform='translateY(0)'"
+                  title="แก้ไขเวลาทำงาน">
             <i class="fas fa-pencil-alt"></i>
           </button>
 
-          <!-- ลบ -->
-          <button 
-            onclick="removeDoctor(${doctor.station_doctor_id}, '${doctor.doctor_name}')"
-            style="
-              background: #dc3545;
-              color: white;
-              border: none;
-              padding: 6px 10px;
-              border-radius: 6px;
-              font-weight: 600;
-              cursor: pointer;
-              font-size: 12px;
-              transition: all 0.2s;
-            "
-            onmouseover="this.style.background='#c82333'; this.style.transform='translateY(-2px)'"
-            onmouseout="this.style.background='#dc3545'; this.style.transform='translateY(0)'"
-            title="ลบแพทย์"
-          >
+          <button onclick="removeDoctor(${doctor.station_doctor_id}, '${doctor.doctor_name}')"
+                  style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.2s;"
+                  onmouseover="this.style.background='#c82333'; this.style.transform='translateY(-2px)'"
+                  onmouseout="this.style.background='#dc3545'; this.style.transform='translateY(0)'"
+                  title="ลบแพทย์">
             <i class="fas fa-trash"></i>
           </button>
         </div>
@@ -362,178 +302,263 @@ function displayStationDoctors(doctors) {
 
 /**
  * ✅ Add Doctor to Station
- *//**
- * ✅ 09-doctor-management-PATCH.js
- * 
- * ใช้ script นี้ patch ฟังก์ชัน addDoctorToStation ใน 09-doctor-management.js
- * 
- * วิธีการ:
- * 1. แทนที่ส่วน addDoctorToStation (บรรทัด ~500-720)
- * 2. หรือ เพิ่มไฟล์นี้หลังจากโหลด 09-doctor-management.js
  */
-
-// ========================================
-// ✅ ADD DOCTOR TO STATION (PATCHED VERSION)
-// ========================================
-
 async function addDoctorToStation(stationId) {
   try {
-    // ✅ ดึง list doctors
-    const doctorsResponse = await fetch(`${API_BASE_URL}/get_all_doctors.php`);
-    if (!doctorsResponse.ok) throw new Error("ไม่สามารถดึงรายชื่อแพทย์");
-    const doctorsResult = await doctorsResponse.json();
-    const doctors = doctorsResult.data?.doctors || [];
+    console.log(`➕ เพิ่มแพทย์ใหม่ - station_id: ${stationId}`);
 
-    if (doctors.length === 0) {
-      throw new Error("ไม่มีแพทย์ในระบบ");
+    if (!API_BASE_URL) {
+      throw new Error("API_BASE_URL ไม่ได้ประกาศ");
     }
+
+    console.log("📥 ดึงข้อมูล station...");
+
+    const stationResponse = await fetch(
+      `${API_BASE_URL}/get_station_detail.php?station_id=${stationId}`
+    );
+
+    if (!stationResponse.ok) {
+      throw new Error(
+        `ไม่สามารถดึงข้อมูล station: HTTP ${stationResponse.status}`
+      );
+    }
+
+    const stationResult = await stationResponse.json();
+
+    if (!stationResult.success) {
+      throw new Error(stationResult.message || "ไม่สามารถดึงข้อมูล station");
+    }
+
+    const station = stationResult.data.station;
+    const departmentId = station.department_id;
+
+    if (!departmentId) {
+      throw new Error("ไม่พบ department_id สำหรับ station นี้");
+    }
+
+    console.log(`✅ department_id: ${departmentId}`);
 
     const today = new Date().toISOString().split("T")[0];
-    
-    // ✅ ตรวจสอบว่าแพทย์คนนี้มีอยู่ใน station นี้แล้วหรือไม่
-    const stationDoctorsResponse = await fetch(`${API_BASE_URL}/get_station_doctors.php?station_id=${stationId}`);
-    const stationDoctorsResult = await stationDoctorsResponse.json();
-    const existingDoctors = stationDoctorsResult.data?.doctors || [];
-    const existingDoctorIds = existingDoctors.map(d => d.doctor_id);
-
-    const availableDoctors = doctors.filter(d => !existingDoctorIds.includes(d.doctor_id));
-
-    if (availableDoctors.length === 0) {
-      throw new Error("แพทย์ทั้งหมดมีการเพิ่มแล้ว");
-    }
-
-    // ✅ สร้าง dropdown
-    const doctorOptions = availableDoctors
-      .map(doc => `<option value="${doc.doctor_id}|${doc.doctor_code}|${doc.doctor_name}">
-        👨‍⚕️ ${doc.doctor_name} (${doc.doctor_code})
-      </option>`)
-      .join("");
 
     const { value: formData } = await Swal.fire({
-      title: "➕ เพิ่มแพทย์",
+      title: "➕ เพิ่มแพทย์ใหม่",
       html: `
         <div style="text-align: left; padding: 20px 0;">
-          <!-- Doctor Selection -->
           <div style="margin-bottom: 20px;">
-            <label style="font-size: 13px; color: #333; font-weight: 600; display: block; margin-bottom: 8px;">
-              👨‍⚕️ เลือกแพทย์
+            <label style="font-weight: 500; display: block; margin-bottom: 8px; color: #333; font-size: 13px;">
+              🆔 รหัสแพทย์ <span style="color: #d32f2f;">*</span>
             </label>
-            <select id="doctorSelect" 
-                    style="
-                      width: 100%;
-                      padding: 12px;
-                      border: 1px solid #d0d7e0;
-                      border-radius: 8px;
-                      font-size: 13px;
-                      background: white;
-                    ">
-              <option value="">-- เลือกแพทย์ --</option>
-              ${doctorOptions}
-            </select>
+            <input 
+              type="text" 
+              id="newDoctorId" 
+              placeholder="เช่น DOC001"
+              style="
+                width: 100%;
+                padding: 11px 14px;
+                border: 1px solid #d0d7e0;
+                border-radius: 8px;
+                font-size: 13px;
+                box-sizing: border-box;
+                background: white;
+                color: #333;
+                transition: all 0.2s;
+              "
+              onfocus="this.style.borderColor='#0066cc'; this.style.boxShadow='0 0 0 3px rgba(0, 102, 204, 0.08)'"
+              onblur="this.style.borderColor='#d0d7e0'; this.style.boxShadow='none'">
           </div>
 
-          <!-- Work Start Time -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-            <div>
-              <label style="font-size: 13px; color: #333; font-weight: 600; display: block; margin-bottom: 8px;">
-                📍 เข้างาน
-              </label>
-              <input 
-                type="time" 
-                id="workStart" 
-                value="08:00"
-                style="
-                  width: 100%;
-                  padding: 10px 12px;
-                  border: 1px solid #d0d7e0;
-                  border-radius: 8px;
-                  font-size: 13px;
-                  box-sizing: border-box;
-                ">
+          <div style="margin-bottom: 20px;">
+            <label style="font-weight: 500; display: block; margin-bottom: 8px; color: #333; font-size: 13px;">
+              👨‍⚕️ ชื่อแพทย์ <span style="color: #d32f2f;">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="newDoctorName" 
+              placeholder="เช่น ดร.สมชาย มาศวร"
+              style="
+                width: 100%;
+                padding: 11px 14px;
+                border: 1px solid #d0d7e0;
+                border-radius: 8px;
+                font-size: 13px;
+                box-sizing: border-box;
+                background: white;
+                color: #333;
+                transition: all 0.2s;
+              "
+              onfocus="this.style.borderColor='#0066cc'; this.style.boxShadow='0 0 0 3px rgba(0, 102, 204, 0.08)'"
+              onblur="this.style.borderColor='#d0d7e0'; this.style.boxShadow='none'">
+          </div>
+
+          <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e0e6ed;">
+            <div style="font-weight: 500; color: #333; margin-bottom: 12px; font-size: 13px;">
+              🕐 เวลาทำงาน
             </div>
-            <div>
-              <label style="font-size: 13px; color: #333; font-weight: 600; display: block; margin-bottom: 8px;">
-                📍 ออกงาน
-              </label>
-              <input 
-                type="time" 
-                id="workEnd" 
-                value="17:00"
-                style="
-                  width: 100%;
-                  padding: 10px 12px;
-                  border: 1px solid #d0d7e0;
-                  border-radius: 8px;
-                  font-size: 13px;
-                  box-sizing: border-box;
-                ">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="font-size: 12px; color: #666; display: block; margin-bottom: 6px;">เข้างาน</label>
+                <input 
+                  type="time" 
+                  id="newWorkStart" 
+                  value="08:00"
+                  style="
+                    width: 100%;
+                    padding: 10px 12px;
+                    border: 1px solid #d0d7e0;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    box-sizing: border-box;
+                    background: white;
+                    transition: all 0.2s;
+                  "
+                  onfocus="this.style.borderColor='#0066cc'; this.style.boxShadow='0 0 0 3px rgba(0, 102, 204, 0.08)'"
+                  onblur="this.style.borderColor='#d0d7e0'; this.style.boxShadow='none'">
+              </div>
+              <div>
+                <label style="font-size: 12px; color: #666; display: block; margin-bottom: 6px;">ออกงาน</label>
+                <input 
+                  type="time" 
+                  id="newWorkEnd" 
+                  value="17:00"
+                  style="
+                    width: 100%;
+                    padding: 10px 12px;
+                    border: 1px solid #d0d7e0;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    box-sizing: border-box;
+                    background: white;
+                    transition: all 0.2s;
+                  "
+                  onfocus="this.style.borderColor='#0066cc'; this.style.boxShadow='0 0 0 3px rgba(0, 102, 204, 0.08)'"
+                  onblur="this.style.borderColor='#d0d7e0'; this.style.boxShadow='none'">
+              </div>
             </div>
           </div>
 
-          <!-- Break Time -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div>
-              <label style="font-size: 13px; color: #333; font-weight: 600; display: block; margin-bottom: 8px;">
-                🍽️ เบรก เริ่ม
-              </label>
-              <input 
-                type="time" 
-                id="breakStart" 
-                value="12:00"
-                style="
-                  width: 100%;
-                  padding: 10px 12px;
-                  border: 1px solid #d0d7e0;
-                  border-radius: 8px;
-                  font-size: 13px;
-                  box-sizing: border-box;
-                ">
+          <div>
+            <div style="font-weight: 500; color: #333; margin-bottom: 12px; font-size: 13px;">
+              ☕ เวลาพักเบรก
             </div>
-            <div>
-              <label style="font-size: 13px; color: #333; font-weight: 600; display: block; margin-bottom: 8px;">
-                🍽️ เบรก จบ
-              </label>
-              <input 
-                type="time" 
-                id="breakEnd" 
-                value="13:00"
-                style="
-                  width: 100%;
-                  padding: 10px 12px;
-                  border: 1px solid #d0d7e0;
-                  border-radius: 8px;
-                  font-size: 13px;
-                  box-sizing: border-box;
-                ">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label style="font-size: 12px; color: #666; display: block; margin-bottom: 6px;">พักเริ่ม</label>
+                <input 
+                  type="time" 
+                  id="newBreakStart" 
+                  value="12:00"
+                  style="
+                    width: 100%;
+                    padding: 10px 12px;
+                    border: 1px solid #d0d7e0;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    box-sizing: border-box;
+                    background: white;
+                    transition: all 0.2s;
+                  "
+                  onfocus="this.style.borderColor='#0066cc'; this.style.boxShadow='0 0 0 3px rgba(0, 102, 204, 0.08)'"
+                  onblur="this.style.borderColor='#d0d7e0'; this.style.boxShadow='none'">
+              </div>
+              <div>
+                <label style="font-size: 12px; color: #666; display: block; margin-bottom: 6px;">พักจบ</label>
+                <input 
+                  type="time" 
+                  id="newBreakEnd" 
+                  value="13:00"
+                  style="
+                    width: 100%;
+                    padding: 10px 12px;
+                    border: 1px solid #d0d7e0;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    box-sizing: border-box;
+                    background: white;
+                    transition: all 0.2s;
+                  "
+                  onfocus="this.style.borderColor='#0066cc'; this.style.boxShadow='0 0 0 3px rgba(0, 102, 204, 0.08)'"
+                  onblur="this.style.borderColor='#d0d7e0'; this.style.boxShadow='none'">
+              </div>
             </div>
           </div>
         </div>
       `,
+      showCancelButton: true,
       confirmButtonText: "✅ บันทึก",
       cancelButtonText: "❌ ยกเลิก",
-      showCancelButton: true,
       confirmButtonColor: "#0066cc",
+      cancelButtonColor: "#6c757d",
+      width: "500px",
+      preConfirm: () => {
+        const doctorId = document.getElementById("newDoctorId").value.trim();
+        const doctorName = document
+          .getElementById("newDoctorName")
+          .value.trim();
+        const workStart = document.getElementById("newWorkStart").value;
+        const workEnd = document.getElementById("newWorkEnd").value;
+        const breakStart = document.getElementById("newBreakStart").value;
+        const breakEnd = document.getElementById("newBreakEnd").value;
+
+        if (!doctorId) {
+          Swal.showValidationMessage("⚠️ กรุณากรอกรหัสแพทย์");
+          return false;
+        }
+
+        if (!doctorName) {
+          Swal.showValidationMessage("⚠️ กรุณากรอกชื่อแพทย์");
+          return false;
+        }
+
+        if (!workStart || !workEnd || !breakStart || !breakEnd) {
+          Swal.showValidationMessage("⚠️ กรุณากรอกเวลาทั้งหมด");
+          return false;
+        }
+
+        if (workStart >= workEnd) {
+          Swal.showValidationMessage("⚠️ เวลาออกงานต้องหลังเวลาเข้างาน");
+          return false;
+        }
+
+        if (breakStart >= breakEnd) {
+          Swal.showValidationMessage("⚠️ เวลาพักจบต้องหลังเวลาพักเริ่ม");
+          return false;
+        }
+
+        if (breakStart < workStart || breakEnd > workEnd) {
+          Swal.showValidationMessage("⚠️ เวลาพักต้องอยู่ในเวลาทำงาน");
+          return false;
+        }
+
+        return {
+          doctor_id: doctorId,
+          doctor_name: doctorName,
+          work_start_time: workStart,
+          work_end_time: workEnd,
+          break_start_time: breakStart,
+          break_end_time: breakEnd,
+        };
+      },
     });
 
-    if (!formData) return;
-
-    const [doctor_id, doctor_code, doctor_name] = document.getElementById("doctorSelect").value.split("|");
-    
-    if (!doctor_id) {
-      throw new Error("กรุณาเลือกแพทย์");
+    if (!formData) {
+      console.log("❌ ผู้ใช้ยกเลิกการเพิ่มแพทย์");
+      return;
     }
 
-    // ✅ Show loading
+    console.log("📤 ส่งข้อมูลแพทย์ไปยัง API");
+
     Swal.fire({
-      title: "⏳ กำลังบันทึก...",
+      title: "กำลังบันทึก...",
       html: '<div style="margin-top: 20px;"><i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #0066cc;"></i></div>',
       allowOutsideClick: false,
       allowEscapeKey: false,
       showConfirmButton: false,
     });
 
-    // ✅ Add doctor to station
-    const apiUrl = `${API_BASE_URL}/add_doctor_to_station.php`;
+    // ✅ FIXED: ใช้ endpoint ที่ถูกต้อง + เพิ่ม doctor_code
+    const apiUrl = typeof getApiUrl === 'function'
+      ? getApiUrl('add_doctor_to_station.php')
+      : `${API_BASE_URL}/add_doctor_to_station.php`;
 
     const addResponse = await fetch(apiUrl, {
       method: "POST",
@@ -542,40 +567,40 @@ async function addDoctorToStation(stationId) {
       },
       body: JSON.stringify({
         station_id: stationId,
-        doctor_id: doctor_id,
-        doctor_code: doctor_code,
-        doctor_name: doctor_name,
+        doctor_id: formData.doctor_id,
+        doctor_code: formData.doctor_id, // ✅ ADD: doctor_code (required by API)
+        doctor_name: formData.doctor_name,
         work_date: today,
-        work_start_time: document.getElementById("workStart").value + ":00",
-        work_end_time: document.getElementById("workEnd").value + ":00",
-        break_start_time: document.getElementById("breakStart").value + ":00",
-        break_end_time: document.getElementById("breakEnd").value + ":00",
+        work_start_time: formData.work_start_time + ":00",
+        work_end_time: formData.work_end_time + ":00",
+        break_start_time: formData.break_start_time + ":00",
+        break_end_time: formData.break_end_time + ":00",
       }),
     });
 
     if (!addResponse.ok) {
-      throw new Error(`เกิดข้อผิดพลาด ${addResponse.status}`);
+      const errorText = await addResponse.text();
+      throw new Error(
+        `HTTP ${addResponse.status}: ${errorText.substring(0, 100)}`
+      );
     }
 
     const result = await addResponse.json();
+    console.log("✅ ผลลัพธ์:", result);
 
     if (result.success) {
-      // ✅ SUCCESS
       Swal.fire({
-        title: "✅ สำเร็จ!",
+        title: "✅ บันทึกเรียบร้อย",
         html: `
           <div style="text-align: left; padding: 15px;">
             <p style="margin-bottom: 10px;">
-              <strong>👨‍⚕️ ${doctor_name}</strong>
+              <strong>👨‍⚕️ ${formData.doctor_name}</strong>
             </p>
-            <p style="color: #28a745; font-size: 13px; margin-bottom: 8px;">
-              ✓ เพิ่มแพทย์เข้าสถานีสำเร็จ
-            </p>
-            <p style="color: #666; font-size: 12px; line-height: 1.6;">
-              ⏰ เวลาทำงาน: ${document.getElementById("workStart").value} - ${document.getElementById("workEnd").value}<br>
-              🍽️ พักเบรก: ${document.getElementById("breakStart").value} - ${document.getElementById("breakEnd").value}<br>
-              <br>
-              🔄 กำลังมอบหมายห้อง...
+            <p style="color: #666; font-size: 13px;">
+              ✓ เพิ่มแพทย์เข้าสถานีสำเร็จ<br>
+              ✓ เวลาทำงาน: ${formData.work_start_time} - ${formData.work_end_time}<br>
+              ✓ พักเบรก: ${formData.break_start_time} - ${formData.break_end_time}<br>
+              ✓ กำลังมอบหมายห้อง...
             </p>
           </div>
         `,
@@ -583,73 +608,63 @@ async function addDoctorToStation(stationId) {
         confirmButtonColor: "#0066cc",
       });
 
-      // ✅ Reload doctors
-      await loadDoctorsForStation(stationId);
+      loadDoctorsForStation(stationId);
 
-      // ✅ TRIGGER AUTO-ASSIGN
-      console.log("🔄 Auto-assigning doctor to room...");
+      // ✅ 🏪 TRIGGER AUTO-ASSIGN DOCTOR TO ROOM (NEW!)
+      console.log("🏪 Triggering auto-assign doctor to room...");
       
+      const autoAssignUrl = typeof getApiUrl === 'function'
+        ? getApiUrl('auto_assign_doctor.php')
+        : `${API_BASE_URL}/auto_assign_doctor.php`;
+
       try {
-        const autoAssignResponse = await fetch(`${API_BASE_URL}/auto_assign_doctor.php`, {
+        const autoAssignResponse = await fetch(autoAssignUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             station_id: stationId,
-            current_date: today,
+            current_date: new Date().toISOString().split('T')[0],
             current_time: new Date().toTimeString().split(' ')[0]
           }),
         });
 
         if (autoAssignResponse.ok) {
           const autoAssignResult = await autoAssignResponse.json();
-          console.log("✅ Auto-assign result:", autoAssignResult);
-
-          // ✅ Reload UI after 1 second
-          setTimeout(async () => {
-            console.log("🔄 Refreshing UI...");
-            await loadDoctorsForStation(stationId);
-            if (typeof loadStationRooms === 'function') {
-              await loadStationRooms(stationId);
-            }
+          
+          if (autoAssignResult.success) {
+            console.log("✅ Auto-assign completed:", autoAssignResult.data);
             
-            // ✅ Show success message
-            if (autoAssignResult.data.auto_assigned_count > 0) {
-              Swal.fire({
-                title: "✅ มอบหมายห้องสำเร็จ",
-                html: `
-                  <div style="text-align: left; padding: 15px;">
-                    <p style="color: #28a745; font-size: 13px;">
-                      ✓ เพิ่มแพทย์: ${doctor_name}<br>
-                      ✓ มอบหมายห้อง: ${autoAssignResult.data.assignments[0]?.room_name || 'N/A'}<br>
-                      <br>
-                      <strong>Ready to work!</strong> 🎉
-                    </p>
-                  </div>
-                `,
-                icon: "success",
-                confirmButtonColor: "#0066cc",
-                timer: 3000
-              });
-            }
-          }, 1000);
+            // ✅ Reload UI หลังจาก 500ms
+            setTimeout(() => {
+              console.log("🔄 Reloading doctors and rooms...");
+              loadDoctorsForStation(stationId);
+              if (typeof loadStationRooms === 'function') {
+                loadStationRooms(stationId);
+              }
+            }, 500);
+          }
         }
       } catch (autoAssignError) {
-        console.warn("⚠️ Auto-assign warning:", autoAssignError.message);
-        // ✅ ไม่ throw error - just warn
+        console.warn("⚠️ Auto-assign warning (non-critical):", autoAssignError.message);
       }
 
     } else {
-      throw new Error(result.message || "ไม่สามารถเพิ่มแพทย์");
+      throw new Error(result.message || "ไม่สามารถเพิ่มแพทย์ได้");
     }
-
   } catch (error) {
     console.error("❌ Error:", error);
 
     Swal.fire({
       title: "❌ เกิดข้อผิดพลาด",
-      text: error.message,
+      html: `
+        <div style="text-align: left; padding: 15px;">
+          <p style="color: #d32f2f; font-weight: 500;">
+            ${error.message}
+          </p>
+        </div>
+      `,
       icon: "error",
       confirmButtonColor: "#0066cc",
     });
@@ -1344,316 +1359,3 @@ window.addEventListener('load', () => {
 window.addEventListener('beforeunload', () => {
   stopAutoDoctorStatusUpdate();
 });
-
-// ========================================
-// ✅ FIXED: AUTO-ASSIGN ROOM FUNCTIONS
-// ========================================
-
-/**
- * ✅ START DOCTOR WORK + AUTO-ASSIGN ROOM
- * กด "ขึ้นทำงาน" → status="working" + auto-assign ห้อง
- */
-async function startDoctorWorkWithRoomAssignment(stationDoctorId, doctorCode) {
-  try {
-    const currentDate = new Date().toISOString().split("T")[0];
-    const currentTime = new Date().toTimeString().split(" ")[0];
-
-    console.log(`🏥 เริ่มทำงาน + Auto-assign ห้องให้ Doctor: ${doctorCode}`);
-
-    // 1️⃣ Update status → "working"
-    const statusResponse = await fetch(`${API_BASE_URL}/update_doctor_status.php`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        station_doctor_id: stationDoctorId,
-        status: "working",
-        work_start_time: currentTime
-      })
-    });
-
-    if (!statusResponse.ok) throw new Error("Status update failed");
-    const statusResult = await statusResponse.json();
-
-    if (!statusResult.success) {
-      showNotificationMessage("❌ อัพเดท status ไม่สำเร็จ: " + statusResult.message, "error");
-      return false;
-    }
-
-    console.log("✅ Status updated to working");
-
-    // 2️⃣ Auto-assign ห้อง
-    const assignResponse = await fetch(`${API_BASE_URL}/auto_assign_doctor_to_room.php`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        station_doctor_id: stationDoctorId,
-        station_id: currentStationId,
-        work_date: currentDate
-      })
-    });
-
-    if (!assignResponse.ok) throw new Error("Room assignment failed");
-    const assignResult = await assignResponse.json();
-
-    if (assignResult.success && assignResult.data.assigned_room_id) {
-      console.log(`✅ Doctor assigned to room ${assignResult.data.room_name}`);
-      showNotificationMessage(
-        `✅ ${doctorCode} เข้าห้อง ${assignResult.data.room_name}`,
-        "success"
-      );
-    } else {
-      console.warn("⚠️ ไม่มีห้องว่าง - Doctor อยู่ในสถานะ working แต่ยังไม่เข้าห้อง");
-      showNotificationMessage("⚠️ ไม่มีห้องว่าง - Doctor เข้าสถานะทำงาน แต่ยังไม่มีห้อง", "warning");
-    }
-
-    // 3️⃣ Reload doctors to refresh UI
-    await loadDoctorsForStation(currentStationId);
-    return true;
-
-  } catch (error) {
-    console.error("❌ Error in startDoctorWorkWithRoomAssignment:", error);
-    showNotificationMessage("❌ เกิดข้อผิดพลาด: " + error.message, "error");
-    return false;
-  }
-}
-
-/**
- * ✅ MANUAL ASSIGN ROOM (สำหรับกรณีที่ไม่มีห้องว่างตอน start work)
- * Doctor สามารถเลือกห้องได้เอง
- */
-async function manualAssignDoctorToRoom(stationDoctorId, doctorName) {
-  try {
-    const currentDate = new Date().toISOString().split("T")[0];
-
-    // Fetch available rooms
-    const roomsResponse = await fetch(
-      `${API_BASE_URL}/get_available_rooms.php?station_id=${currentStationId}&work_date=${currentDate}`
-    );
-    const roomsResult = await roomsResponse.json();
-    
-    if (!roomsResult.success || !roomsResult.data.rooms.length) {
-      showNotificationMessage("❌ ไม่มีห้องว่าง", "error");
-      return;
-    }
-
-    const rooms = roomsResult.data.rooms;
-
-    // Create modal for room selection
-    const roomOptions = rooms
-      .map(room => `<option value="${room.room_id}">${room.room_name}</option>`)
-      .join("");
-
-    const modalHtml = `
-      <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-        <h3 style="margin-bottom: 20px; font-weight: 700; color: #000;">🚪 เลือกห้องตรวจ</h3>
-        <p style="margin-bottom: 15px; color: #666;">แพทย์: <strong>${doctorName}</strong></p>
-        
-        <select id="roomSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 20px;">
-          <option value="">-- เลือกห้อง --</option>
-          ${roomOptions}
-        </select>
-
-        <div style="display: flex; gap: 10px;">
-          <button onclick="confirmRoomAssignment(${stationDoctorId})" 
-                  style="flex: 1; background: #0066cc; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-            ✅ ยืนยัน
-          </button>
-          <button onclick="closeModal()" 
-                  style="flex: 1; background: #e9ecef; color: #333; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-            ❌ ยกเลิก
-          </button>
-        </div>
-      </div>
-    `;
-
-    showModal(modalHtml);
-
-  } catch (error) {
-    console.error("Error in manualAssignDoctorToRoom:", error);
-    showNotificationMessage("❌ เกิดข้อผิดพลาด", "error");
-  }
-}
-
-/**
- * ✅ CONFIRM ROOM ASSIGNMENT
- */
-async function confirmRoomAssignment(stationDoctorId) {
-  const roomSelect = document.getElementById("roomSelect");
-  const roomId = roomSelect ? roomSelect.value : null;
-  
-  if (!roomId) {
-    showNotificationMessage("❌ กรุณาเลือกห้อง", "error");
-    return;
-  }
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/assign_doctor_to_specific_room.php`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        station_doctor_id: stationDoctorId,
-        room_id: roomId,
-        work_date: new Date().toISOString().split("T")[0]
-      })
-    });
-
-    const result = await response.json();
-    
-    if (result.success) {
-      closeModal();
-      showNotificationMessage(`✅ เข้าห้อง ${result.data.room_name} สำเร็จ`, "success");
-      await loadDoctorsForStation(currentStationId);
-    } else {
-      showNotificationMessage("❌ " + result.message, "error");
-    }
-  } catch (error) {
-    console.error("Error confirming room assignment:", error);
-    showNotificationMessage("❌ เกิดข้อผิดพลาด", "error");
-  }
-}
-
-/**
- * ✅ UNASSIGN DOCTOR FROM ROOM
- * เมื่อ Doctor ออกจากห้อง
- */
-async function unassignDoctorFromRoom(stationDoctorId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/unassign_doctor_room.php`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        station_doctor_id: stationDoctorId
-      })
-    });
-
-    const result = await response.json();
-    
-    if (result.success) {
-      showNotificationMessage("✅ ออกจากห้องสำเร็จ", "success");
-      await loadDoctorsForStation(currentStationId);
-    } else {
-      showNotificationMessage("❌ " + result.message, "error");
-    }
-  } catch (error) {
-    console.error("Error unassigning room:", error);
-    showNotificationMessage("❌ เกิดข้อผิดพลาด", "error");
-  }
-}
-
-/**
- * ✅ UPDATE DOCTOR STATUS (Generic - for other statuses)
- */
-async function updateDoctorStatusOnly(stationDoctorId, newStatus) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/update_doctor_status.php`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        station_doctor_id: stationDoctorId,
-        status: newStatus
-      })
-    });
-
-    const result = await response.json();
-    
-    if (result.success) {
-      await loadDoctorsForStation(currentStationId);
-      return true;
-    } else {
-      showNotificationMessage("❌ " + result.message, "error");
-      return false;
-    }
-  } catch (error) {
-    console.error("Error updating status:", error);
-    showNotificationMessage("❌ เกิดข้อผิดพลาด", "error");
-    return false;
-  }
-}
-
-/**
- * ✅ HELPER FUNCTIONS
- */
-
-function showModal(content) {
-  const modal = document.createElement("div");
-  modal.id = "assignRoomModal";
-  modal.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-  `;
-  modal.innerHTML = content;
-  modal.onclick = (e) => {
-    if (e.target === modal) closeModal();
-  };
-  document.body.appendChild(modal);
-}
-
-function closeModal() {
-  const modal = document.getElementById("assignRoomModal");
-  if (modal) modal.remove();
-}
-
-function showNotificationMessage(message, type = "info") {
-  const notification = document.createElement("div");
-  const bgColor = {
-    success: "#d4edda",
-    error: "#f8d7da",
-    warning: "#fff3cd",
-    info: "#d1ecf1"
-  }[type] || "#d1ecf1";
-
-  const textColor = {
-    success: "#155724",
-    error: "#721c24",
-    warning: "#856404",
-    info: "#0c5460"
-  }[type] || "#0c5460";
-
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: ${bgColor};
-    color: ${textColor};
-    padding: 15px 20px;
-    border-radius: 8px;
-    border-left: 4px solid ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#17a2b8'};
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    z-index: 10000;
-    max-width: 400px;
-    animation: slideIn 0.3s ease-out;
-  `;
-  notification.textContent = message;
-  
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.style.animation = "slideOut 0.3s ease-out";
-    setTimeout(() => notification.remove(), 300);
-  }, 3000);
-}
-
-// ✅ Add CSS animation (if not already present)
-if (!document.getElementById('notificationStyles')) {
-  const style = document.createElement("style");
-  style.id = 'notificationStyles';
-  style.textContent = `
-    @keyframes slideIn {
-      from { transform: translateX(400px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(400px); opacity: 0; }
-    }
-  `;
-  document.head.appendChild(style);
-}

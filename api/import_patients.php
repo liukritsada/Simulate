@@ -26,25 +26,18 @@ class PatientImporter {
 
     public function __construct() {
         try {
+            // Use centralized database configurations
+            require_once __DIR__ . '/db_config.php';
+            require_once __DIR__ . '/external_db_config.php';
+
             // Local database connection
-            $this->pdo = new PDO(
-                "mysql:host=127.0.0.1;port=3306;dbname=hospitalstation;charset=utf8mb4",
-                'root',
-                '',
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_TIMEOUT => 30
-                ]
-            );
+            $this->pdo = DBConfig::getPDO();
 
             // External PDP database connection
-            $this->pdpPdo = new PDO(
-                "mysql:host=172.25.41.30;port=3306;dbname=pdp;charset=utf8",
-                'root',
-                'abzolute',
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-            );
+            $this->pdpPdo = ExternalDBConfig::getPDPConnection();
         } catch (PDOException $e) {
+            $this->sendResponse(false, 'Database connection failed: ' . $e->getMessage());
+        } catch (RuntimeException $e) {
             $this->sendResponse(false, 'Database connection failed: ' . $e->getMessage());
         }
     }

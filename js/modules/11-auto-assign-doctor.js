@@ -2,18 +2,11 @@
  * ✅ auto-assign-doctor.js - FIXED VERSION
  * Auto-assign doctors to rooms when doctor is added or status changes
  * 
- * ✅ FIXES:
- * 1. Global variables declared at top (autoAssignDoctorInterval, doctorStatusUpdateInterval)
- * 2. Proper interval cleanup
- * 3. Memory leak prevention
+ * NOTE: 09-doctor-management.js ทำ auto-assign โดยตรงแล้ว
+ *       ไฟล์นี้ใช้สำหรับ status updates และ timer อย่างเดียว
  */
 
-// ========================================
-// ✅ GLOBAL VARIABLES - DECLARED FIRST
-// ========================================
-let autoAssignDoctorInterval = null;
-let doctorStatusUpdateInterval = null;
-let AUTO_ASSIGN_DOCTOR_INTERVAL = 30 * 1000; // 30 seconds
+
 
 /**
  * ✅ Trigger auto-assign doctor
@@ -79,11 +72,9 @@ async function triggerAutoAssignDoctor(stationId = null) {
 function startAutoAssignDoctorTimer(stationId = null) {
     console.log("⏰ Starting auto-assign doctor timer...");
     
-    // ✅ Clear existing interval SAFELY
-    if (autoAssignDoctorInterval !== null) {
+    // ✅ Clear existing interval
+    if (autoAssignDoctorInterval) {
         clearInterval(autoAssignDoctorInterval);
-        autoAssignDoctorInterval = null;
-        console.log("🧹 Cleared previous interval");
     }
 
     // ✅ Run immediately
@@ -101,27 +92,24 @@ function startAutoAssignDoctorTimer(stationId = null) {
  * ✅ Stop auto-assign doctor timer
  */
 function stopAutoAssignDoctorTimer() {
-    console.log("⏹️ Stopping auto-assign doctor timer...");
-    
-    if (autoAssignDoctorInterval !== null) {
+    if (autoAssignDoctorInterval) {
         clearInterval(autoAssignDoctorInterval);
         autoAssignDoctorInterval = null;
-        console.log("✅ Auto-assign doctor timer stopped");
-    } else {
-        console.log("ℹ️ No active timer to stop");
+        console.log("⏹️ Auto-assign doctor timer stopped");
     }
 }
 
 /**
  * ✅ Auto-Assign Doctor After Add (SIMPLIFIED)
  * 
- * NOTE: 09-doctor-management.js ทำ auto-assign โดยตรงแล้ว
+ * NOTE: 09-doctor-management.js ทำ auto-assign โดยตรงแล้ว (line 712-740)
  *       ไฟล์นี้ใช้สำหรับ status updates และ timer อย่างเดียว
  */
 function hookAutoAssignDoctorAfterAdd() {
     console.log("🔗 Auto-assign doctor integration ready");
     console.log("✅ [09] will trigger auto-assign on doctor add");
     console.log("✅ [13] will handle status updates & timers");
+    // Hook ไม่จำเป็น - 09-doctor-management.js เรียก auto-assign โดยตรง (line 712-740)
 }
 
 /**
@@ -187,47 +175,12 @@ async function updateDoctorStatusByTime(stationId = null) {
 function startDoctorStatusUpdateTimer(stationId = null) {
     console.log("⏰ Starting doctor status update timer...");
 
-    // ✅ Clear existing interval SAFELY
-    if (doctorStatusUpdateInterval !== null) {
-        clearInterval(doctorStatusUpdateInterval);
-        doctorStatusUpdateInterval = null;
-        console.log("🧹 Cleared previous status update interval");
-    }
-
-    // ✅ Run immediately
-    updateDoctorStatusByTime(stationId);
-
     // ✅ Run every 10 seconds (check time-based status changes)
-    doctorStatusUpdateInterval = setInterval(() => {
+    setInterval(() => {
         updateDoctorStatusByTime(stationId);
     }, 10 * 1000);
 
-    console.log("✅ Doctor status update timer started (every 10s)");
-}
-
-/**
- * ✅ Stop status update timer
- */
-function stopDoctorStatusUpdateTimer() {
-    console.log("⏹️ Stopping doctor status update timer...");
-    
-    if (doctorStatusUpdateInterval !== null) {
-        clearInterval(doctorStatusUpdateInterval);
-        doctorStatusUpdateInterval = null;
-        console.log("✅ Doctor status update timer stopped");
-    } else {
-        console.log("ℹ️ No active status timer to stop");
-    }
-}
-
-/**
- * ✅ Stop all timers
- */
-function stopAllTimers() {
-    console.log("🛑 Stopping ALL timers...");
-    stopAutoAssignDoctorTimer();
-    stopDoctorStatusUpdateTimer();
-    console.log("✅ All timers stopped");
+    console.log("✅ Doctor status update timer started");
 }
 
 /**
@@ -237,7 +190,7 @@ window.addEventListener('load', () => {
     console.log("📝 Page loaded - Initializing auto-assign doctor");
 
     setTimeout(() => {
-        // ✅ Setup integration
+        // ✅ Setup integration (hook is now disabled)
         hookAutoAssignDoctorAfterAdd();
 
         // ✅ Start status update timer
@@ -245,12 +198,4 @@ window.addEventListener('load', () => {
 
         console.log("✅ Auto-assign doctor initialized");
     }, 1000);
-});
-
-/**
- * ✅ Cleanup on page unload (prevent memory leak)
- */
-window.addEventListener('beforeunload', () => {
-    console.log("🧹 Page unloading - Cleaning up timers");
-    stopAllTimers();
 });

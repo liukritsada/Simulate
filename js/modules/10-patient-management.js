@@ -121,35 +121,43 @@ async function loadPatientsList() {
                 const row = document.createElement('tr');
                 row.style.cssText = 'transition: all 0.2s ease; border-bottom: 1px solid #f0f0f0;';
                 
-                // 🎯 ฟังก์ชันคำนวณเวลารอ (ใช้ start_time)
-                function getWaitingTimeStatus(appointmentDate, startTime) {
+                // 🎯 ฟังก์ชันคำนวณเวลารอ (FIXED: ใช้ arrival_time แทน start_time)
+                function getWaitingTimeStatus(appointmentDate, arrivalTime, startTime) {
                     if (!appointmentDate) return { emoji: '⏳', color: '#3498db', text: 'ไม่ทราบ' };
-                    
-                    let appointmentDateTime = new Date(appointmentDate + 'T00:00:00').getTime();
-                    
-                    // ถ้ามี start_time ให้ใช้เป็นเวลาเริ่มต้น
+
+                    let referenceTime;
+
+                    // ถ้ามี start_time แสดงว่ากำลังทำหัตถการ -> ไม่แสดงเวลารอ
                     if (startTime) {
-                        appointmentDateTime = new Date(appointmentDate + 'T' + startTime).getTime();
+                        return { emoji: '⚕️', color: '#f39c12', text: 'กำลังรักษา' };
                     }
-                    
+                    // ถ้ามี arrival_time แสดงว่ามาถึงแล้ว -> คำนวณจาก arrival_time
+                    else if (arrivalTime) {
+                        referenceTime = new Date(appointmentDate + 'T' + arrivalTime).getTime();
+                    }
+                    // ถ้าไม่มีทั้ง arrival_time และ start_time -> ใช้ appointment date
+                    else {
+                        referenceTime = new Date(appointmentDate + 'T00:00:00').getTime();
+                    }
+
                     const now = new Date().getTime();
-                    const diffMs = now - appointmentDateTime;
+                    const diffMs = now - referenceTime;
                     const diffMinutes = Math.floor(diffMs / 60000);
-                    
+
                     // ถ้ายังไม่ถึงวันนัด
                     if (diffMinutes < 0) {
                         return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่ถึงเวลานัด' };
                     }
-                    
+
                     // ≤ 15 นาที -> หน้ายิ้ม 😊 เขียว
                     if (diffMinutes <= 15) {
                         return { emoji: '😊', color: '#27ae60', text: `รอ ${diffMinutes} นาที` };
                     }
-                    // 16-25 นาที -> หน้าปกติ 😐 เหลือง
-                    else if (diffMinutes <= 25) {
+                    // 16-30 นาที -> หน้าปกติ 😐 เหลือง
+                    else if (diffMinutes <= 30) {
                         return { emoji: '😐', color: '#f39c12', text: `รอ ${diffMinutes} นาที` };
                     }
-                    // 26-60 นาที -> บึ้ง 😕 ส้ม
+                    // 31-60 นาที -> บึ้ง 😕 ส้ม
                     else if (diffMinutes <= 60) {
                         return { emoji: '😕', color: '#e67e22', text: `รอ ${diffMinutes} นาที` };
                     }
@@ -184,7 +192,11 @@ async function loadPatientsList() {
                 
                 const status = statusConfig[patient.status] || { color: '#95a5a6', text: 'ไม่ทราบ', icon: '❓' };
                 const genderIcon = getGenderIcon(patient.gender);
-                const waitingTimeData = getWaitingTimeStatus(patient.appointment_date, patient.start_time);
+                const waitingTimeData = getWaitingTimeStatus(
+                    patient.appointment_date,
+                    patient.arrival_time,  // FIXED: ใช้ arrival_time แทน start_time
+                    patient.start_time
+                );
                 
                 row.innerHTML = `
                     <td style="padding: 14px 12px; text-align: center; color: #333; font-weight: 700; font-size: 13px;">

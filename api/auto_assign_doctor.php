@@ -1,242 +1,227 @@
 <?php
 /**
- * ✅ auto_assign_doctor.php - FIXED VERSION (No Cron Needed)
- * 
- * การทำงาน:
- * 1. เมื่อเพิ่มแพทย์ → ระบบ auto assign ให้เข้าห้องทันที
- * 2. ถ้าแพทย์ไม่มี work_end_time → AUTO-FIX ให้เป็น 17:00 น.
- * 3. หาห้องว่าง → assign แพทย์เข้าห้อง
- * 4. ถ้าไม่มีห้องว่าง → show message ให้ user เลือกห้องเอง
- * 
- * ✅ ไม่ต้องใช้ Cron Job - ทำงานทันทีเมื่อเพิ่มแพทย์
+ * ✅ auto_assign_doctor.php (VERSION 1.7 - ULTRA FIXED)
+ * เพิ่มแพทย์เข้าห้องอัตโนมัติ เมื่อห้องว่าง
  */
 
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
+ob_end_clean();
 ob_start();
+
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+date_default_timezone_set('Asia/Bangkok');
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    ob_clean();
+    http_response_code(200);
+    exit();
+}
 
 try {
-    // ✅ Include database config
-    $db_file = __DIR__ . DIRECTORY_SEPARATOR . 'db_config.php';
-    if (!file_exists($db_file)) {
-        $db_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'db_config.php';
-    }
-    
-    if (!file_exists($db_file)) {
-        throw new Exception("Database config file not found");
-    }
-    
-    require_once($db_file);
-    
-    if (!isset($conn) || $conn->connect_error) {
-        throw new Exception("Database connection failed: " . ($conn->connect_error ?? "Unknown"));
-    }
+    ob_clean();
 
-    // ✅ Get input
-    $input = file_get_contents('php://input');
-    $data = json_decode($input, true);
-    
-    $station_id = $data['station_id'] ?? null;
-    $current_date = $data['current_date'] ?? date('Y-m-d');
-    $current_time = $data['current_time'] ?? date('H:i:s');
+    require_once __DIR__ . '/db_config.php';
+    $pdo = DBConfig::getPDO();
 
-    if (!$station_id) {
-        throw new Exception("Missing station_id parameter");
-    }
+    $input = json_decode(file_get_contents('php://input'), true);
+    $current_date = $input['current_date'] ?? date('Y-m-d');
+    $current_time = $input['current_time'] ?? date('H:i:s');
+    $station_id = intval($input['station_id'] ?? 0);
 
-    $log_file = __DIR__ . '/../auto_assign_doctor.log';
+    error_log("=== AUTO_ASSIGN_DOCTOR START ===");
+    error_log("🔍 Input: station_id=$station_id, date=$current_date, time=$current_time");
 
-    // ✅ STEP 1: AUTO-FIX Missing work_end_time
-    // ถ้าแพทย์ไม่มี work_end_time → set เป็น 17:00 น.
-    $fix_query = "
-        UPDATE station_doctors
-        SET work_end_time = '17:00:00'
-        WHERE station_id = ?
-        AND work_date = ?
-        AND (work_end_time IS NULL OR work_end_time = '' OR work_end_time = '0000-00-00' OR work_end_time = '00:00:00')
-        AND is_active = 1
-    ";
+    // ========================================
+    // STEP 1: ดึงห้องที่ว่างเปล่า
+    // ========================================
 
-    $stmt = $conn->prepare($fix_query);
-    if ($stmt) {
-        $stmt->bind_param("is", $station_id, $current_date);
-        $stmt->execute();
-        $fixed_count = $stmt->affected_rows;
-        $stmt->close();
-        
-        if ($fixed_count > 0) {
-            file_put_contents($log_file, date('Y-m-d H:i:s') . " [Station {$station_id}] Fixed {$fixed_count} doctors - Added missing work_end_time\n", FILE_APPEND);
-        }
-    }
-
-    // ✅ STEP 2: Get unassigned doctors
-    $doctor_query = "
-        SELECT sd.station_doctor_id, 
-               sd.doctor_code, 
-               sd.doctor_name,
-               sd.status,
-               sd.assigned_room_id,
-               sd.work_start_time,
-               sd.work_end_time
-        FROM station_doctors sd
-        WHERE sd.station_id = ?
-        AND sd.work_date = ?
-        AND sd.status IN ('available', 'working')
-        AND (sd.assigned_room_id IS NULL OR sd.assigned_room_id = 0)
-        AND sd.is_active = 1
-        AND sd.work_end_time IS NOT NULL
-        AND sd.work_end_time != ''
-        AND sd.work_end_time != '00:00:00'
-        ORDER BY sd.station_doctor_id DESC
-        LIMIT 50
-    ";
-
-    $stmt = $conn->prepare($doctor_query);
-    if (!$stmt) {
-        throw new Exception("Doctor query prepare failed: " . $conn->error);
-    }
-
-    $stmt->bind_param("is", $station_id, $current_date);
-    if (!$stmt->execute()) {
-        throw new Exception("Doctor query execute failed: " . $stmt->error);
-    }
-
-    $doctor_result = $stmt->get_result();
-    $unassigned_doctors = [];
-    while ($row = $doctor_result->fetch_assoc()) {
-        $unassigned_doctors[] = $row;
-    }
-    $stmt->close();
-
-    // ✅ STEP 3: Get available rooms (rooms not assigned to any active doctor today)
-    $room_query = "
-        SELECT DISTINCT sr.room_id, 
-               sr.room_name,
-               sr.room_number
+    $empty_rooms_query = "
+        SELECT 
+            sr.room_id, 
+            sr.room_number,
+            sr.room_name, 
+            s.station_id, 
+            s.station_name
         FROM station_rooms sr
-        WHERE sr.station_id = ?
-        AND sr.is_active = 1
+        JOIN stations s ON sr.station_id = s.station_id
+        WHERE 1=1
+    ";
+
+    if ($station_id > 0) {
+        $empty_rooms_query .= " AND sr.station_id = $station_id";
+    }
+
+    $empty_rooms_query .= "
         AND sr.room_id NOT IN (
-            SELECT DISTINCT assigned_room_id
-            FROM station_doctors
-            WHERE station_id = ?
-            AND work_date = ?
-            AND assigned_room_id IS NOT NULL
+            SELECT DISTINCT assigned_room_id 
+            FROM station_doctors 
+            WHERE assigned_room_id IS NOT NULL 
             AND assigned_room_id > 0
             AND is_active = 1
             AND status IN ('working', 'available')
         )
-        ORDER BY sr.room_id ASC
-        LIMIT 50
+        ORDER BY sr.room_id
     ";
 
-    $stmt = $conn->prepare($room_query);
-    if (!$stmt) {
-        throw new Exception("Room query prepare failed: " . $conn->error);
-    }
+    error_log("Query: " . $empty_rooms_query);
+    $empty_rooms = $pdo->query($empty_rooms_query);
+    $empty_rooms_list = $empty_rooms->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmt->bind_param("iis", $station_id, $station_id, $current_date);
-    if (!$stmt->execute()) {
-        throw new Exception("Room query execute failed: " . $stmt->error);
-    }
+    error_log("📊 Found " . count($empty_rooms_list) . " empty rooms");
 
-    $room_result = $stmt->get_result();
-    $available_rooms = [];
-    while ($row = $room_result->fetch_assoc()) {
-        $available_rooms[] = $row;
-    }
-    $stmt->close();
+    $auto_assigned = [];
+    $already_assigned = [];
 
-    // ✅ STEP 4: Auto-assign doctors to rooms
-    $assignments = [];
-    $assigned_count = 0;
+    // ========================================
+    // STEP 2: สำหรับแต่ละห้องที่ว่าง เลือกแพทย์
+    // ========================================
 
-    foreach ($unassigned_doctors as $index => $doctor) {
-        // ✅ ถ้าไม่มีห้องพอ → ข้ามไป
-        if ($index >= count($available_rooms)) {
-            break;
-        }
+    foreach ($empty_rooms_list as $room) {
+        error_log("🔍 Processing room {$room['room_id']} ({$room['room_name']})");
 
-        $room = $available_rooms[$index];
-        $room_id = $room['room_id'];
-        $station_doctor_id = $doctor['station_doctor_id'];
-        $doctor_code = $doctor['doctor_code'] ?? 'N/A';
-        $doctor_name = $doctor['doctor_name'] ?? 'Unknown';
+        // สร้าง IN list
+        $in_list = empty($already_assigned) ? '0' : implode(',', array_map('intval', $already_assigned));
 
-        // ✅ Update assigned_room_id
-        $update_query = "
-            UPDATE station_doctors
-            SET assigned_room_id = ?,
-                status = 'working',
-                update_date = NOW()
-            WHERE station_doctor_id = ?
-            AND station_id = ?
-            AND work_date = ?
+        // สร้าง query โดยไม่ใช้ prepared statement (เพื่อหลีกเลี่ยงปัญหา placeholder)
+        $available_doctor_query = "
+            SELECT 
+                sd.station_doctor_id, 
+                sd.doctor_id,
+                sd.doctor_name, 
+                sd.doctor_type,
+                sd.work_start_time, 
+                sd.work_end_time,
+                sd.break_start_time, 
+                sd.break_end_time,
+                sd.status
+            FROM station_doctors sd
+            WHERE sd.station_id = " . intval($room['station_id']) . "
+                AND sd.is_active = 1
+                AND sd.work_date = '" . $pdo->quote($current_date) . "'
+                AND sd.assigned_room_id IS NULL
+                AND sd.status IN ('available', 'working')
+                AND sd.station_doctor_id NOT IN ($in_list)
+                AND (
+                    sd.break_start_time IS NULL
+                    OR sd.break_end_time IS NULL
+                    OR NOT (
+                        '" . $pdo->quote($current_time) . "' >= sd.break_start_time 
+                        AND '" . $pdo->quote($current_time) . "' < sd.break_end_time
+                    )
+                )
+            ORDER BY 
+                CASE 
+                    WHEN sd.status = 'available' THEN 1
+                    WHEN sd.status = 'working' THEN 2
+                END,
+                sd.doctor_name
             LIMIT 1
         ";
 
-        $stmt = $conn->prepare($update_query);
-        if (!$stmt) {
-            continue;
+        error_log("Doctor Query: " . $available_doctor_query);
+
+        try {
+            $stmt = $pdo->query($available_doctor_query);
+            $doctor = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($doctor) {
+                $is_in_break = isDoctorInBreak($current_time, $doctor);
+
+                if ($is_in_break) {
+                    error_log("⚠️ Doctor {$doctor['doctor_name']} is in break - SKIP");
+                    continue;
+                }
+
+                error_log("✅ Found doctor: {$doctor['doctor_name']} (ID: {$doctor['station_doctor_id']})");
+
+                // Update doctor assignment
+                $update_query = "
+                    UPDATE station_doctors 
+                    SET assigned_room_id = " . intval($room['room_id']) . ",
+                        status = 'working'
+                    WHERE station_doctor_id = " . intval($doctor['station_doctor_id']) . "
+                ";
+
+                error_log("Update Query: " . $update_query);
+                $pdo->exec($update_query);
+
+                $auto_assigned[] = [
+                    'room_id' => (int)$room['room_id'],
+                    'room_name' => $room['room_name'],
+                    'station_name' => $room['station_name'],
+                    'station_doctor_id' => (int)$doctor['station_doctor_id'],
+                    'doctor_name' => $doctor['doctor_name'],
+                    'doctor_type' => $doctor['doctor_type'] ?? 'Doctor',
+                    'message' => "✅ ส่ง {$doctor['doctor_name']} เข้าห้อง {$room['room_name']}"
+                ];
+
+                $already_assigned[] = $doctor['station_doctor_id'];
+
+                error_log("✅ Assigned successfully");
+
+            } else {
+                error_log("⚠️ No available doctor for room {$room['room_id']}");
+            }
+
+        } catch (Exception $e) {
+            error_log("❌ Query Error: " . $e->getMessage());
         }
-
-        $stmt->bind_param("iiis", $room_id, $station_doctor_id, $station_id, $current_date);
-        if (!$stmt->execute()) {
-            $stmt->close();
-            continue;
-        }
-        $stmt->close();
-
-        $assigned_count++;
-        $room_name = $room['room_name'] ?? ("Room " . $room['room_number']);
-        
-        $assignments[] = [
-            'station_doctor_id' => (int)$station_doctor_id,
-            'doctor_code' => $doctor_code,
-            'doctor_name' => $doctor_name,
-            'room_id' => (int)$room_id,
-            'room_name' => $room_name
-        ];
-
-        file_put_contents($log_file, "   ✅ {$doctor_name} ({$doctor_code}) → {$room_name}\n", FILE_APPEND);
     }
 
-    if ($assigned_count > 0 || $fixed_count > 0) {
-        file_put_contents($log_file, "✅ Completed: Fixed={$fixed_count}, Assigned={$assigned_count}\n\n", FILE_APPEND);
-    }
+    error_log("📊 Total assigned: " . count($auto_assigned));
+    error_log("=== AUTO_ASSIGN_DOCTOR END (SUCCESS) ===");
 
-    ob_end_clean();
-
+    http_response_code(200);
     echo json_encode([
         'success' => true,
-        'message' => 'Auto-assign completed',
+        'message' => 'ตรวจสอบห้องว่างและเพิ่มแพทย์เสร็จสิ้น',
         'data' => [
-            'fixed_work_end_time' => $fixed_count ?? 0,
-            'available_rooms_count' => count($available_rooms),
-            'unassigned_doctors_count' => count($unassigned_doctors),
-            'auto_assigned_count' => $assigned_count,
-            'assignments' => $assignments
+            'empty_rooms_count' => count($empty_rooms_list),
+            'auto_assigned_count' => count($auto_assigned),
+            'assignments' => $auto_assigned,
+            'current_time' => $current_time,
+            'current_date' => $current_date,
+            'timestamp' => date('Y-m-d H:i:s')
         ]
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {
-    ob_end_clean();
+    error_log("❌ Error: " . $e->getMessage());
+    error_log("Stack: " . $e->getTraceAsString());
+    error_log("=== AUTO_ASSIGN_DOCTOR END (ERROR) ===");
 
-    if (isset($log_file)) {
-        file_put_contents($log_file, "❌ Error: " . $e->getMessage() . "\n\n", FILE_APPEND);
-    }
-
+    ob_clean();
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
-    ]);
+        'message' => $e->getMessage(),
+        'error_line' => $e->getLine(),
+        'current_date' => $current_date ?? null,
+        'current_time' => $current_time ?? null
+    ], JSON_UNESCAPED_UNICODE);
+}
 
-} finally {
-    if (isset($conn) && is_object($conn)) {
-        $conn->close();
+/**
+ * ✅ ตรวจสอบว่าแพทย์อยู่ในช่วง break หรือไม่
+ */
+function isDoctorInBreak($current_time, $doctor) {
+    $break_start = $doctor['break_start_time'] ?? null;
+    $break_end = $doctor['break_end_time'] ?? null;
+
+    if (!$break_start || !$break_end) {
+        return false;
     }
+
+    if ($current_time >= $break_start && $current_time < $break_end) {
+        return true;
+    }
+
+    return false;
 }
 ?>

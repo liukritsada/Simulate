@@ -19,23 +19,12 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);
 
-// Database connection
-$host = 'localhost';
-$dbname = 'hospitalstation';
-$user = 'root';
-$password = '';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-];
+// Use centralized database configuration
+require_once __DIR__ . '/db_config.php';
 
 try {
-    $pdo = new PDO($dsn, $user, $password, $options);
-} catch (PDOException $e) {
+    $pdo = DBConfig::getPDO();
+} catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
@@ -203,13 +192,30 @@ try {
         
         // ✅ ดึง doctor_code ตัวแรกที่มีค่า
         $doctorCodeValue = $firstDoctorCodeMap[$countKey] ?? null;
-        
+
         // ✅ ดึง doctor_name จากแมป
         $doctorNameValue = '-';
         if ($doctorCodeValue && isset($doctorNameMap[$doctorCodeValue])) {
             $doctorNameValue = $doctorNameMap[$doctorCodeValue];
         }
-        
+
+        // ✅ FALLBACK: If doctor name still not found, try PDP lookup
+        if ($doctorNameValue === '-' && $doctorCodeValue) {
+            try {
+                require_once __DIR__ . '/external_db_config.php';
+                $pdpPdo = ExternalDBConfig::getPDPConnection();
+                $pdpStmt = $pdpPdo->prepare("SELECT doctor_name FROM doctors WHERE doctor_code = ? LIMIT 1");
+                $pdpStmt->execute([$doctorCodeValue]);
+                $pdpName = $pdpStmt->fetchColumn();
+
+                if ($pdpName) {
+                    $doctorNameValue = $pdpName;
+                }
+            } catch (Exception $e) {
+                error_log("PDP doctor lookup failed for $doctorCodeValue: " . $e->getMessage());
+            }
+        }
+
         $patient = [
             'patient_id' => $record['patient_id'],
             'patient_name' => $record['patient_name'] ?? '-',

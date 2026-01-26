@@ -1,13 +1,13 @@
 /**
  * 🏢 Station Management Module - FINAL COMPLETE WITH API SAVE
- * จัดการสเตชั่น - เปิด แสดง และจัดการข้อมูลสเตชั่น
+ * ระบบจัดการสถานี - โหลดและบันทึกข้อมูล
  * 
  * ✅ FIXED: 
- * - displayStationProcedures: ลบ equipment column, readonly mode
- * - saveStationProcedureToDatabase: ✅ ส่ง time_target ไป API บันทึก Database
- * - editStationProcedure: เพิ่ม time_target field, editable mode, ✅ API SAVE
- * - 5 คอลัมน์เท่านั้น (procedure_name | เวลาทำ | เวลารอ | เป้าหมาย | พนักงาน)
- * - ✅ บันทึก time_target ลง Database เมื่อกด บันทึก
+ * - displayStationProcedures: เพิ่ม equipment column, readonly mode
+ * - saveStationProcedureToDatabase: ✅ บันทึก time_target ผ่าน API ไป Database
+ * - editStationProcedure: แก้ไข time_target field, editable mode, ✅ API SAVE
+ * - 5 คอลัมน์แสดงผล (procedure_name | เวลาดำเนินการ | เวลารอ | เป้าหมาย | พนักงาน)
+ * - ✅ เก็บ time_target ลง Database ผ่าน API
  * 
  * Features:
  * - Open station detail modal
@@ -31,18 +31,24 @@ let allProceduresChecked = false;
 // ========================================
 
 /**
- * ✅ Open Station Detail Modal
- * ดึงข้อมูลสเตชั่นและแสดง modal
+ * เปิด Modal รายละเอียดสถานี
  * 
- * @param {number} stationId - ID ของสเตชั่น
+ * @param {number} stationId - ID ของสถานี
  */
 async function openStationDetail(stationId) {
+  // ✅ ตรวจสอบ stationId ว่าถูกต้องหรือไม่
+  if (!stationId || stationId <= 0 || isNaN(stationId)) {
+    console.error("❌ stationId ไม่ถูกต้อง:", stationId);
+    alert("❌ ไม่สามารถเปิดสถานี: ID ไม่ถูกต้อง");
+    return;
+  }
+
   currentStationId = stationId;
 
   try {
     const apiUrl =
       getApiUrl("get_station_detail.php") + `?station_id=${stationId}`;
-    console.log("📥 กำลังดึงข้อมูล:", apiUrl);
+    console.log("🔥 กำลังโหลดข้อมูลสถานี ID:", stationId);
 
     const response = await fetch(apiUrl);
     const result = await response.json();
@@ -51,40 +57,41 @@ async function openStationDetail(stationId) {
       displayStationDetail(result.data);
       document.getElementById("stationDetailModal").style.display = "block";
 
-      console.log("🔍 เกี่ยวกับจะเรียก loadDoctorsForStation...");
+      console.log("✅ กำลัง loadDoctorsForStation...");
       loadDoctorsForStation(stationId);
-      console.log("🔍 เรียก loadDoctorsForStation เสร็จแล้ว");
+      console.log("✅ loadDoctorsForStation เสร็จสิ้น");
 
       loadStationStaff(stationId);
       
-      // ✅ ทริกเกอร์ auto-assign staff
-      console.log("🤖 เรียก autoAssignStaffToRooms...");
+      // ✅ เริ่มโหลด auto-assign staff
+      console.log("🤔 กำลังโหลด autoAssignStaffToRooms...");
       setTimeout(() => {
         autoAssignStaffToRooms();
       }, 800);
       
-      // ✅ เรียกฟังก์ชันนี้เฉพาะเมื่อมีการกำหนด
-      if (typeof setupStatusAutoUpdate === 'function') {
-        setupStatusAutoUpdate(stationId);
-      }
+      // ✅ เริ่มโหลด setup status auto update
+      if (typeof startDoctorAutoAssignByTime === 'function') {
+  console.log("⏰ Starting doctor time-based auto-assign...");
+  startDoctorAutoAssignByTime(stationId);
+}
     } else {
       alert("❌ " + result.message);
     }
   } catch (error) {
-    console.error("❌ เกิดข้อผิดพลาด:", error);
+    console.error("❌ เกิดข้อผิดพลาดในการโหลด:", error);
     alert("❌ ไม่สามารถโหลดข้อมูลได้");
   }
 }
 
 /**
  * ✅ Add Doctor to Station
- * เพิ่มแพทย์ให้กับสเตชั่น
+ * เพิ่มแพทย์เข้าสถานี
  * 
- * @param {number} stationId - ID ของสเตชั่น
+ * @param {number} stationId - ID ของสถานี
  */
 async function addDoctorToStation(stationId) {
   try {
-    // ✅ ดึง station detail
+    // ✅ ดึงข้อมูล station detail
     const stationUrl =
       getApiUrl("get_station_detail.php") + `?station_id=${stationId}`;
 
@@ -115,7 +122,7 @@ async function addDoctorToStation(stationId) {
     if (result.success) {
       if (typeof Swal !== 'undefined') {
         Swal.fire({
-          title: "✅ เพิ่มสำเร็จ",
+          title: "✅ เพิ่มแพทย์สำเร็จ",
           icon: "success",
         });
       }
@@ -128,7 +135,7 @@ async function addDoctorToStation(stationId) {
     console.error("❌ Error:", error);
     if (typeof Swal !== 'undefined') {
       Swal.fire({
-        title: "❌ ข้อผิดพลาด",
+        title: "❌ เกิดข้อผิดพลาด",
         text: error.message,
         icon: "error",
       });
@@ -138,7 +145,7 @@ async function addDoctorToStation(stationId) {
 
 /**
  * ✅ Display Station Detail
- * แสดงข้อมูลสเตชั่นในรูปแบบ tabs
+ * แสดงรายละเอียดสถานีใน tabs
  * 
  * @param {object} data - Station data จาก API
  */
@@ -157,12 +164,12 @@ async function displayStationDetail(data) {
   loadStationStaff(station.station_id);
   displayStationDoctors(data.doctors || []);
   
-  // ✅ เรียกฟังก์ชันนี้เฉพาะเมื่อมีการกำหนด
+  // ✅ เริ่มโหลดข้อมูลขั้นตอนการรักษาจริง
   if (typeof displayStationProcedures === 'function') {
     displayStationProcedures(data.station_procedures || []);
   }
 
-  // ✅ ดึงข้อมูลคนไข้จาก RealTime API
+  // ✅ ดึงข้อมูลผู้ป่วยแบบ RealTime API
   if (typeof loadStationPatients === 'function') {
     if (station.department_ids || station.department_id) {
       const deptIds = station.department_ids || [station.department_id];
@@ -176,7 +183,7 @@ async function displayStationDetail(data) {
 
 /**
  * ✅ Display Station Rooms - MODERN UI
- * แสดงห้องในรูป Modern Card Grid Layout สวยๆ
+ * แสดงห้องในรูปแบบ Modern Card Grid Layout
  */
 function displayStationRooms(rooms) {
   const now = new Date();
@@ -198,7 +205,7 @@ function displayStationRooms(rooms) {
       <div style="text-align: center; padding: 60px 20px; color: #adb5bd;">
         <i class="fas fa-door-open" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
         <div style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">ไม่มีห้องในสถานีนี้</div>
-        <div style="font-size: 13px; color: #999; margin-bottom: 20px;">ยังไม่มีการสร้างห้องเข้ามา</div>
+        <div style="font-size: 13px; color: #999; margin-bottom: 20px;">ยังไม่มีข้อมูลห้องที่สร้าง</div>
         <button onclick="openCreateRoomModal()" 
                 style="background: #0066cc; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px;">
           <i class="fas fa-plus"></i> สร้างห้องใหม่
@@ -212,7 +219,7 @@ function displayStationRooms(rooms) {
     <div style="margin-bottom: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #000;">
-          🏠 ห้อง 
+          🏢 ห้อง 
           <span style="background: #0066cc; color: white; padding: 4px 12px; border-radius: 12px; font-size: 13px; margin-left: 10px;">
             ${rooms.length}
           </span>
@@ -292,13 +299,13 @@ function displayStationRooms(rooms) {
       });
     }
 
-    // ✅ ตรวจสอบเครื่องมือที่ไม่ต้องพนักงาน
+    // ✅ ตรวจสอบว่ามีอุปกรณ์ที่ไม่ต้องการพนักงานหรือไม่
     const hasEquipmentNotRequiringStaff = 
       room.equipment_list && 
       Array.isArray(room.equipment_list) && 
       room.equipment_list.some(eq => eq.require_staff !== 1);
 
-    // ✅ ห้องเปิด = มีแพทย์อยู่ OR มีพนักงานอยู่ OR มีเครื่องมือที่ไม่ต้องพนักงาน
+    // ✅ ห้องเปิดใช้งาน = มีแพทย์อยู่เวร OR มีพนักงานอยู่เวร OR มีอุปกรณ์ที่ไม่ต้องการพนักงาน
     const isActive = isDoctorOnDuty || isStaffOnDuty || hasEquipmentNotRequiringStaff;
     const isDisabled = !isActive;
 
@@ -324,10 +331,10 @@ function displayStationRooms(rooms) {
       borderColor = "#d0d7e0";
     }
 
-    // ✅ สร้างข้อความเตือน
-    let warningMsg = "🔒 ปิดใช้งาน";
+    // แสดงข้อความเตือน
+    let warningMsg = "⚠️ ปิดเนื่องจากขาดพนักงาน";
     if (!hasDoctor && !hasStaff) {
-      warningMsg = "🔒 ไม่มีแพทย์/พนักงาน";
+      warningMsg = "⚠️ ไม่มีแพทย์/พนักงาน";
     } else if (!isActive) {
       const firstTime =
         room.doctor_work_times?.[0] || room.staff_work_times?.[0];
@@ -424,7 +431,7 @@ function displayStationRooms(rooms) {
               ${room.staff_count}
             </div>
             <div style="font-size: 10px; color: #666; margin-top: 2px; font-weight: 500;">
-              👥 พนักงาน
+              👨‍💼 พนักงาน
             </div>
           </div>
 
@@ -444,7 +451,7 @@ function displayStationRooms(rooms) {
               ${room.patient_count}
             </div>
             <div style="font-size: 10px; color: #666; margin-top: 2px; font-weight: 500;">
-              🛏️ คนไข้
+              🏥️ ผู้ป่วย
             </div>
           </div>
         </div>
@@ -484,7 +491,7 @@ function displayStationRooms(rooms) {
             color: #999;
             font-weight: 500;
           ">
-            💬 คลิกเพื่อดูรายละเอียด
+            🔍 คลิกเพื่อดูรายละเอียด
           </div>
           `
             : ""
@@ -500,7 +507,7 @@ function displayStationRooms(rooms) {
 
 /**
  * ✅ Switch Station Tab
- * เปลี่ยน tab ในหน้า station detail
+ * เปลี่ยน tab ใน station detail
  * 
  * @param {string} tabName - ชื่อ tab (Rooms, Doctors, Staff, Procedures, Patients)
  */
@@ -527,9 +534,9 @@ function switchStationTab(tabName) {
 
 /**
  * ✅ Setup Status Auto Update
- * ตั้งค่าอัปเดตสถานะอัตโนมัติ (ถ้าเรียกหลายครั้ง)
+ * ตั้งค่าให้อัพเดตสถานะสถานีอัตโนมัติ (เริ่มโหลดใหม่ทุกนาที)
  * 
- * @param {number} stationId - ID ของสเตชั่น
+ * @param {number} stationId - ID ของสถานี
  */
 function setupStatusAutoUpdate(stationId) {
   if (statusUpdateInterval) {
@@ -538,17 +545,17 @@ function setupStatusAutoUpdate(stationId) {
   
   statusUpdateInterval = setInterval(() => {
     if (document.getElementById("stationDetailModal").style.display === "block") {
-      // อัปเดตสถานะห้องตามเวลาปัจจุบัน
+      // อัพเดตสถานะห้องโดยอัตโนมัติ
       if (currentStationData) {
-        console.log(`🔄 อัปเดตสถานะ Station ${stationId}`);
+        console.log(`🔄 อัพเดตสถานะ Station ${stationId}`);
       }
     }
-  }, 60000); // อัปเดตทุก 1 นาที
+  }, 60000); // อัพเดตทุก 1 นาที
 }
 
 /**
  * ✅ Display Station Doctors
- * แสดงรายชื่อแพทย์ของสเตชั่น
+ * แสดงรายชื่อแพทย์ในสถานี
  * 
  * @param {array} doctors - Array ของแพทย์
  */
@@ -614,9 +621,9 @@ function displayStationDoctors(doctors) {
     }[doctor.status] || '#6c757d';
 
     const statusText = {
-      'available': 'ว่าง',
+      'available': 'พร้อม',
       'working': 'ทำงาน',
-      'break': 'พักผ่อน',
+      'break': 'พักเบรก',
       'offline': 'ไม่ทำงาน'
     }[doctor.status] || doctor.status;
 
@@ -633,12 +640,12 @@ function displayStationDoctors(doctors) {
         </div>
         
         <div style="background: rgba(0, 71, 171, 0.1); padding: 8px; border-radius: 6px; margin-bottom: 8px; font-size: 11px;">
-          📍 ${doctor.room_name || 'ไม่ได้กำหนดห้อง'}
+          📍 ${doctor.room_name || 'ไม่ได้ระบุห้อง'}
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
-          <div><strong>เข้า:</strong> ${doctor.work_start_time || 'N/A'}</div>
-          <div><strong>เลิก:</strong> ${doctor.work_end_time || 'N/A'}</div>
+          <div><strong>เริ่ม:</strong> ${doctor.work_start_time || 'N/A'}</div>
+          <div><strong>สิ้นสุด:</strong> ${doctor.work_end_time || 'N/A'}</div>
           <div><strong>พักเริ่ม:</strong> ${doctor.break_start_time || 'N/A'}</div>
           <div><strong>พักจบ:</strong> ${doctor.break_end_time || 'N/A'}</div>
         </div>
@@ -651,7 +658,7 @@ function displayStationDoctors(doctors) {
 
 /**
  * ✅ Save Station Procedure to Database
- * ส่งข้อมูล Time_target + อื่นๆ ไปบันทึก API
+ * บันทึกข้อมูล Time_target + อื่นๆ ผ่าน API
  */
 async function saveStationProcedureToDatabase(index, data) {
   const proc = window.stationProceduresData[index];
@@ -682,7 +689,7 @@ async function saveStationProcedureToDatabase(index, data) {
 
     const result = await response.json();
     
-    console.log('📥 API Response:', result);
+    console.log('🔥 API Response:', result);
     
     if (result.success) {
       console.log('✅ Saved to database successfully');
@@ -701,7 +708,7 @@ async function saveStationProcedureToDatabase(index, data) {
     console.error('❌ Error saving to database:', error);
     Swal.fire({
       title: '❌ เกิดข้อผิดพลาด',
-      html: `<p><strong>${error.message}</strong></p><p style="font-size: 12px; color: #999;">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์</p>`,
+      html: `<p><strong>${error.message}</strong></p><p style="font-size: 12px; color: #999;">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</p>`,
       icon: 'error',
       confirmButtonColor: '#dc3545'
     });
@@ -711,9 +718,9 @@ async function saveStationProcedureToDatabase(index, data) {
 
 /**
  * ✅ Display Station Procedures - READONLY MODE (FINAL)
- * แสดงหัตถการในรูป Card ที่ read-only
- * ✅ FIXED: input fields เป็น readonly, ต้องกด edit เพื่อแก้ไข
- * ✅ 5 คอลัมน์เท่านั้น (procedure_name | เวลาทำ | เวลารอ | เป้าหมาย | พนักงาน)
+ * แสดงขั้นตอนการรักษาในรูปแบบ Card read-only
+ * ✅ FIXED: input fields เป็น readonly, ไม่สามารถ edit ได้
+ * ✅ 5 คอลัมน์แสดงผล (procedure_name | เวลาดำเนินการ | เวลารอ | เป้าหมาย | พนักงาน)
  */
 function displayStationProcedures(procedures) {
   const container = document.getElementById("stationProceduresContent");
@@ -726,21 +733,21 @@ function displayStationProcedures(procedures) {
     container.innerHTML = `
       <div style="text-align: center; padding: 60px 20px; color: #adb5bd;">
         <i class="fas fa-ban" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
-        <div style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">ไม่มีหัตถการในสถานีนี้</div>
-        <div style="font-size: 13px; color: #999; margin-bottom: 20px;">ยังไม่มีการเพิ่มหัตถการเข้ามา</div>
+        <div style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">ไม่มีขั้นตอนการรักษาในสถานีนี้</div>
+        <div style="font-size: 13px; color: #999; margin-bottom: 20px;">ยังไม่มีข้อมูลขั้นตอนการรักษาที่เพิ่ม</div>
         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
           <button onclick="addNewStationProcedure()"
                   style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);"
                   onmouseover="this.style.background='#218838'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.3)'; this.style.transform='translateY(-2px)'"
                   onmouseout="this.style.background='#28a745'; this.style.boxShadow='0 2px 4px rgba(40, 167, 69, 0.2)'; this.style.transform='translateY(0)'">
-            <i class="fas fa-plus"></i> เพิ่มหัตถการใหม่
+            <i class="fas fa-plus"></i> เพิ่มขั้นตอนการรักษาใหม่
           </button>
           
           <button onclick="openSelectProcedureFromStationDBModal()"
                   style="background: linear-gradient(135deg, #0056B3 0%, #003d82 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0, 86, 179, 0.2);"
                   onmouseover="this.style.boxShadow='0 4px 12px rgba(0, 86, 179, 0.3)'; this.style.transform='translateY(-2px)'"
                   onmouseout="this.style.boxShadow='0 2px 4px rgba(0, 86, 179, 0.2)'; this.style.transform='translateY(0)'">
-            <i class="fas fa-database"></i> ดึงหัตถการจาก Database
+            <i class="fas fa-database"></i> ดึงขั้นตอนการรักษาจาก Database
           </button>
         </div>
       </div>
@@ -755,7 +762,7 @@ function displayStationProcedures(procedures) {
     <div style="margin-bottom: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #000;">
-          💉 หัตถการ 
+          🔤 ขั้นตอนการรักษา 
           <span style="background: #000; color: white; padding: 4px 12px; border-radius: 12px; font-size: 13px; margin-left: 10px;">
             ${procedures.length}
           </span>
@@ -765,7 +772,7 @@ function displayStationProcedures(procedures) {
                   style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);"
                   onmouseover="this.style.background='#218838'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.3)'; this.style.transform='translateY(-2px)'"
                   onmouseout="this.style.background='#28a745'; this.style.boxShadow='0 2px 4px rgba(40, 167, 69, 0.2)'; this.style.transform='translateY(0)'">
-            <i class="fas fa-plus"></i> เพิ่มหัตถการ
+            <i class="fas fa-plus"></i> เพิ่มขั้นตอนการรักษา
           </button>
           
           <button onclick="openSelectProcedureFromStationDBModal()"
@@ -782,14 +789,14 @@ function displayStationProcedures(procedures) {
         <input 
           type="text" 
           id="procedureSearch"
-          placeholder="ค้นหาหัตถการ..."
+          placeholder="ค้นหาขั้นตอนการรักษา..."
           onkeyup="filterStationProceduresHighlight()"
           style="width: 100%; padding: 10px 15px 10px 40px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 13px; transition: all 0.3s; background: #f8f9fa;"
         />
       </div>
     </div>
 
-    <!-- ✅ FIXED: Horizontal Inline Layout (แนวยาว - ไม่ wrap vertical) -->
+    <!-- ✅ FIXED: Horizontal Inline Layout -->
     <div style="
       display: flex;
       flex-direction: column;
@@ -877,12 +884,12 @@ function displayStationProcedures(procedures) {
           flex-shrink: 0;
         "></div>
 
-        <!-- เวลาทำ -->
+        <!-- เวลาดำเนินการ -->
         <div style="
           flex: 0 0 auto;
           text-align: center;
         ">
-          <div style="font-size: 9px; color: #6b7280; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">เวลาทำ</div>
+          <div style="font-size: 9px; color: #6b7280; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">เวลาดำเนินการ</div>
           <div style="
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
             color: #667EEA;
@@ -892,7 +899,7 @@ function displayStationProcedures(procedures) {
             font-size: 12px;
             white-space: nowrap;
           ">
-            ${proc.procedure_time || 'N/A'}<span style="font-size: 9px; margin-left: 2px;">นม</span>
+            ${proc.procedure_time || 'N/A'}<span style="font-size: 9px; margin-left: 2px;">นาที</span>
           </div>
         </div>
 
@@ -911,15 +918,15 @@ function displayStationProcedures(procedures) {
             font-size: 12px;
             white-space: nowrap;
           ">
-            ${proc.wait_time || 'N/A'}<span style="font-size: 9px; margin-left: 2px;">นม</span>
+            ${proc.wait_time || 'N/A'}<span style="font-size: 9px; margin-left: 2px;">นาที</span>
           </div>
         </div>
 
-        <!-- เป้าหมาย -->
+        <!-- เป้าหมายเวลา -->
         <div style="
           flex: 0 0 auto;
         ">
-          <div style="font-size: 9px; color: #6b7280; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">เป้าหมาย</div>
+          <div style="font-size: 9px; color: #6b7280; font-weight: 600; margin-bottom: 2px; white-space: nowrap;">เป้าหมายเวลา</div>
           <input type="number" 
                  value="${timeTarget}" 
                  readonly
@@ -967,7 +974,7 @@ function displayStationProcedures(procedures) {
           margin-left: auto;
         ">
           <button onclick="editStationProcedure(${index})" 
-                  title="แก้ไขหัตถการ"
+                  title="แก้ไขขั้นตอนการรักษา"
                   style="
                     background: #ffa500;
                     color: white;
@@ -990,7 +997,7 @@ function displayStationProcedures(procedures) {
             <i class="fas fa-edit"></i>
           </button>
           <button onclick="deleteStationProcedure(${index})" 
-                  title="ลบหัตถการ"
+                  title="ลบขั้นตอนการรักษา"
                   style="
                     background: #dc3545;
                     color: white;
@@ -1067,23 +1074,23 @@ function filterStationProceduresHighlight() {
 
 /**
  * ✅ Edit Station Procedure (MODERN) - FIXED WITH API SAVE
- * แก้ไขหัตถการด้วย Modern Dialog + บันทึกลง Database
+ * แก้ไขขั้นตอนการรักษา Modern Dialog + บันทึกลง Database
  */
 function editStationProcedure(index) {
   const proc = window.stationProceduresData[index];
   
   Swal.fire({
-    title: '✏️ แก้ไขหัตถการ',
+    title: '🖏️ แก้ไขขั้นตอนการรักษา',
     html: `
       <div style="text-align: left; padding: 20px; background: #f8f9fa; border-radius: 12px;">
         <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #000; font-size: 13px;">ชื่อหัตถการ</label>
+          <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #000; font-size: 13px;">ชื่อขั้นตอนการรักษา</label>
           <input type="text" id="editProcName" value="${proc.procedure_name || ''}" 
                  class="swal2-input" style="width: 100%; border-radius: 8px; border: 2px solid #e9ecef; padding: 10px 12px; font-size: 13px;" />
         </div>
         
         <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #000; font-size: 13px;">เวลาทำ (นาที)</label>
+          <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #000; font-size: 13px;">เวลาดำเนินการ (นาที)</label>
           <input type="number" id="editProcTime" value="${proc.procedure_time || 30}" 
                  class="swal2-input" style="width: 100%; border-radius: 8px; border: 2px solid #e9ecef; padding: 10px 12px; font-size: 13px;" />
         </div>
@@ -1101,7 +1108,7 @@ function editStationProcedure(index) {
         </div>
 
         <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #000; font-size: 13px;">จำนวนพนักงาน</label>
+          <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #000; font-size: 13px;">จำนวนพนักงานที่ต้องการ</label>
           <input type="number" id="editProcStaff" value="${proc.staff_required || 0}" 
                  class="swal2-input" style="width: 100%; border-radius: 8px; border: 2px solid #e9ecef; padding: 10px 12px; font-size: 13px;" />
         </div>
@@ -1150,9 +1157,9 @@ function editStationProcedure(index) {
         Swal.fire({
           title: '✅ สำเร็จ!',
           html: `
-            <p>แก้ไขหัตถการเรียบร้อย</p>
+            <p>แก้ไขขั้นตอนการรักษาสำเร็จ</p>
             <div style="margin-top: 10px; padding: 10px; background: #f1f8f4; border-radius: 6px; font-size: 12px;">
-              <strong>✅ บันทึกลง Database เรียบร้อย</strong>
+              <strong>✅ บันทึกลง Database สำเร็จ</strong>
             </div>
           `,
           icon: 'success',
@@ -1174,7 +1181,7 @@ function deleteRoomConfirm(roomId, roomName) {
   // Convert to int if it's a string
   roomId = parseInt(roomId, 10);
   
-  console.log('🗑️ Deleting room confirm:', { roomId, roomName, type: typeof roomId });
+  console.log('🔄 Deleting room confirm:', { roomId, roomName, type: typeof roomId });
   
   if (!roomId || roomId <= 0 || isNaN(roomId)) {
     console.error('❌ Invalid room ID:', roomId);
@@ -1184,8 +1191,8 @@ function deleteRoomConfirm(roomId, roomName) {
   
   if (typeof Swal !== 'undefined') {
     Swal.fire({
-      title: '⚠️ ยืนยันการลบห้อง',
-      text: `คุณต้องการลบห้อง "${roomName}" หรือไม่? การลบไม่สามารถกู้คืนได้`,
+      title: '⚠️ ยืนยันการลบ',
+      text: `คุณต้องการลบห้อง "${roomName}" จริงหรือไม่? การลบจะไม่สามารถกู้คืนได้`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '🗑️ ลบ',
@@ -1198,7 +1205,7 @@ function deleteRoomConfirm(roomId, roomName) {
       }
     });
   } else {
-    if (confirm(`ลบห้อง "${roomName}" หรือไม่?`)) {
+    if (confirm(`ลบห้อง "${roomName}" จริงหรือไม่?`)) {
       deleteRoom(roomId);
     }
   }
@@ -1206,13 +1213,13 @@ function deleteRoomConfirm(roomId, roomName) {
 
 /**
  * ✅ Delete Room
- * ลบห้องจากฐานข้อมูล
+ * ลบห้องจากระบบ
  */
 function deleteRoom(roomId) {
   // Convert to int
   roomId = parseInt(roomId, 10);
   
-  console.log('🗑️ Deleting room from DB:', roomId);
+  console.log('🔄 Deleting room from DB:', roomId);
   
   if (!roomId || roomId <= 0) {
     console.error('❌ Invalid room_id:', roomId);
@@ -1234,11 +1241,11 @@ function deleteRoom(roomId) {
     },
     body: JSON.stringify(payload)
   })
-  .then(response => response.text())  // ✅ เปลี่ยนเป็น text() แล้ว parse เอง
+  .then(response => response.text())  // ✅ เปลี่ยนเป็น text() ก่อน parse
   .then(text => {
-    console.log('📥 Raw delete response:', text);
+    console.log('🔥 Raw delete response:', text);
     
-    // ✅ ล้าง response: เอาเฉพาะ JSON ส่วนที่มีความหมาย
+    // ✅ ทำความสะอาด response: ลบข้อความอื่นก่อน JSON
     let cleanText = text.trim();
     const startIdx = cleanText.indexOf('{');
     if (startIdx !== -1) {
@@ -1255,7 +1262,7 @@ function deleteRoom(roomId) {
         if (typeof Swal !== 'undefined') {
           Swal.fire({
             title: '✅ ลบสำเร็จ',
-            text: 'ห้องถูกลบแล้ว',
+            text: 'ห้องถูกลบเรียบร้อย',
             icon: 'success'
           }).then(() => {
             // Refresh station details
@@ -1268,7 +1275,7 @@ function deleteRoom(roomId) {
         console.error('❌ Delete failed:', result.message);
         if (typeof Swal !== 'undefined') {
           Swal.fire({
-            title: '❌ ลบล้มเหลว',
+            title: '❌ ลบไม่สำเร็จ',
             text: result.message || 'ไม่สามารถลบห้องได้',
             icon: 'error'
           });
@@ -1276,7 +1283,7 @@ function deleteRoom(roomId) {
       }
     } catch (parseError) {
       console.error('❌ JSON Parse Error:', parseError);
-      console.error('📥 Response was:', cleanText);
+      console.error('🔥 Response was:', cleanText);
       
       if (typeof Swal !== 'undefined') {
         Swal.fire({
@@ -1292,7 +1299,7 @@ function deleteRoom(roomId) {
     if (typeof Swal !== 'undefined') {
       Swal.fire({
         title: '❌ เกิดข้อผิดพลาด',
-        text: error.message || 'ไม่สามารถเชื่อมต่อ server',
+        text: error.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์',
         icon: 'error'
       });
     }
@@ -1310,7 +1317,7 @@ function addDoctorRow() {
  * ✅ Add Procedure To Patient
  */
 function addProcedureToPatient() {
-  console.log('📋 Adding procedure to patient');
+  console.log('🖨️ Adding procedure to patient');
 }
 
 /**
@@ -1326,8 +1333,8 @@ function addStaffScheduleRow() {
 function clearAllProcedures() {
   if (typeof Swal !== 'undefined') {
     Swal.fire({
-      title: '⚠️ ลบหัตถการทั้งหมด',
-      text: 'คุณต้องการลบหัตถการทั้งหมดหรือไม่?',
+      title: '⚠️ ลบขั้นตอนการรักษาทั้งหมด',
+      text: 'คุณต้องการลบขั้นตอนการรักษาทั้งหมดจริงหรือไม่?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'ใช่, ลบ',
@@ -1400,12 +1407,12 @@ function closeVisualSimulation() {
  * ✅ Close Wizard
  */
 function closeWizard() {
-  console.log('🔴 closeWizard() called');
+  console.log('🔧 closeWizard() called');
   
-  // ✅ 1. ปิด modal (เพียงแค่ display: none ไม่ใช่ !important)
+  // ✅ 1. ปิด modal (ใช้ display: none ไม่ใช่ !important)
   const modal = document.getElementById('createStationWizard');
   if (modal) {
-    modal.style.display = 'none';  // ✅ ปกติ display: none เพื่อให้เปิดได้ครั้งต่อไป
+    modal.style.display = 'none';  // ✅ ใช้ display: none แทนการซ่อนอื่นๆ
     console.log('✅ Modal closed');
   } else {
     console.error('❌ Modal element not found');
@@ -1418,11 +1425,11 @@ function closeWizard() {
     backdrop.style.display = 'none';
   }
   
-  // ✅ อนุญาต scroll
+  // ✅ ปลดล็อค scroll
   document.body.style.overflow = 'auto';
   document.body.classList.remove('modal-open');
 
-  // ✅ 2. Reset HTML form (ของ main.php)
+  // ✅ 2. Reset HTML form
   const wizardForm = document.getElementById('wizardForm');
   if (wizardForm) {
     wizardForm.reset();
@@ -1432,7 +1439,7 @@ function closeWizard() {
   // ✅ 2.5 ล้าง dropdown HTML
   const departmentSelect = document.getElementById('departmentSelect');
   if (departmentSelect) {
-    departmentSelect.innerHTML = '<option value="">-- เลือกแผนก --</option>';
+    departmentSelect.innerHTML = '<option value="">-- เลือกฝ่าย --</option>';
     console.log('✅ Dropdown departments cleared');
   }
   
@@ -1443,7 +1450,7 @@ function closeWizard() {
     console.log('✅ Procedures list cleared');
   }
   
-  // ✅ 3. ล้างค่า input fields ทั้งหมด
+  // ✅ 3. ล้างข้อมูล input fields ทั้งหมด
   document.querySelectorAll('#wizardForm input, #wizardForm select, #wizardForm textarea').forEach(el => {
     if (el.type === 'radio' || el.type === 'checkbox') {
       el.checked = false;
@@ -1481,7 +1488,7 @@ function closeWizard() {
   });
   console.log('✅ Tabs reset');
 
-  // ✅ 8. รีเซ็ตข้อมูล wizard (JS object)
+  // ✅ 8. ล้างข้อมูล wizard (JS object)
   if (typeof wizardData !== 'undefined') {
     wizardData = {
       station_name: '',
@@ -1524,8 +1531,8 @@ function deleteEquipmentRow(idx) {
 function deletePatient(patientId) {
   if (typeof Swal !== 'undefined') {
     Swal.fire({
-      title: '⚠️ ลบคนไข้',
-      text: 'คุณต้องการลบคนไข้นี้หรือไม่?',
+      title: '⚠️ ลบผู้ป่วย',
+      text: 'คุณต้องการลบผู้ป่วยนี้จริงหรือไม่?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '🗑️ ลบ',
@@ -1548,13 +1555,13 @@ async function deleteStation(stationId) {
   }
 
   const result = await Swal.fire({
-    title: '⚠️ ต้องการลบ Station นี้?',
+    title: '⚠️ คุณต้องการลบ Station นี้?',
     text: 'การลบจะไม่สามารถกู้คืนได้ และจะลบข้อมูลทั้งหมดที่เกี่ยวข้อง',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#A93226',
     cancelButtonColor: '#6c757d',
-    confirmButtonText: 'ลบใช่แล้ว',
+    confirmButtonText: 'ลบทันที',
     cancelButtonText: 'ยกเลิก'
   });
 
@@ -1563,10 +1570,10 @@ async function deleteStation(stationId) {
   }
 
   try {
-    // ✅ เรียก API
+    // ✅ เรียกใช้ API
     const API_BASE_URL = '/hospital/api/';
     const apiUrl = `${API_BASE_URL.replace(/\/$/, '')}/delete_station.php`;
-    console.log('🗑️ Deleting station:', stationId, 'at:', apiUrl);
+    console.log('🔄 Deleting station:', stationId, 'at:', apiUrl);
     
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -1590,11 +1597,11 @@ async function deleteStation(stationId) {
         title: '✅ ลบสำเร็จ!',
         html: `<div style="text-align: left; font-size: 14px;">
             <strong>${data.data.station_name}</strong> (${data.data.station_code})<br>
-            ลบแล้ว ${data.data.rooms_deleted} ห้อง<br><br>
-            <small style="color: #495057;">ข้อมูลทั้งหมดได้ถูกลบออกจากระบบ</small>
+            ลบ ${data.data.rooms_deleted} ห้อง<br><br>
+            <small style="color: #495057;">ข้อมูลทั้งหมดถูกลบออกจากระบบแล้ว</small>
         </div>`,
         icon: 'success',
-        confirmButtonText: 'ตกลง'
+        confirmButtonText: 'ดำเนินการต่อ'
       });
 
       // ✅ Reload data
@@ -1612,7 +1619,7 @@ async function deleteStation(stationId) {
         title: '❌ เกิดข้อผิดพลาด',
         text: data.message || 'ไม่สามารถลบ Station ได้',
         icon: 'error',
-        confirmButtonText: 'ตกลง'
+        confirmButtonText: 'ดำเนินการต่อ'
       });
     }
   } catch (error) {
@@ -1621,7 +1628,7 @@ async function deleteStation(stationId) {
       title: '❌ เกิดข้อผิดพลาด',
       text: 'Error: ' + error.message,
       icon: 'error',
-      confirmButtonText: 'ตกลง'
+      confirmButtonText: 'ดำเนินการต่อ'
     });
   }
 }
@@ -1643,13 +1650,13 @@ function openAddProcedureModal() {
 
 /**
  * ✅ Manual Reset Daily Rooms
- * รีเซ็ตห้องรายวันด้วยตนเอง
+ * รีเซ็ตห้องแบบแมนนวล
  */
 function manualResetDailyRooms() {
   if (typeof Swal !== 'undefined') {
     Swal.fire({
       title: '⚠️ ยืนยันการรีเซ็ต',
-      text: 'คุณต้องการรีเซ็ตห้องทั้งหมดหรือไม่?',
+      text: 'คุณต้องการรีเซ็ตห้องทั้งหมดจริงหรือไม่?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'ใช่, รีเซ็ต',
@@ -1658,7 +1665,7 @@ function manualResetDailyRooms() {
       if (result.isConfirmed) {
         Swal.fire({
           title: '✅ รีเซ็ตสำเร็จ',
-          text: 'ห้องทั้งหมดถูกรีเซ็ตแล้ว',
+          text: 'ห้องทั้งหมดถูกรีเซ็ตเรียบร้อย',
           icon: 'success'
         });
       }
@@ -1668,7 +1675,7 @@ function manualResetDailyRooms() {
 
 /**
  * ✅ Close Create Room Modal
- * ปิด modal สำหรับสร้างห้องใหม่
+ * ปิด modal สร้างห้องใหม่
  */
 function closeCreateRoomModal() {
   const modal = document.getElementById('createRoomModal');
@@ -1709,7 +1716,7 @@ function closeAssignRoomModal() {
 
 /**
  * ✅ Close Room Procedure Settings
- * ปิด modal ตั้งค่าหัตถการห้อง
+ * ปิด modal ตั้งค่าขั้นตอนการรักษาห้อง
  */
 function closeRoomProcedureSettings() {
   const modal = document.getElementById('roomProcedureSettingsModal');
@@ -1730,7 +1737,7 @@ function createNewRoom() {
   const roomName = roomNameInput ? roomNameInput.value.trim() : '';
   const roomType = roomTypeInput ? roomTypeInput.value : '';
   
-  console.log('🏠 Creating room:', { roomName, roomType });
+  console.log('🏢 Creating room:', { roomName, roomType });
   
   // Validation
   if (!roomName) {
@@ -1763,14 +1770,14 @@ function createNewRoom() {
     },
     body: JSON.stringify(payload)
   })
-  .then(response => response.text())  // ✅ เปลี่ยนเป็น text() แล้ว parse เอง
+  .then(response => response.text())  // ✅ เปลี่ยนเป็น text() ก่อน parse
   .then(text => {
-    console.log('📥 Raw response:', text);
+    console.log('🔥 Raw response:', text);
     
-    // ✅ ล้าง response: เอาเฉพาะ JSON ส่วนที่มีความหมาย
+    // ✅ ทำความสะอาด response: ลบข้อความอื่นก่อน JSON
     let cleanText = text.trim();
     
-    // หาตำแหน่ง { เริ่มต้น
+    // ค้นหา { เริ่มต้น
     const startIdx = cleanText.indexOf('{');
     if (startIdx !== -1) {
       cleanText = cleanText.substring(startIdx);
@@ -1787,7 +1794,7 @@ function createNewRoom() {
         if (typeof Swal !== 'undefined') {
           Swal.fire({
             title: '✅ สร้างห้องสำเร็จ',
-            text: `ห้อง ${roomName} ถูกสร้างแล้ว`,
+            text: `ห้อง ${roomName} ถูกสร้างเรียบร้อย`,
             icon: 'success'
           }).then(() => {
             // Clear inputs
@@ -1808,7 +1815,7 @@ function createNewRoom() {
         
         if (typeof Swal !== 'undefined') {
           Swal.fire({
-            title: '❌ สร้างห้องล้มเหลว',
+            title: '❌ สร้างห้องไม่สำเร็จ',
             text: result.message || 'ไม่สามารถสร้างห้องได้',
             icon: 'error'
           });
@@ -1816,7 +1823,7 @@ function createNewRoom() {
       }
     } catch (parseError) {
       console.error('❌ JSON Parse Error:', parseError);
-      console.error('📥 Response was:', cleanText);
+      console.error('🔥 Response was:', cleanText);
       
       if (typeof Swal !== 'undefined') {
         Swal.fire({
@@ -1833,7 +1840,7 @@ function createNewRoom() {
     if (typeof Swal !== 'undefined') {
       Swal.fire({
         title: '❌ เกิดข้อผิดพลาด',
-        text: error.message || 'ไม่สามารถเชื่อมต่อ server',
+        text: error.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์',
         icon: 'error'
       });
     }
@@ -1849,7 +1856,7 @@ function createNewRoom() {
  * เปิด modal รายละเอียดห้อง
  */
 function openRoomDetail(roomId) {
-  console.log('🏠 Opening room detail:', roomId);
+  console.log('🏢 Opening room detail:', roomId);
   openRoomDetailsModal(roomId);
 }
 
@@ -1872,7 +1879,7 @@ function saveRoomDetails() {
   if (typeof Swal !== 'undefined') {
     Swal.fire({
       title: '✅ บันทึกสำเร็จ',
-      text: 'รายละเอียดห้องถูกบันทึกแล้ว',
+      text: 'รายละเอียดห้องถูกบันทึกเรียบร้อย',
       icon: 'success'
     }).then(() => {
       closeRoomDetail();
@@ -1882,10 +1889,10 @@ function saveRoomDetails() {
 
 /**
  * ✅ Switch Room Tab
- * เปลี่ยนแท็บในโหมดห้อง
+ * เปลี่ยนแท็บในรายละเอียดห้อง
  */
 function switchRoomTab(tabNum) {
-  console.log('📋 Switching to room tab:', tabNum);
+  console.log('🖨️ Switching to room tab:', tabNum);
   // Implementation depends on your tab structure
 }
 
@@ -1906,13 +1913,13 @@ function assignRoomConfirmed() {
 
 /**
  * ✅ Save Room Procedure Settings
- * บันทึกตั้งค่าหัตถการห้อง
+ * บันทึกการตั้งค่าขั้นตอนการรักษาห้อง
  */
 function saveRoomProcedureSettings() {
   if (typeof Swal !== 'undefined') {
     Swal.fire({
       title: '✅ บันทึกสำเร็จ',
-      text: 'ตั้งค่าหัตถการถูกบันทึกแล้ว',
+      text: 'การตั้งค่าขั้นตอนการรักษาถูกบันทึกเรียบร้อย',
       icon: 'success'
     }).then(() => {
       closeRoomProcedureSettings();
@@ -1922,13 +1929,13 @@ function saveRoomProcedureSettings() {
 
 /**
  * ✅ Confirm Add Procedures
- * ยืนยันการเพิ่มหัตถการ
+ * ยืนยันการเพิ่มขั้นตอนการรักษา
  */
 function confirmAddProcedures(roomId) {
   if (typeof Swal !== 'undefined') {
     Swal.fire({
-      title: '✅ เพิ่มหัตถการสำเร็จ',
-      text: 'หัตถการถูกเพิ่มแล้ว',
+      title: '✅ เพิ่มขั้นตอนการรักษาสำเร็จ',
+      text: 'ขั้นตอนการรักษาถูกเพิ่มเรียบร้อย',
       icon: 'success'
     });
   }
@@ -1936,7 +1943,7 @@ function confirmAddProcedures(roomId) {
 
 /**
  * ✅ Add Equipment Row
- * เพิ่มแถวเครื่องมือ
+ * เพิ่มแถวอุปกรณ์
  */
 function addEquipmentRow(roomId) {
   console.log('🔧 Adding equipment row for room:', roomId);
@@ -1945,7 +1952,7 @@ function addEquipmentRow(roomId) {
 
 /**
  * ✅ Add Equipment To Room
- * เพิ่มเครื่องมือให้ห้อง
+ * เพิ่มอุปกรณ์เข้าห้อง
  */
 function addEquipmentToRoom() {
   console.log('🔧 Adding equipment to room');
@@ -1954,81 +1961,34 @@ function addEquipmentToRoom() {
 
 /**
  * ✅ Add Procedure Row
- * เพิ่มแถวหัตถการ
+ * เพิ่มแถวขั้นตอนการรักษา
  */
 function addProcedureRow(roomId) {
-  console.log('📋 Adding procedure row for room:', roomId);
+  console.log('🖨️ Adding procedure row for room:', roomId);
   // Implementation depends on your procedure management
 }
 
 /**
- * ✅ Manual Reset Daily Rooms
- * รีเซ็ตห้องรายวันด้วยตนเอง
- */
-function manualResetDailyRooms() {
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({
-      title: '⚠️ ยืนยันการรีเซ็ต',
-      text: 'คุณต้องการรีเซ็ตห้องทั้งหมดหรือไม่?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'ใช่, รีเซ็ต',
-      cancelButtonText: 'ยกเลิก'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: '✅ รีเซ็ตสำเร็จ',
-          text: 'ห้องทั้งหมดถูกรีเซ็ตแล้ว',
-          icon: 'success'
-        });
-      }
-    });
-  }
-}
-
-/**
- * ✅ Open Create Room Modal
- * เปิด modal สำหรับสร้างห้องใหม่
- */
-function openCreateRoomModal() {
-  if (!currentStationId) {
-    alert('❌ กรุณาเลือกสถานีก่อน');
-    return;
-  }
-
-  // Show the create room modal
-  const modal = document.getElementById('createRoomModal');
-  if (modal) {
-    modal.style.display = 'block';
-    // Set station name if available
-    const stationName = currentStationData ? currentStationData.station_name : 'สถานี ' + currentStationId;
-    document.getElementById('createRoomStationName').textContent = stationName;
-  } else {
-    alert('❌ Modal ไม่พบ');
-  }
-}
-
-/**
  * ✅ Auto-Assign & Manage Staff
- * - เพิ่มพนักงานอัตโนมัติเข้าห้องที่ว่าง
- * - ลบพนักงานออกเมื่อถึงเวลา break
- * - ลบพนักงานออกเมื่อถึงเวลา end
- * - เพิ่มพนักงาน available แทน
+ * - เพิ่มพนักงานเริ่มต้นเข้าห้องว่าง
+ * - ลบพนักงานที่ถึงเวลา break
+ * - ลบพนักงานที่ถึงเวลา end
+ * - เพิ่มพนักงาน available ใหม่
  */
 async function autoAssignStaffToRooms() {
   try {
     if (!currentStationId) {
-      console.log('⏭️ ไม่มี Station ID');
+      console.log('🛑️ ไม่มี Station ID');
       return;
     }
 
     const currentDate = new Date().toISOString().split('T')[0];
     const currentTime = new Date().toTimeString().split(' ')[0];
 
-    console.log(`🤖 Triggering auto-assign/replacement: Station ${currentStationId}, Time: ${currentTime}`);
+    console.log(`🤔 Triggering auto-assign/replacement: Station ${currentStationId}, Time: ${currentTime}`);
 
     // ============================================
-    // STEP 1: จัดการพนักงาน (ลบ + แทนที่)
+    // STEP 1: จัดการพนักงาน (ลบ + เปลี่ยน)
     // ============================================
     const replacementResponse = await fetch(getApiUrl('manage_staff_replacement.php'), {
       method: 'POST',
@@ -2060,7 +2020,7 @@ async function autoAssignStaffToRooms() {
     }
 
     // ============================================
-    // STEP 2: เพิ่มพนักงานเข้าห้องที่ว่าง
+    // STEP 2: เพิ่มพนักงานเริ่มต้นเข้าห้องว่าง
     // ============================================
     const autoAssignResponse = await fetch(getApiUrl('auto_assign_staff.php'), {
       method: 'POST',
@@ -2082,7 +2042,7 @@ async function autoAssignStaffToRooms() {
         console.log(`   📝 ${assign.message}`);
       });
     } else {
-      console.log('⏭️ ไม่มีห้องว่างหรือพนักงาน');
+      console.log('🛑️ ไม่มีห้องว่างที่ต้องการพนักงาน');
     }
 
     // ============================================
@@ -2107,25 +2067,25 @@ async function autoAssignStaffToRooms() {
 
 /**
  * ✅ Add New Station Procedure
- * เพิ่มหัตถการใหม่ให้กับสเตชั่น
+ * เพิ่มขั้นตอนการรักษาใหม่เข้าสถานี
  */
 function addNewStationProcedure() {
   Swal.fire({
-    title: '➕ เพิ่มหัตถการใหม่',
+    title: '➕ เพิ่มขั้นตอนการรักษาใหม่',
     html: `
       <div style="text-align: left;">
         <div style="margin-bottom: 15px;">
           <label style="display: block; font-size: 13px; font-weight: 600; color: #000; margin-bottom: 5px;">
-            ชื่อหัตถการ *
+            ชื่อขั้นตอนการรักษา *
           </label>
-          <input type="text" id="addProcName" placeholder="เช่น ตรวจสุขภาพ, ฟัน" 
+          <input type="text" id="addProcName" placeholder="ตัวอย่าง: เอกซเรย์, ตรวจเลือด" 
                  style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
           <div>
             <label style="display: block; font-size: 13px; font-weight: 600; color: #000; margin-bottom: 5px;">
-              เวลาทำ (นาที) *
+              เวลาดำเนินการ (นาที) *
             </label>
             <input type="number" id="addProcTime" placeholder="30" value="30" min="1"
                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
@@ -2142,14 +2102,14 @@ function addNewStationProcedure() {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
           <div>
             <label style="display: block; font-size: 13px; font-weight: 600; color: #000; margin-bottom: 5px;">
-              เป้าหมาย (นาที)
+              เป้าหมายเวลา (นาที)
             </label>
-            <input type="number" id="addProcTarget" placeholder="ไม่บังคับ" min="1"
+            <input type="number" id="addProcTarget" placeholder="ไม่ระบุ" min="1"
                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
           </div>
           <div>
             <label style="display: block; font-size: 13px; font-weight: 600; color: #000; margin-bottom: 5px;">
-              จำนวนพนักงาน
+              จำนวนพนักงานที่ต้องการ
             </label>
             <input type="number" id="addProcStaff" placeholder="1" value="1" min="0"
                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; box-sizing: border-box;">
@@ -2161,13 +2121,13 @@ function addNewStationProcedure() {
             <label style="display: flex; align-items: center; font-size: 13px; font-weight: 600; color: #000; cursor: pointer;">
               <input type="checkbox" id="addProcEquipment" 
                      style="width: 18px; height: 18px; margin-right: 8px; cursor: pointer;">
-              <span>🔧 ต้องใช้เครื่องมือ</span>
+              <span>🔧 ต้องการอุปกรณ์</span>
             </label>
           </div>
         </div>
 
         <div style="padding: 10px; background: #f0f7ff; border-radius: 6px; font-size: 12px; color: #0056b3;">
-          <i class="fas fa-info-circle"></i> หมายเหตุ: กรุณากรอกข้อมูลให้ครบถ้วน
+          <i class="fas fa-info-circle"></i> หมายเหตุ: กรุณากรอกข้อมูลที่จำเป็นสำหรับการบันทึก
         </div>
       </div>
     `,
@@ -2189,11 +2149,11 @@ function addNewStationProcedure() {
 
       // Validation
       if (!name) {
-        Swal.showValidationMessage('❌ กรุณาใส่ชื่อหัตถการ');
+        Swal.showValidationMessage('❌ กรุณากรอกชื่อขั้นตอนการรักษา');
         return false;
       }
       if (time <= 0) {
-        Swal.showValidationMessage('❌ เวลาทำต้องมากกว่า 0 นาที');
+        Swal.showValidationMessage('❌ เวลาดำเนินการต้องมากกว่า 0 นาที');
         return false;
       }
 
@@ -2230,9 +2190,9 @@ function addNewStationProcedure() {
         Swal.fire({
           title: '✅ สำเร็จ!',
           html: `
-            <p>เพิ่มหัตถการใหม่เรียบร้อย</p>
+            <p>เพิ่มขั้นตอนการรักษาสำเร็จ</p>
             <div style="margin-top: 10px; padding: 10px; background: #f1f8f4; border-radius: 6px; font-size: 12px;">
-              <strong>✅ บันทึกลง Database เรียบร้อย</strong>
+              <strong>✅ บันทึกลง Database สำเร็จ</strong>
             </div>
           `,
           icon: 'success',
@@ -2248,9 +2208,9 @@ function addNewStationProcedure() {
 
 /**
  * ✅ Save New Station Procedure to Database
- * บันทึกหัตถการใหม่ลงฐานข้อมูล
+ * บันทึกขั้นตอนการรักษาใหม่ลงฐานข้อมูล
  * 
- * @param {object} procedureData - ข้อมูลหัตถการ
+ * @param {object} procedureData - ข้อมูลขั้นตอนการรักษา
  * @returns {boolean} - สถานะการบันทึก
  */
 async function saveNewStationProcedureToDatabase(procedureData) {
@@ -2305,7 +2265,7 @@ async function saveNewStationProcedureToDatabase(procedureData) {
       console.error('❌ API Error:', result.message);
       Swal.fire({
         title: '❌ เกิดข้อผิดพลาด',
-        text: result.message || 'ไม่สามารถบันทึกหัตถการได้',
+        text: result.message || 'ไม่สามารถบันทึกขั้นตอนการรักษาได้',
         icon: 'error',
         confirmButtonColor: '#000'
       });
@@ -2339,18 +2299,18 @@ async function deleteStationProcedure(index) {
   console.log(`🗑️ [DELETE STATION PROCEDURE] ID=${procedureId}, Name=${procedureName}`);
   
   const result = await Swal.fire({
-    title: '⚠️ ต้องการลบหัตถการนี้?',
+    title: '⚠️ คุณต้องการลบขั้นตอนการรักษานี้?',
     html: `
       <div style="font-size: 15px; color: #000; margin-bottom: 15px;">
         <strong>${procedureName}</strong>
       </div>
       <div style="font-size: 13px; color: #adb5bd;">
-        การลบนี้ไม่สามารถกู้คืนได้ และจะลบจาก Database
+        การลบจะไม่สามารถกู้คืนได้ และจะลบออกจาก Database
       </div>
     `,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: '🗑️ ลบถาวร',
+    confirmButtonText: '🗑️ ลบทันที',
     cancelButtonText: 'ยกเลิก',
     confirmButtonColor: '#dc3545',
     cancelButtonColor: '#6c757d'
@@ -2364,7 +2324,7 @@ async function deleteStationProcedure(index) {
     // ✅ Send DELETE API request
     const apiUrl = getApiUrl('delete_station_procedure.php');
     
-    console.log(`📡 Sending DELETE to: ${apiUrl}`);
+    console.log(`🔔 Sending DELETE to: ${apiUrl}`);
     console.log(`📦 Payload:`, { procedure_id: procedureId });
     
     const response = await fetch(apiUrl, {
@@ -2390,7 +2350,7 @@ async function deleteStationProcedure(index) {
     
     // ✅ Show success
     await Swal.fire({
-      title: '✅ ลบเรียบร้อย!',
+      title: '✅ ลบสำเร็จ!',
       text: `${procedureName} ถูกลบออกจาก Database`,
       icon: 'success',
       confirmButtonColor: '#000'
@@ -2400,13 +2360,13 @@ async function deleteStationProcedure(index) {
     
   } catch (error) {
     console.error(`❌ Error: ${error.message}\n`);
-    Swal.fire('❌ ข้อผิดพลาด', error.message, 'error');
+    Swal.fire('❌ เกิดข้อผิดพลาด', error.message, 'error');
   }
 }
 
 /**
  * ✅ Load Station Patients
- * ดึงและแสดงข้อมูลคนไข้ในสถานี
+ * ดึงและแสดงข้อมูลผู้ป่วยในสถานี
  * 
  * @param {number} stationId - ID ของสถานี
  * @param {array} deptIds - Array ของ department IDs
@@ -2426,7 +2386,7 @@ async function loadStationPatients(stationId, deptIds = null) {
     }
 
     const apiUrl = getApiUrl("get_station_today_patients.php") + queryStr;
-    console.log("📥 Fetching patients from:", apiUrl);
+    console.log("🔥 Fetching patients from:", apiUrl);
 
     const response = await fetch(apiUrl);
     const result = await response.json();
@@ -2435,7 +2395,7 @@ async function loadStationPatients(stationId, deptIds = null) {
       container.innerHTML = `
         <div style="text-align: center; padding: 40px; color: #adb5bd;">
           <i class="fas fa-user-slash" style="font-size: 48px; margin-bottom: 15px;"></i>
-          <div>ไม่มีคนไข้ในสถานีนี้</div>
+          <div>ไม่มีผู้ป่วยในสถานีนี้</div>
         </div>
       `;
       return;
@@ -2446,16 +2406,16 @@ async function loadStationPatients(stationId, deptIds = null) {
 
     let patientsHTML = `
       <div style="background: rgba(0, 86, 179, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #0047AB;">
-        <strong>📊 รวม ${inprogressPatients.length + waitingPatients.length} คนไข้</strong>
+        <strong>📊 รวม ${inprogressPatients.length + waitingPatients.length} ผู้ป่วย</strong>
         <div style="font-size: 12px; color: #adb5bd; margin-top: 5px;">
-          กำลังทำ: ${inprogressPatients.length} | รอทำ: ${waitingPatients.length}
+          กำลังรักษา: ${inprogressPatients.length} | รอรักษา: ${waitingPatients.length}
         </div>
       </div>
     `;
 
     // Inprogress patients
     if (inprogressPatients.length > 0) {
-      patientsHTML += '<h4 style="margin: 15px 0 10px 0; color: #0056B3;">⏳ กำลังทำ</h4>';
+      patientsHTML += '<h4 style="margin: 15px 0 10px 0; color: #0056B3;">⏳ กำลังรักษา</h4>';
       inprogressPatients.forEach(patient => {
         patientsHTML += `
           <div style="background: rgba(0, 86, 179, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #0056B3;">
@@ -2476,7 +2436,7 @@ async function loadStationPatients(stationId, deptIds = null) {
 
     // Waiting patients
     if (waitingPatients.length > 0) {
-      patientsHTML += '<h4 style="margin: 15px 0 10px 0; color: #D35400;">⏱️ รอทำ</h4>';
+      patientsHTML += '<h4 style="margin: 15px 0 10px 0; color: #D35400;">⏰ รอรักษา</h4>';
       waitingPatients.forEach(patient => {
         patientsHTML += `
           <div style="background: rgba(255, 152, 0, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #D35400;">
@@ -2503,7 +2463,7 @@ async function loadStationPatients(stationId, deptIds = null) {
     container.innerHTML = `
       <div style="text-align: center; padding: 40px; color: #A93226;">
         <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 15px;"></i>
-        <div>ไม่สามารถโหลดข้อมูลคนไข้</div>
+        <div>ไม่สามารถโหลดข้อมูลผู้ป่วยได้</div>
         <small style="color: #adb5bd;">${error.message}</small>
       </div>
     `;
@@ -2512,7 +2472,7 @@ async function loadStationPatients(stationId, deptIds = null) {
 
 /**
  * ✅ Cleanup Status Auto Update
- * หยุดการอัปเดตสถานะอัตโนมัติ
+ * ล้างการตั้งค่าอัพเดตสถานะอัตโนมัติ
  */
 function cleanupStatusAutoUpdate() {
   if (statusUpdateInterval) {
@@ -2529,7 +2489,7 @@ function closeStationDetail() {
   currentStationId = null;
   currentStationData = null;
 
-  // ✅ หยุด timer เมื่อปิด
+  // ✅ ยกเลิก timer เมื่อปิด
   cleanupStatusAutoUpdate();
   
   if (typeof stopAutoStaffSystem === 'function') {
@@ -2537,14 +2497,14 @@ function closeStationDetail() {
   }
 }
 // ====================================
-// ดึงหัตถการจาก Database - COMPLETE
+// ดึงขั้นตอนการรักษาจาก Database - COMPLETE
 // ====================================
 
 let dbProceduresData = {};
 let selectedDBProcedures = new Set();
 
 /**
- * เปิด Modal สำหรับดึงหัตถการจาก Database
+ * เปิด Modal สำหรับดึงขั้นตอนการรักษาจาก Database
  */
 function openSelectProcedureFromDBModal() {
     console.log("Opening Select Procedure from DB modal");
@@ -2565,7 +2525,7 @@ function closeSelectProcedureFromDBModal() {
 }
 
 /**
- * โหลดแผนกทั้งหมดลงใน dropdown
+ * ดึงข้อมูลฝ่ายทั้งหมดสำหรับ dropdown
  */
 async function loadDepartmentsForDB() {
     try {
@@ -2576,7 +2536,7 @@ async function loadDepartmentsForDB() {
 
         if (result.success && result.data) {
             const select = document.getElementById('dbDepartmentFilter');
-            select.innerHTML = '<option value="">-- เลือกแผนก --</option>';
+            select.innerHTML = '<option value="">-- เลือกฝ่าย --</option>';
 
             result.data.forEach(dept => {
                 const option = document.createElement('option');
@@ -2589,12 +2549,12 @@ async function loadDepartmentsForDB() {
         }
     } catch (error) {
         console.error('Error loading departments:', error);
-        alert('เกิดข้อผิดพลาดในการโหลดแผนก');
+        alert('เกิดข้อผิดพลาดในการดึงข้อมูลฝ่าย');
     }
 }
 
 /**
- * โหลดหัตถการจาก Database ตามแผนกที่เลือก
+ * ดึงขั้นตอนการรักษาจาก Database ตามฝ่ายที่เลือก
  */
 async function loadProceduresFromDB() {
     const deptId = document.getElementById('dbDepartmentFilter').value;
@@ -2646,7 +2606,7 @@ async function loadProceduresFromDB() {
             document.getElementById('dbProceduresContainer').innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #adb5bd;">
                     <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                    <div>ไม่พบหัตถการในแผนกนี้</div>
+                    <div>ไม่พบขั้นตอนการรักษาจากฝ่ายนี้</div>
                 </div>
             `;
             document.getElementById('dbProceduresContainer').style.display = 'block';
@@ -2654,12 +2614,12 @@ async function loadProceduresFromDB() {
         }
     } catch (error) {
         console.error('Error loading procedures:', error);
-        alert('เกิดข้อผิดพลาดในการโหลดหัตถการ');
+        alert('เกิดข้อผิดพลาดในการดึงขั้นตอนการรักษา');
     }
 }
 
 /**
- * อัปเดตหัตถการที่เลือกไว้
+ * อัพเดตขั้นตอนการรักษาที่เลือก
  */
 function updateSelectedDBProcedures() {
     selectedDBProcedures.clear();
@@ -2670,11 +2630,11 @@ function updateSelectedDBProcedures() {
 }
 
 /**
- * เพิ่มหัตถการที่เลือกจาก Database ไปยังห้อง
+ * เพิ่มขั้นตอนการรักษาที่เลือกจาก Database → เข้าห้อง
  */
 function addSelectedProceduresFromDB() {
     if (selectedDBProcedures.size === 0) {
-        alert('โปรดเลือกหัตถการอย่างน้อย 1 รายการ');
+        alert('กรุณาเลือกขั้นตอนการรักษาอย่างน้อย 1 รายการ');
         return;
     }
 
@@ -2685,7 +2645,7 @@ function addSelectedProceduresFromDB() {
 
     const room = wizardData.rooms[currentRoomId];
 
-    // เพิ่มหัตถการที่เลือกเข้าไปในห้อง
+    // เพิ่มขั้นตอนการรักษาที่เลือกเข้าห้อง
     selectedDBProcedures.forEach(procId => {
         if (!room.procedures.includes(procId)) {
             room.procedures.push(procId);
@@ -2697,33 +2657,26 @@ function addSelectedProceduresFromDB() {
     // ปิด Modal
     closeSelectProcedureFromDBModal();
 
-    // รีโหลด UI เพื่อแสดงหัตถการที่เพิ่มเข้ามา
+    // โหลด UI แสดงขั้นตอนการรักษาที่เพิ่มใหม่
     loadRoomDetails(currentRoomId);
 
     // แสดงข้อความสำเร็จ
     if (typeof showNotification === 'function') {
-        showNotification("เพิ่มหัตถการจาก Database สำเร็จ: " + selectedDBProceduressize + " รายการ", 'success');
+        showNotification("เพิ่มขั้นตอนการรักษาจาก Database สำเร็จ: " + selectedDBProceduressize + " รายการ", 'success');
     } else {
-        alert("เพิ่มหัตถการจาก Database สำเร็จ: " + selectedDBProcedures.size + " รายการ");
+        alert("เพิ่มขั้นตอนการรักษาจาก Database สำเร็จ: " + selectedDBProcedures.size + " รายการ");
     }
 }
 
 // ========================================
-// ✅ สำหรับดึงหัตถการจาก Database ไปยัง Station
+// ✅ Modal สำหรับดึงขั้นตอนการรักษาจาก Database → สถานี
 // ========================================
 
 let stationDBProceduresData = {};
 let selectedStationDBProcedures = new Set();
 
 /**
- * เปิด Modal สำหรับดึงหัตถการจาก Database ไปยัง Station
- */
-// ========================================
-// ✅ NEW: SweetAlert Modal Functions (ONLY)
-// ========================================
-
-/**
- * ✅ เปิด Modal ดึงหัตถการจาก Database (ใช้ SweetAlert) - MODERN with SELECT ALL
+ * ✅ เปิด Modal ดึงขั้นตอนการรักษาจาก Database (ใช้ SweetAlert) - MODERN with SELECT ALL
  */
 async function openSelectProcedureFromStationDBModal() {
     console.log("🎯 Opening Station DB Modal with SweetAlert - MODERN SELECT ALL");
@@ -2734,19 +2687,19 @@ async function openSelectProcedureFromStationDBModal() {
         const deptResult = await deptResponse.json();
         
         if (!deptResult.success || !deptResult.data) {
-            Swal.fire('❌ เกิดข้อผิดพลาด', 'ไม่สามารถโหลดแผนกได้', 'error');
+            Swal.fire('❌ เกิดข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลฝ่ายได้', 'error');
             return;
         }
         
         // Step 2: Create department options
-        let deptOptions = '<option value="">-- เลือกแผนก --</option>';
+        let deptOptions = '<option value="">-- เลือกฝ่าย --</option>';
         deptResult.data.forEach(dept => {
             deptOptions += `<option value="${dept.department_id}">${dept.department_name}</option>`;
         });
         
         // Step 3: Show modal with departments - MODERN DESIGN with SELECT ALL
         const { value: selectedDept } = await Swal.fire({
-            title: '🗄️ ดึงหัตถการจาก Database',
+            title: '📖 ดึงขั้นตอนการรักษาจาก Database',
             html: `
                 <style>
                     .modern-modal-content {
@@ -2793,10 +2746,18 @@ async function openSelectProcedureFromStationDBModal() {
                     }
                     
                     .procedures-loading-div {
-                        display: none;
+                        display: block;
                         margin-top: 20px;
                         text-align: center;
                         padding: 40px 20px;
+                    }
+                    
+                    .procedures-loading-div[style*="display: none"] {
+                        display: none !important;
+                    }
+                    
+                    .procedures-loading-div[style*="display: block"] {
+                        display: block !important;
                     }
                     
                     .spinner-wrapper {
@@ -2822,7 +2783,7 @@ async function openSelectProcedureFromStationDBModal() {
                     }
                     
                     .procedures-container {
-                        display: none;
+                        display: block;
                         margin-top: 15px;
                         max-height: 250px;
                         overflow-y: auto;
@@ -2851,12 +2812,20 @@ async function openSelectProcedureFromStationDBModal() {
                     }
                     
                     .select-all-wrapper {
-                        display: none;
+                        display: block;
                         margin-bottom: 15px;
                         padding: 12px;
                         background: linear-gradient(135deg, rgba(0, 102, 204, 0.08) 0%, rgba(0, 102, 204, 0.03) 100%);
                         border-radius: 10px;
                         border: 1px solid rgba(0, 102, 204, 0.15);
+                    }
+                    
+                    .select-all-wrapper[style*="display: none"] {
+                        display: none !important;
+                    }
+                    
+                    .select-all-wrapper[style*="display: block"] {
+                        display: block !important;
                     }
                     
                     .select-all-btn {
@@ -2900,14 +2869,22 @@ async function openSelectProcedureFromStationDBModal() {
 
                     /* Procedures Container */
                     .procedures-container {
-                        display: none !important;
-                        margin-top: 0 !important;
+                        display: block !important;
+                        margin-top: 15px !important;
                         max-height: 300px !important;
                         overflow-y: auto !important;
                         border: 1px solid rgba(102, 126, 234, 0.15) !important;
                         border-radius: 14px !important;
                         padding: 10px !important;
                         background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(240, 245, 255, 0.8) 100%) !important;
+                    }
+                    
+                    .procedures-container[style*="display: none"] {
+                        display: none !important;
+                    }
+                    
+                    .procedures-container[style*="display: block"] {
+                        display: block !important;
                     }
 
                     .procedures-container::-webkit-scrollbar {
@@ -3015,6 +2992,14 @@ async function openSelectProcedureFromStationDBModal() {
                         border: 2px dashed rgba(102, 126, 234, 0.2) !important;
                         letter-spacing: 0.2px !important;
                     }
+                    
+                    .no-selection-div[style*="display: none"] {
+                        display: none !important;
+                    }
+                    
+                    .no-selection-div[style*="display: block"] {
+                        display: block !important;
+                    }
 
                     .no-selection-div i {
                         font-size: 45px !important;
@@ -3101,7 +3086,7 @@ async function openSelectProcedureFromStationDBModal() {
                 
                 <div class="modern-modal-content">
                     <label class="modal-label">
-                        <i class="fas fa-hospital-user"></i> เลือกแผนก *
+                        <i class="fas fa-hospital-user"></i> เลือกฝ่าย *
                     </label>
                     <select id="stationDBDeptSelect" class="dept-select">
                         ${deptOptions}
@@ -3111,7 +3096,7 @@ async function openSelectProcedureFromStationDBModal() {
                         <div class="spinner-wrapper">
                             <i class="fas fa-spinner fa-spin"></i>
                         </div>
-                        <p class="loading-text">กำลังโหลดหัตถการ...</p>
+                        <p class="loading-text">กำลังดึงขั้นตอนการรักษา...</p>
                     </div>
                     
                     <div class="select-all-wrapper" id="selectAllWrapper">
@@ -3128,13 +3113,13 @@ async function openSelectProcedureFromStationDBModal() {
                     
                     <div class="no-selection-div" id="noSelectionDiv">
                         <i class="fas fa-inbox"></i>
-                        <p>โปรดเลือกแผนกเพื่อดูหัตถการ</p>
+                        <p>กรุณาเลือกฝ่ายเพื่อแสดงขั้นตอนการรักษา</p>
                     </div>
                 </div>
             `,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '✅ เพิ่มหัตถการที่เลือก',
+            confirmButtonText: '✅ เพิ่มขั้นตอน',
             cancelButtonText: '❌ ยกเลิก',
             confirmButtonColor: '#4CAF50',
             cancelButtonColor: '#e0e0e0',
@@ -3183,7 +3168,7 @@ async function openSelectProcedureFromStationDBModal() {
                                         <div class="procedure-info">
                                             <div class="procedure-name">${proc.procedure_name}</div>
                                             <div class="procedure-duration">
-                                                <span>⏱</span>
+                                                <span>⏱️</span>
                                                 ${proc.default_duration || 30} นาที
                                             </div>
                                         </div>
@@ -3210,7 +3195,7 @@ async function openSelectProcedureFromStationDBModal() {
             preConfirm: () => {
                 const checkboxes = document.querySelectorAll('.stationDBProcCheckbox:checked');
                 if (checkboxes.length === 0) {
-                    Swal.showValidationMessage('❌ โปรดเลือกหัตถการอย่างน้อย 1 รายการ');
+                    Swal.showValidationMessage('❌ กรุณาเลือกขั้นตอนการรักษาอย่างน้อย 1 รายการ');
                     return false;
                 }
                 
@@ -3236,7 +3221,7 @@ async function openSelectProcedureFromStationDBModal() {
 
 /**
  * ✅ Toggle Select All Checkboxes
- * เลือก/ยกเลิกการเลือกทั้งหมด
+ * เลือก/ยกเลิกเลือกทั้งหมด
  */
 function toggleSelectAll() {
     const checkboxes = document.querySelectorAll('.stationDBProcCheckbox');
@@ -3251,7 +3236,7 @@ function toggleSelectAll() {
 
 /**
  * ✅ Update Select All Button State
- * อัปเดตสถานะและข้อความของปุ่ม Select All
+ * อัพเดตสถานะและข้อมูลปุ่ม Select All
  */
 function updateSelectAllButton() {
     const checkboxes = document.querySelectorAll('.stationDBProcCheckbox');
@@ -3275,10 +3260,7 @@ function updateSelectAllButton() {
 }
 
 /**
- * ✅ เพิ่มหัตถการที่เลือกจาก Database → บันทึก Database
- */
-/**
- * ✅ เพิ่มหัตถการที่เลือกจาก Database → บันทึก Database
+ * ✅ เพิ่มขั้นตอนการรักษาที่เลือกจาก Database → บันทึก Database
  */
 async function addSelectedProceduresFromStationDB(selectedProcedureIds) {
     Swal.fire({
@@ -3297,13 +3279,13 @@ async function addSelectedProceduresFromStationDB(selectedProcedureIds) {
     if (!window.departmentProcedures || !Array.isArray(window.departmentProcedures)) {
         console.error('❌ Department procedures data not available. Please reload the modal.');
         Swal.close();
-        Swal.fire('❌ เกิดข้อผิดพลาด', 'ไม่พบข้อมูลหัตถการ โปรดลองใหม่อีกครั้ง', 'error');
+        Swal.fire('❌ เกิดข้อผิดพลาด', 'ไม่มีข้อมูลขั้นตอนการรักษา กรุณาโหลดใหม่', 'error');
         return;
     }
 
     for (const procId of selectedProcedureIds) {
         try {
-            // 🔹 หา procedure จากข้อมูลใน modal
+            // 🔍 หา procedure จากข้อมูลที่โหลดจาก modal
             const proc = window.departmentProcedures.find(
                 p => p.procedure_id == procId
             );
@@ -3315,7 +3297,7 @@ async function addSelectedProceduresFromStationDB(selectedProcedureIds) {
 
             const payload = {
                 station_id: currentStationId,
-                Procedurepdp_id: proc.procedure_id,  // ✅ เพิ่ม: master_procedure_id = procedure_item_id (from PDP)
+                Procedurepdp_id: proc.procedure_id,  // ✅ เพิ่ม: master_procedure_id = procedure_item_id (จาก PDP)
                 procedure_name: proc.procedure_name,
                 procedure_code: proc.procedure_code || '',
                 procedure_time: proc.default_duration || 30,
@@ -3368,7 +3350,7 @@ async function addSelectedProceduresFromStationDB(selectedProcedureIds) {
     displayStationProcedures(currentProcedures);
 
     Swal.fire({
-        title: '✅ เสร็จสิ้น',
+        title: '✅ การดำเนินการเสร็จสิ้น',
         html: `
             เพิ่มสำเร็จ: <b>${addedCount}</b> รายการ<br>
             ${failedCount > 0 ? `ล้มเหลว: ${failedCount} รายการ` : ''}

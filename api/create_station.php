@@ -1,9 +1,9 @@
 <?php
 /**
- * API: Create Hospital Station - SIMPLEST FIX
- * ✅ ใช้ station_id เป็น department_id เลย
- * ✅ station_id auto_increment → department_id auto_increment
- * ✅ 1:1 relationship = ไม่มี duplicate ได้เลย
+ * API: Create Hospital Station - FIXED VERSION
+ * ✅ แก้ไข Foreign Key Constraint Violation
+ * ✅ ติดตาม procedure_id และส่งต่อให้ฟังก์ชันถัดไป
+ * ✅ ใช้ procedure_id ที่ถูกต้องเมื่อแทรก room_procedures
  */
 
 ini_set('display_errors', 1);
@@ -88,7 +88,8 @@ class StationCreator {
             $this->updateStationCode($stationId, $stationCode);
 
             if ($stationType === 'with_rooms') {
-                $this->addStationProcedures($stationId, $procedureMap);
+                // ✅ FIX #2: เก็บค่า procedure mapping ที่คืนมา
+                $stationProcedureMap = $this->addStationProcedures($stationId, $procedureMap);
                 
                 $doctors = isset($inputData['doctors']) ? $inputData['doctors'] : [];
                 if (!empty($doctors)) {
@@ -97,7 +98,8 @@ class StationCreator {
                 }
                 
                 $this->createStaff(isset($inputData['staff']) ? $inputData['staff'] : [], $stationId);
-                $rooms = $this->createRooms($stationId, $inputData);
+                // ✅ FIX #4: ส่ง procedure mapping ที่ถูกต้องไปให้ createRooms
+                $rooms = $this->createRooms($stationId, $inputData, $stationProcedureMap);
             } else {
                 error_log("✅ Simple station created - no staff/schedules added");
             }
@@ -106,7 +108,7 @@ class StationCreator {
 
             $responseData = [
                 'station_id' => $stationId,
-                'department_id' => $stationId,  // ← SAME!
+                'department_id' => $stationId,
                 'station_code' => $stationCode,
                 'station_name' => $inputData['station_name'],
                 'station_type' => $stationType,
@@ -187,12 +189,11 @@ class StationCreator {
             return false;
         }
 
-        // ✅ เปลี่ยน: return array ที่มีทั้ง procedure_item_id + procedure_name
         $procedureMap = [];
         foreach ($results as $row) {
             $procedureMap[$row['procedure_item_id']] = [
                 'name' => $row['procedure_name'],
-                'pdp_id' => $row['procedure_item_id']  // ✅ เพิ่ม
+                'pdp_id' => $row['procedure_item_id']
             ];
         }
         return $procedureMap;
@@ -227,35 +228,45 @@ class StationCreator {
         return $staffMap;
     }
 
+    // ✅ FIX #1: แก้ไข addStationProcedures() - บันทึกและคืนค่า procedure_id mapping
     private function addStationProcedures($stationId, $procedureMap) {
         if (empty($procedureMap)) {
             error_log("⚠️ No procedures for station $stationId");
-            return;
+            return [];  // ✅ เปลี่ยน return; เป็น return [];
         }
 
-        // ✅ เพิ่ม Procedurepdp_id ใน INSERT
+        // ✅ Insert และติดตามค่า procedure_id ที่สร้างใหม่
         $stmt = $this->pdo->prepare("
             INSERT INTO station_procedures 
             (station_id, Procedurepdp_id, procedure_name, wait_time, procedure_time, staff_required)
             VALUES (:station_id, :Procedurepdp_id, :procedure_name, :wait_time, :procedure_time, :staff_required)
         ");
 
+        $newProcedureMap = [];  // ✅ เพิ่มการติดตาม
+        
         foreach ($procedureMap as $procId => $procData) {
-            // ✅ Handle both old format (string) dan new format (array)
+            // ✅ Handle both old format (string) and new format (array)
             $procName = is_array($procData) ? $procData['name'] : $procData;
             $pdpId = is_array($procData) ? $procData['pdp_id'] : $procId;
             
             $stmt->execute([
                 ':station_id' => $stationId,
-                ':Procedurepdp_id' => intval($pdpId),  // ✅ เพิ่ม
+                ':Procedurepdp_id' => intval($pdpId),
                 ':procedure_name' => $procName,
                 ':wait_time' => 10,
                 ':procedure_time' => 30,
                 ':staff_required' => 0
             ]);
+
+            // ✅ ขั้นที่สำคัญ: บันทึก procedure_id ที่สร้างใหม่
+            $newProcedureId = $this->getLastInsertId();
+            $newProcedureMap[$pdpId] = $newProcedureId;  // ✅ เก็บการแมป
+            
+            error_log("✅ Procedure: $procName (PDP: $pdpId) → DB procedure_id: $newProcedureId");
         }
 
-        error_log("✓ Procedures added: " . count($procedureMap));
+        error_log("✅ Procedures added: " . count($procedureMap));
+        return $newProcedureMap;  // ✅ คืนการแมปที่สร้าง
     }
 
     private function generateStationCode($stationName, $floor, $stationId) {
@@ -269,16 +280,10 @@ class StationCreator {
         error_log("✓ Station code generated: $stationCode");
     }
 
-    /**
-     * 🎯 SIMPLEST FIX: Insert ทั่วไป ปล่อยให้ station_id auto_increment
-     * แล้ว UPDATE department_id = station_id ทันที
-     */
     private function createStation($data) {
         $stationType = isset($data['station_type']) ? $data['station_type'] : 'with_rooms';
         $requireDoctor = (isset($data['require_doctor']) && $data['require_doctor']) ? 1 : 0;
 
-        // 🔧 Step 1: ใส่ค่า placeholder สำหรับ department_id ชั่วคราว
-        // เพราะ unique constraint ต้องมีค่าให้ก่อน
         $sql = "
             INSERT INTO stations 
             (station_name, station_type, department_id, floor, room_count, require_doctor, 
@@ -319,7 +324,6 @@ class StationCreator {
             
             error_log("✅ Station inserted: ID=$stationId");
             
-            // 🔧 Step 2: UPDATE department_id = station_id ทันที
             $updateSql = "UPDATE stations SET department_id = :station_id WHERE station_id = :station_id";
             $updateStmt = $this->pdo->prepare($updateSql);
             $updateResult = $updateStmt->execute([':station_id' => $stationId]);
@@ -432,7 +436,8 @@ class StationCreator {
         error_log("✓ Total doctors added to room_doctors: $addedCount");
     }
 
-    private function createRooms($stationId, $data) {
+    // ✅ FIX #3: แก้ไข createRooms() - รับ parameter $stationProcedureMap
+    private function createRooms($stationId, $data, $stationProcedureMap = []) {
         $rooms = [];
         $roomsData = isset($data['rooms']) ? $data['rooms'] : [];
         $roomCount = intval(isset($data['room_count']) ? $data['room_count'] : 1);
@@ -455,7 +460,8 @@ class StationCreator {
 
             $roomDbId = $this->getLastInsertId();
             $this->addEquipment($roomDbId, isset($roomSettings['equipment']) ? $roomSettings['equipment'] : []);
-            $this->addRoomProcedures($roomDbId, isset($roomSettings['procedures']) ? $roomSettings['procedures'] : 'all', isset($data['procedure_map']) ? $data['procedure_map'] : []);
+            // ✅ FIX #4: ส่ง $stationProcedureMap ที่ถูกต้องแทน $data['procedure_map']
+            $this->addRoomProcedures($roomDbId, isset($roomSettings['procedures']) ? $roomSettings['procedures'] : 'all', $stationProcedureMap);
 
             $rooms[] = [
                 'room_id' => $roomDbId,
@@ -484,17 +490,20 @@ class StationCreator {
         }
     }
 
+    // ✅ FIX #5: แก้ไข addRoomProcedures() - ใช้ procedure_id ที่ถูกต้อง
     private function addRoomProcedures($roomId, $procedures, $stationProcedureMap = []) {
         if (empty($stationProcedureMap)) {
             error_log("⚠️ No procedure map for room $roomId");
             return;
         }
 
+        // ✅ stationProcedureMap มีรูปแบบ: [pdp_id => procedure_id]
+        // ดึงรายละเอียดหัตถการจาก station_procedures
         $detailStmt = $this->pdo->prepare("
-            SELECT procedure_id, wait_time, procedure_time, staff_required, equipment_required
+            SELECT procedure_id, procedure_name, wait_time, procedure_time, staff_required, equipment_required
             FROM station_procedures
-            WHERE station_id = (SELECT station_id FROM station_rooms WHERE room_id = :room_id)
-            AND procedure_id = :procedure_id LIMIT 1
+            WHERE procedure_id = :procedure_id
+            LIMIT 1
         ");
 
         $stmt = $this->pdo->prepare("
@@ -504,42 +513,58 @@ class StationCreator {
         ");
 
         if ($procedures === 'all' && !empty($stationProcedureMap)) {
-            foreach ($stationProcedureMap as $procId => $procName) {
-                $detailStmt->execute([':room_id' => $roomId, ':procedure_id' => intval($procId)]);
-                $detail = $detailStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+            foreach ($stationProcedureMap as $pdpId => $actualProcedureId) {
+                // ✅ ใช้ procedure_id ที่ถูก จาก station_procedures
+                $detailStmt->execute([':procedure_id' => $actualProcedureId]);
+                $detail = $detailStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$detail) {
+                    error_log("⚠️ Procedure $actualProcedureId not found in station_procedures");
+                    continue;
+                }
 
                 $stmt->execute([
                     ':room_id' => $roomId,
-                    ':procedure_id' => intval($procId),
-                    ':procedure_name' => $procName,
-                    ':wait_time' => isset($detail['wait_time']) ? $detail['wait_time'] : 10,
-                    ':procedure_time' => isset($detail['procedure_time']) ? $detail['procedure_time'] : 30,
-                    ':staff_required' => isset($detail['staff_required']) ? $detail['staff_required'] : 0,
-                    ':equipment_required' => isset($detail['equipment_required']) ? $detail['equipment_required'] : 0,
+                    ':procedure_id' => $actualProcedureId,  // ✅ ใช้ ID ที่ถูก!
+                    ':procedure_name' => $detail['procedure_name'],
+                    ':wait_time' => $detail['wait_time'],
+                    ':procedure_time' => $detail['procedure_time'],
+                    ':staff_required' => $detail['staff_required'],
+                    ':equipment_required' => $detail['equipment_required'],
                     ':type' => 'all_from_station'
                 ]);
             }
-            error_log("✓ Room $roomId: ALL procedures (" . count($stationProcedureMap) . " procedures)");
+            error_log("✅ Room $roomId: ALL procedures (" . count($stationProcedureMap) . " procedures)");
 
         } elseif (is_array($procedures) && !empty($procedures)) {
             foreach ($procedures as $procId) {
-                $detailStmt->execute([':room_id' => $roomId, ':procedure_id' => intval($procId)]);
+                if (!isset($stationProcedureMap[$procId])) {
+                    error_log("⚠️ Procedure ID $procId not in mapping");
+                    continue;
+                }
+                
+                $actualProcedureId = $stationProcedureMap[$procId];
+                
+                $detailStmt->execute([':procedure_id' => $actualProcedureId]);
                 $detail = $detailStmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($detail) {
-                    $stmt->execute([
-                        ':room_id' => $roomId,
-                        ':procedure_id' => intval($procId),
-                        ':procedure_name' => isset($stationProcedureMap[$procId]) ? $stationProcedureMap[$procId] : 'Unknown',
-                        ':wait_time' => isset($detail['wait_time']) ? $detail['wait_time'] : 10,
-                        ':procedure_time' => isset($detail['procedure_time']) ? $detail['procedure_time'] : 30,
-                        ':staff_required' => isset($detail['staff_required']) ? $detail['staff_required'] : 0,
-                        ':equipment_required' => isset($detail['equipment_required']) ? $detail['equipment_required'] : 0,
-                        ':type' => 'specific'
-                    ]);
+                if (!$detail) {
+                    error_log("⚠️ Procedure $actualProcedureId not found");
+                    continue;
                 }
+
+                $stmt->execute([
+                    ':room_id' => $roomId,
+                    ':procedure_id' => $actualProcedureId,
+                    ':procedure_name' => $detail['procedure_name'],
+                    ':wait_time' => $detail['wait_time'],
+                    ':procedure_time' => $detail['procedure_time'],
+                    ':staff_required' => $detail['staff_required'],
+                    ':equipment_required' => $detail['equipment_required'],
+                    ':type' => 'selective'
+                ]);
             }
-            error_log("✓ Room $roomId: SPECIFIC procedures (" . count($procedures) . " procedures)");
+            error_log("✅ Room $roomId: Selected procedures (" . count($procedures) . " procedures)");
         }
     }
 }
