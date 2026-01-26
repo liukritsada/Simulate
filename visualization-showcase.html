@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Data Visualization Showcase</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        }
+        :root {
+            --primary: #0066CC;
+            --primary-light: #3399FF;
+            --primary-dark: #004A99;
+            --primary-lighter: #E6F0FF;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --info: #3B82F6;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+        }
+        body {
+            background: linear-gradient(135deg, #F5FAFF 0%, #E0EEFF 50%, #F0F5FF 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .grid.full {
+            grid-template-columns: 1fr;
+        }
+        .chart-container {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);
+        }
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        .demo-box {
+            background: var(--gray-50);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid var(--primary);
+        }
+        .demo-box code {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            display: block;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin-top: 12px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Data Visualization Showcase</h1>
+            <p>การแสดงผลข้อมูลด้วย charts, graphs และ indicators</p>
+        </div>
+
+        <div class="grid">
+            <!-- Bar Chart -->
+            <div class="chart-container">
+                <div class="chart-title">📊 Bar Chart - อัตราการครอบครัวคน</div>
+                <div id="barChart"></div>
+                <div class="demo-box">
+                    <strong>วิธีใช้:</strong>
+                    <code>
+createBarChart('barChart', [
+  { label: 'วันจันทร์', value: 45, max: 100, color: 'success' },
+  { label: 'วันอังคาร', value: 72, max: 100, color: 'success' },
+  { label: 'วันพุธ', value: 38, max: 100, color: 'warning' },
+  { label: 'วันพฤหัสบดี', value: 91, max: 100, color: 'success' }
+]);
+                    </code>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="chart-container">
+                <div class="chart-title">📈 Metric Cards</div>
+                <div id="metricCards"></div>
+                <div class="demo-box">
+                    <strong>วิธีใช้:</strong>
+                    <code>
+createMetricCards('metricCards', [
+  { label: 'ผู้ป่วยทั้งหมด', value: 256, change: 12 },
+  { label: 'อยู่ระหว่างรักษา', value: 48, change: -5 },
+  { label: 'เสร็จสิ้น', value: 189, change: 24 }
+]);
+                    </code>
+                </div>
+            </div>
+
+            <!-- Progress Indicators -->
+            <div class="chart-container">
+                <div class="chart-title">⏳ Progress Indicators</div>
+                <div id="progressChart"></div>
+                <div class="demo-box">
+                    <strong>วิธีใช้:</strong>
+                    <code>
+createProgressIndicator('progressChart', [
+  { label: 'ห้องว่างพร้อมใช้', value: 85, max: 100 },
+  { label: 'อัตราความพึงพอใจ', value: 92, max: 100 }
+]);
+                    </code>
+                </div>
+            </div>
+
+            <!-- Donut Chart -->
+            <div class="chart-container">
+                <div class="chart-title">🍩 Donut Chart - สถานะผู้ป่วย</div>
+                <div id="donutChart"></div>
+                <div class="demo-box">
+                    <strong>วิธีใช้:</strong>
+                    <code>
+createDonutChart('donutChart', [
+  { label: 'รอคิว', value: 45, color: '#3B82F6' },
+  { label: 'กำลังทำ', value: 28, color: '#F59E0B' },
+  { label: 'เสร็จสิ้น', value: 89, color: '#10B981' }
+]);
+                    </code>
+                </div>
+            </div>
+
+            <!-- Heatmap -->
+            <div class="chart-container">
+                <div class="chart-title">🔥 Heatmap - การใช้งาน</div>
+                <div id="heatmapChart"></div>
+                <div class="demo-box">
+                    <strong>วิธีใช้:</strong>
+                    <code>
+createHeatmap('heatmapChart', [
+  { label: 'จันทร์', value: 45 },
+  { label: 'อังคาร', value: 72 },
+  { label: 'พุธ', value: 38 },
+  // ...more data
+]);
+                    </code>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="chart-container full">
+                <div class="chart-title">📅 Timeline - เหตุการณ์ของผู้ป่วย</div>
+                <div id="timelineChart"></div>
+                <div class="demo-box">
+                    <strong>วิธีใช้:</strong>
+                    <code>
+createTimeline('timelineChart', [
+  { title: 'เข้าระบบ', time: '08:30 AM', description: 'ผู้ป่วยลงทะเบียนเข้า' },
+  { title: 'รอคิว', time: '08:45 AM', description: 'อยู่ในคิวรอตรวจ' },
+  { title: 'เริ่มตรวจ', time: '09:15 AM', description: 'แพทย์เริ่มตรวจรักษา' }
+]);
+                    </code>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="chart-container">
+                <div class="chart-title">⚡ Quick Stats</div>
+                <div id="quickStats"></div>
+                <div class="demo-box">
+                    <strong>วิธีใช้:</strong>
+                    <code>
+createQuickStats('quickStats', [
+  { icon: 'fa-hospital-user', value: '256', label: 'ผู้ป่วย' },
+  { icon: 'fa-user-nurse', value: '42', label: 'พยาบาล' },
+  { icon: 'fa-bed', value: '28', label: 'ห้องว่าง' }
+]);
+                    </code>
+                </div>
+            </div>
+
+            <!-- Stats Table -->
+            <div class="chart-container full">
+                <div class="chart-title">📋 Statistics Table</div>
+                <div id="statsTable"></div>
+                <div class="demo-box">
+                    <strong>วิธีใช้:</strong>
+                    <code>
+createStatsTable('statsTable',
+  [{ title: 'สถานีชื่อ', key: 'station' }, { title: 'จำนวนผู้ป่วย', key: 'patients' }],
+  [{ station: 'ICU', patients: 12 }, { station: 'ER', patients: 8 }]
+);
+                    </code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/modules/15-data-visualization.js"></script>
+    <script>
+        // ========================================
+        // DEMO: Bar Chart
+        // ========================================
+        createBarChart('barChart', [
+            { label: 'วันจันทร์', value: 45, max: 100, color: 'success' },
+            { label: 'วันอังคาร', value: 72, max: 100, color: 'success' },
+            { label: 'วันพุธ', value: 38, max: 100, color: 'warning' },
+            { label: 'วันพฤหัสบดี', value: 91, max: 100, color: 'success' },
+            { label: 'วันศุกร์', value: 68, max: 100, color: 'success' }
+        ], null);
+
+        // ========================================
+        // DEMO: Metric Cards
+        // ========================================
+        createMetricCards('metricCards', [
+            { label: 'ผู้ป่วยทั้งหมด', value: 256, change: 12, color: 'var(--primary)' },
+            { label: 'อยู่ระหว่างรักษา', value: 48, change: -5, color: 'var(--warning)' },
+            { label: 'เสร็จสิ้น', value: 189, change: 24, color: 'var(--success)' }
+        ]);
+
+        // ========================================
+        // DEMO: Progress Indicators
+        // ========================================
+        createProgressIndicator('progressChart', [
+            { label: 'ห้องว่างพร้อมใช้', value: 85, max: 100, color: 'var(--success)' },
+            { label: 'อัตราความพึงพอใจ', value: 92, max: 100, color: 'var(--primary)' },
+            { label: 'เข้าถึงการรักษา', value: 78, max: 100, color: 'var(--warning)' }
+        ]);
+
+        // ========================================
+        // DEMO: Donut Chart
+        // ========================================
+        createDonutChart('donutChart', [
+            { label: 'รอคิว', value: 45, color: '#3B82F6' },
+            { label: 'กำลังทำ', value: 28, color: '#F59E0B' },
+            { label: 'เสร็จสิ้น', value: 89, color: '#10B981' },
+            { label: 'ยกเลิก', value: 8, color: '#EF4444' }
+        ], null);
+
+        // ========================================
+        // DEMO: Heatmap
+        // ========================================
+        createHeatmap('heatmapChart', [
+            { label: 'จันทร์', value: 45 },
+            { label: 'อังคาร', value: 72 },
+            { label: 'พุธ', value: 38 },
+            { label: 'พฤหัสบดี', value: 91 },
+            { label: 'ศุกร์', value: 68 },
+            { label: 'เสาร์', value: 55 },
+            { label: 'อาทิตย์', value: 42 }
+        ], null);
+
+        // ========================================
+        // DEMO: Timeline
+        // ========================================
+        createTimeline('timelineChart', [
+            { title: 'เข้าระบบ', time: '08:30 AM', description: 'ผู้ป่วยลงทะเบียนเข้า' },
+            { title: 'รอคิว', time: '08:45 AM', description: 'อยู่ในคิวรอตรวจ' },
+            { title: 'เริ่มตรวจ', time: '09:15 AM', description: 'แพทย์เริ่มตรวจรักษา' },
+            { title: 'เสร็จสิ้น', time: '10:00 AM', description: 'เสร็จสิ้นการรักษา' }
+        ]);
+
+        // ========================================
+        // DEMO: Quick Stats
+        // ========================================
+        createQuickStats('quickStats', [
+            { icon: 'fa-hospital-user', value: '256', label: 'ผู้ป่วย', color: 'var(--primary)' },
+            { icon: 'fa-user-nurse', value: '42', label: 'พยาบาล', color: 'var(--success)' },
+            { icon: 'fa-bed', value: '28', label: 'ห้องว่าง', color: 'var(--info)' },
+            { icon: 'fa-hourglass-end', value: '12', label: 'รอรักษา', color: 'var(--warning)' }
+        ]);
+
+        // ========================================
+        // DEMO: Stats Table
+        // ========================================
+        createStatsTable('statsTable',
+            [
+                { title: 'สถานี', key: 'station' },
+                { title: 'ผู้ป่วยทั้งหมด', key: 'total' },
+                { title: 'รอคิว', key: 'waiting' },
+                { title: 'กำลังทำ', key: 'processing' },
+                { title: 'เสร็จสิ้น', key: 'completed' }
+            ],
+            [
+                { station: 'ICU', total: 42, waiting: 8, processing: 12, completed: 22 },
+                { station: 'ER', total: 38, waiting: 12, processing: 8, completed: 18 },
+                { station: 'OPD', total: 95, waiting: 45, processing: 28, completed: 22 },
+                { station: 'OT', total: 28, waiting: 5, processing: 15, completed: 8 },
+                { station: 'Cardio', total: 53, waiting: 18, processing: 20, completed: 15 }
+            ],
+            '📊 สรุปสถิติตามสถานี'
+        );
+    </script>
+</body>
+</html>
