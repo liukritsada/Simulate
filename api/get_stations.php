@@ -28,7 +28,16 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 
-    error_log("📍 Loading all stations...");
+    // Handle date filtering
+    $dateFrom = $_GET['date_from'] ?? date('Y-m-d');
+    $dateTo = $_GET['date_to'] ?? date('Y-m-d');
+    
+    // Validate dates
+    if (!strtotime($dateFrom) || !strtotime($dateTo)) {
+        $dateFrom = $dateTo = date('Y-m-d');
+    }
+
+    error_log("📍 Loading stations for date range: {$dateFrom} to {$dateTo}");
 
     // ✅ ดึงข้อมูล stations พร้อม staff_count
     // ✅ เรียงตาม display_order (custom order) ถ้าไม่มี ให้เรียงตาม station_id
@@ -47,23 +56,59 @@ try {
             s.staff_count,
             s.display_order,
             
-            -- ✅ นับ staff วันนี้
+            -- ✅ นับ staff ในช่วงวันที่
             COALESCE(
                 (SELECT COUNT(*) FROM station_staff 
                  WHERE station_id = s.station_id 
-                 AND DATE(work_date) = CURDATE() 
+                 AND DATE(work_date) BETWEEN :dateFrom AND :dateTo
                  AND is_active = 1),
                 0
             ) as total_staff,
             
-            -- ✅ นับ doctors วันนี้
+            -- ✅ นับ doctors ในช่วงวันที่
             COALESCE(
                 (SELECT COUNT(DISTINCT doctor_id) FROM station_doctors 
                  WHERE station_id = s.station_id 
-                 AND DATE(work_date) = CURDATE() 
+                 AND DATE(work_date) BETWEEN :dateFrom AND :dateTo
                  AND is_active = 1),
                 0
-            ) as total_doctors
+            ) as total_doctors,
+            
+            -- ✅ นับจำนวนผู้ป่วยที่กำลังรอ (ในช่วงวันที่)
+            COALESCE(
+                (SELECT COUNT(*) FROM station_patients 
+                 WHERE station_id = s.station_id 
+                 AND DATE(appointment_date) BETWEEN :dateFrom AND :dateTo
+                 AND status IN ('waiting', 'in_process')),
+                0
+            ) as patient_count,
+            
+            -- ✅ คำนวณเวลารอคอยเฉลี่ย (นาที) สำหรับผู้ป่วยที่กำลังรอ
+            COALESCE(
+                (SELECT AVG(
+                    CASE 
+                        WHEN TIME_TO_SEC(TIMEDIFF(NOW(), arrival_time)) > 0 
+                        THEN TIME_TO_SEC(TIMEDIFF(NOW(), arrival_time)) / 60 
+                        ELSE 0 
+                    END
+                 ) FROM station_patients 
+                 WHERE station_id = s.station_id 
+                 AND DATE(appointment_date) BETWEEN :dateFrom AND :dateTo
+                 AND status IN ('waiting', 'in_process')
+                 AND arrival_time IS NOT NULL),
+                0
+            ) as avg_wait_time,
+            
+            -- ✅ นับจำนวนผู้ป่วยที่รอเกิน 60 นาที
+            COALESCE(
+                (SELECT COUNT(*) FROM station_patients 
+                 WHERE station_id = s.station_id 
+                 AND DATE(appointment_date) BETWEEN :dateFrom AND :dateTo
+                 AND status IN ('waiting', 'in_process')
+                 AND arrival_time IS NOT NULL
+                 AND TIME_TO_SEC(TIMEDIFF(NOW(), arrival_time)) > 3600), -- 60 นาที
+                0
+            ) as long_wait_count
             
         FROM stations s
         ORDER BY 
@@ -72,7 +117,10 @@ try {
             s.display_order ASC,
             s.station_id ASC
     ");
-    $stmt->execute();
+    $stmt->execute([
+        ':dateFrom' => $dateFrom,
+        ':dateTo' => $dateTo
+    ]);
     $stations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     error_log("✅ Found " . count($stations) . " stations");
@@ -100,7 +148,7 @@ try {
         // ✅ ดึง total_doctors จาก subquery ข้างบน
         $totalDoctors = intval($station['total_doctors']);
 
-        // ✅ ดึงข้อมูลแพทย์แต่ละคนจาก station_doctors (วันนี้เท่านั้น)
+        // ✅ ดึงข้อมูลแพทย์แต่ละคนจาก station_doctors (ในช่วงวันที่)
         $stmt = $pdo->prepare("
             SELECT 
                 sd.station_doctor_id,
@@ -124,14 +172,18 @@ try {
             FROM station_doctors sd
             LEFT JOIN station_rooms sr ON sd.assigned_room_id = sr.room_id
             WHERE sd.station_id = :id 
-            AND DATE(sd.work_date) = CURDATE()
+            AND DATE(sd.work_date) BETWEEN :dateFrom AND :dateTo
             AND sd.is_active = 1
             ORDER BY 
                 CASE WHEN sd.assigned_room_id IS NULL THEN 1 ELSE 0 END,
                 sr.room_number,
                 sd.doctor_name
         ");
-        $stmt->execute([':id' => $stationId]);
+        $stmt->execute([
+            ':id' => $stationId,
+            ':dateFrom' => $dateFrom,
+            ':dateTo' => $dateTo
+        ]);
         $allDoctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // ✅ ดึง department_name จาก pdp database
@@ -173,6 +225,11 @@ try {
         $station['total_doctors'] = $totalDoctors;  // ✅ ใช้ค่าที่นับจาก subquery
         $station['department_name'] = $departmentName ?? 'N/A';
         $station['doctors_detail'] = $allDoctors;
+        
+        // ✅ เพิ่มข้อมูลผู้ป่วยและเวลารอคอย
+        $station['patient_count'] = intval($station['patient_count']);
+        $station['avg_wait_time'] = round(floatval($station['avg_wait_time']), 1);
+        $station['long_wait_count'] = intval($station['long_wait_count']);
 
         error_log("    ✅ Rooms: $totalRooms, Procedures: $totalProcedures, Staff: $totalStaff, Doctors: $totalDoctors");
         
@@ -213,7 +270,8 @@ try {
         'data' => $stationsWithDetails,
         'count' => count($stationsWithDetails),
         'timestamp' => date('Y-m-d H:i:s'),
-        'note' => 'Staff and Doctors count for today (CURDATE()), ordered by display_order'
+        'date_range' => ['from' => $dateFrom, 'to' => $dateTo],
+        'note' => 'Staff and Doctors count for date range, ordered by display_order'
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (PDOException $e) {

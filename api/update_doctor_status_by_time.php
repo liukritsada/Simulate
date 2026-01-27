@@ -218,7 +218,7 @@ function determineDocatorStatus(
 ) {
     $current = strtotime($current_time);
     $start   = strtotime($work_start ?? '08:00:00');
-    $end     = strtotime($work_end ?? '17:00:00');
+    $end     = $work_end ? strtotime($work_end) : strtotime('23:59:59'); // NULL means work all day
     $b_start = strtotime($break_start ?? '12:00:00');
     $b_end   = strtotime($break_end ?? '13:00:00');
 

@@ -4,6 +4,57 @@
 // Note: API_BASE_URL is declared in 01-api-config.js
 
 // ========================================
+// 🕐 COUNTDOWN TIMER FOR STATION LEVEL
+// ========================================
+
+const stationCountdownTimers = {}; // Store active station-level timers
+
+function startStationCountdownTimer(patientId, countdownExitTime, displayElementId) {
+  if (!patientId || !countdownExitTime) return;
+
+  // Clear existing timer if any
+  if (stationCountdownTimers[patientId]) {
+    clearInterval(stationCountdownTimers[patientId]);
+  }
+
+  const updateCountdown = () => {
+    const now = new Date();
+
+    // Parse countdown_exit_time (format: YYYY-MM-DD HH:MM:SS)
+    const [datePart, timePart] = countdownExitTime.split(' ');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+
+    const targetTime = new Date(year, month - 1, day, hours, minutes, seconds);
+    const diffMs = targetTime - now;
+    const minutes_remaining = Math.ceil(diffMs / 60000);
+
+    const element = document.getElementById(displayElementId);
+    if (!element) {
+      clearInterval(stationCountdownTimers[patientId]);
+      delete stationCountdownTimers[patientId];
+      return;
+    }
+
+    if (minutes_remaining <= 0) {
+      element.innerHTML = '<span style="font-size: 14px;">⏱️</span> หมดเวลา';
+      element.style.color = '#ef4444';
+      element.style.fontWeight = '700';
+      clearInterval(stationCountdownTimers[patientId]);
+      delete stationCountdownTimers[patientId];
+    } else {
+      const color = minutes_remaining <= 5 ? '#ef4444' : (minutes_remaining <= 10 ? '#f59e0b' : '#10b981');
+      element.innerHTML = `<span style="font-size: 14px;">⏱️</span> ${minutes_remaining}น`;
+      element.style.color = color;
+      element.style.fontWeight = minutes_remaining <= 5 ? '700' : '600';
+    }
+  };
+
+  updateCountdown(); // Initial update
+  stationCountdownTimers[patientId] = setInterval(updateCountdown, 1000);
+}
+
+// ========================================
 // 📋 Load Patients List (ENHANCED)
 // ========================================
 async function loadPatientsList() {
@@ -85,10 +136,17 @@ async function loadPatientsList() {
             return;
         }
 
+        // ✅ Clear all existing station-level countdown timers to prevent memory leak
+        Object.keys(stationCountdownTimers).forEach(patientId => {
+            clearInterval(stationCountdownTimers[patientId]);
+            delete stationCountdownTimers[patientId];
+        });
+        console.log('🧹 Cleared all previous station countdown timers');
+
         // Display patient table with enhanced design
         if (patientsList) {
             patientsList.innerHTML = '';
-            
+
             const tableHtml = `
                 <div style="overflow-x: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
                     <table style="width: 100%; border-collapse: collapse; background: white;">
@@ -121,49 +179,46 @@ async function loadPatientsList() {
                 const row = document.createElement('tr');
                 row.style.cssText = 'transition: all 0.2s ease; border-bottom: 1px solid #f0f0f0;';
                 
-                // 🎯 ฟังก์ชันคำนวณเวลารอ (FIXED: ใช้ arrival_time แทน start_time)
-                function getWaitingTimeStatus(appointmentDate, arrivalTime, startTime) {
+                // 🎯 ฟังก์ชันคำนวณเวลารอ (ใช้ time_target และ time_target_wait จาก station_patients)
+                function getWaitingTimeStatus(appointmentDate, arrivalTime, startTime, timeTarget, timeTargetWait) {
                     if (!appointmentDate) return { emoji: '⏳', color: '#3498db', text: 'ไม่ทราบ' };
 
-                    let referenceTime;
-
-                    // ถ้ามี start_time แสดงว่ากำลังทำหัตถการ -> ไม่แสดงเวลารอ
+                    // ถ้ากำลังทำหัตถการ (มี start_time แล้ว)
                     if (startTime) {
                         return { emoji: '⚕️', color: '#f39c12', text: 'กำลังรักษา' };
                     }
-                    // ถ้ามี arrival_time แสดงว่ามาถึงแล้ว -> คำนวณจาก arrival_time
-                    else if (arrivalTime) {
-                        referenceTime = new Date(appointmentDate + 'T' + arrivalTime).getTime();
-                    }
-                    // ถ้าไม่มีทั้ง arrival_time และ start_time -> ใช้ appointment date
-                    else {
-                        referenceTime = new Date(appointmentDate + 'T00:00:00').getTime();
+
+                    // ถ้ายังไม่มาถึง (ไม่มี arrival_time)
+                    if (!arrivalTime) {
+                        return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่มาถึง' };
                     }
 
+                    // คำนวณเวลารอ (จาก arrival_time)
+                    const arrivalDateTime = new Date(appointmentDate + 'T' + arrivalTime).getTime();
                     const now = new Date().getTime();
-                    const diffMs = now - referenceTime;
+                    const diffMs = now - arrivalDateTime;
                     const diffMinutes = Math.floor(diffMs / 60000);
 
-                    // ถ้ายังไม่ถึงวันนัด
+                    // ถ้ายังไม่ถึงเวลา
                     if (diffMinutes < 0) {
-                        return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่ถึงเวลานัด' };
+                        return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่ถึงเวลา' };
                     }
 
-                    // ≤ 15 นาที -> หน้ายิ้ม 😊 เขียว
-                    if (diffMinutes <= 15) {
+                    // ✅ เกณฑ์ใหม่: เปรียบเทียบเวลาปัจจุบันกับ time_target และ time_target_wait
+                    const currentTime = new Date();
+                    const currentTimeStr = currentTime.toTimeString().split(' ')[0]; // HH:MM:SS
+
+                    // 😊 ได้ทำเลย = เวลาปัจจุบัน ≤ time_target (ยังไม่เกินเวลาที่ต้องเสร็จ)
+                    if (timeTarget && currentTimeStr <= timeTarget) {
                         return { emoji: '😊', color: '#27ae60', text: `รอ ${diffMinutes} นาที` };
                     }
-                    // 16-30 นาที -> หน้าปกติ 😐 เหลือง
-                    else if (diffMinutes <= 30) {
+                    // 😐 รอไม่เกิน = time_target < เวลาปัจจุบัน ≤ time_target_wait
+                    else if (timeTargetWait && currentTimeStr <= timeTargetWait) {
                         return { emoji: '😐', color: '#f39c12', text: `รอ ${diffMinutes} นาที` };
                     }
-                    // 31-60 นาที -> บึ้ง 😕 ส้ม
-                    else if (diffMinutes <= 60) {
-                        return { emoji: '😕', color: '#e67e22', text: `รอ ${diffMinutes} นาที` };
-                    }
-                    // > 60 นาที -> โกรธ 😠 แดง
+                    // 😡 รอเกินไป = เวลาปัจจุบัน > time_target_wait
                     else {
-                        return { emoji: '😠', color: '#e74c3c', text: `รอ ${diffMinutes} นาที` };
+                        return { emoji: '😡', color: '#e74c3c', text: `รอ ${diffMinutes} นาที` };
                     }
                 }
                 
@@ -194,8 +249,10 @@ async function loadPatientsList() {
                 const genderIcon = getGenderIcon(patient.gender);
                 const waitingTimeData = getWaitingTimeStatus(
                     patient.appointment_date,
-                    patient.arrival_time,  // FIXED: ใช้ arrival_time แทน start_time
-                    patient.start_time
+                    patient.arrival_time,
+                    patient.start_time,
+                    patient.time_target,      // ✅ เวลาที่ต้องเสร็จ
+                    patient.time_target_wait  // ✅ ช้าสุดที่ทำเสร็จได้
                 );
                 
                 row.innerHTML = `
@@ -230,20 +287,36 @@ async function loadPatientsList() {
                         ${patient.start_time || '-'}
                     </td>
                     <td style="padding: 14px 12px; text-align: center;">
-                        <span style="
-                            background: ${waitingTimeData.color}22;
-                            color: ${waitingTimeData.color};
-                            padding: 6px 12px;
-                            border-radius: 20px;
-                            font-size: 12px;
-                            font-weight: 700;
-                            display: inline-block;
-                            border: 1px solid ${waitingTimeData.color}44;
-                            white-space: nowrap;
-                        ">
-                            <span style="font-size: 16px;">${waitingTimeData.emoji}</span>
-                            ${waitingTimeData.text}
-                        </span>
+                        ${patient.status === 'in_process' && patient.countdown_exit_time ? `
+                            <span id="countdown_${patient.patient_id}" style="
+                                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                                color: white;
+                                padding: 6px 12px;
+                                border-radius: 20px;
+                                font-size: 12px;
+                                font-weight: 700;
+                                display: inline-block;
+                                border: 1px solid #f59e0b;
+                                white-space: nowrap;
+                            ">
+                                <span style="font-size: 14px;">⏱️</span> นับถอยหลัง...
+                            </span>
+                        ` : `
+                            <span style="
+                                background: ${waitingTimeData.color}22;
+                                color: ${waitingTimeData.color};
+                                padding: 6px 12px;
+                                border-radius: 20px;
+                                font-size: 12px;
+                                font-weight: 700;
+                                display: inline-block;
+                                border: 1px solid ${waitingTimeData.color}44;
+                                white-space: nowrap;
+                            ">
+                                <span style="font-size: 16px;">${waitingTimeData.emoji}</span>
+                                ${waitingTimeData.text}
+                            </span>
+                        `}
                     </td>
                     
                     <td style="padding: 14px 12px; text-align: center; color: #666; font-size: 13px;">
@@ -300,8 +373,17 @@ async function loadPatientsList() {
                 row.addEventListener('mouseout', () => {
                     row.style.background = 'white';
                 });
-                
+
                 tbody.appendChild(row);
+
+                // ✅ Initialize countdown timer for in-process patients
+                if (patient.status === 'in_process' && patient.countdown_exit_time) {
+                    startStationCountdownTimer(
+                        patient.patient_id,
+                        patient.countdown_exit_time,
+                        `countdown_${patient.patient_id}`
+                    );
+                }
             });
 
             // Add summary at bottom

@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(ls:*)",
-      "Bash(mysql:*)"
+      "Bash(mysql:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nImplement countdown timer for in-process patients with auto-complete\n\n- Add countdown timer display showing minutes remaining before patient exits room\n- Auto-complete patient when countdown reaches zero \\(time_target_wait elapsed\\)\n- Update patient status to ''completed'' and clear room assignment\n- Integrate with update_patient_status.php API\n- Expand get_room_detail.php to return patient countdown data \\(time_target_wait, appointment_date, etc.\\)\n- Color-coded timer: green \\(>10 min\\), amber \\(5-10 min\\), red \\(<5 min or time up\\)\n- Auto-start timers when room detail modal opens\n\nCo-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "Bash(php -l:*)"
     ]
   }
 }

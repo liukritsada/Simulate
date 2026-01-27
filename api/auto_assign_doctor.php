@@ -1,7 +1,13 @@
 <?php
 /**
- * ✅ auto_assign_doctor.php (VERSION 1.7 - ULTRA FIXED)
+ * ✅ auto_assign_doctor.php (VERSION 2.0 - NULL work_end_time FIXED)
  * เพิ่มแพทย์เข้าห้องอัตโนมัติ เมื่อห้องว่าง
+ *
+ * ✅ FIX: เลือกเฉพาะแพทย์ที่ status = 'available' (ไม่เอา 'working')
+ * ✅ FIX: เช็คว่าถึงเวลาทำงานแล้ว (current_time >= work_start_time)
+ * ✅ FIX: รองรับ work_end_time = NULL (ทำงานตลอดวัน)
+ * ✅ FIX: เช็คไม่อยู่ในช่วง break time
+ * ✅ FIX: แก้ bug SQL quote ซ้อน (''value'' → 'value')
  */
 
 ob_end_clean();
@@ -89,38 +95,37 @@ try {
         $in_list = empty($already_assigned) ? '0' : implode(',', array_map('intval', $already_assigned));
 
         // สร้าง query โดยไม่ใช้ prepared statement (เพื่อหลีกเลี่ยงปัญหา placeholder)
+        // ✅ FIX: $pdo->quote() เติม quote ให้เองแล้ว ไม่ต้องใส่เพิ่ม!
+        // ✅ FIX: ถ้า work_end_time = NULL ให้ถือว่าทำงานตลอดวัน
         $available_doctor_query = "
-            SELECT 
-                sd.station_doctor_id, 
+            SELECT
+                sd.station_doctor_id,
                 sd.doctor_id,
-                sd.doctor_name, 
+                sd.doctor_name,
                 sd.doctor_type,
-                sd.work_start_time, 
+                sd.work_start_time,
                 sd.work_end_time,
-                sd.break_start_time, 
+                sd.break_start_time,
                 sd.break_end_time,
                 sd.status
             FROM station_doctors sd
             WHERE sd.station_id = " . intval($room['station_id']) . "
                 AND sd.is_active = 1
-                AND sd.work_date = '" . $pdo->quote($current_date) . "'
+                AND sd.work_date = " . $pdo->quote($current_date) . "
                 AND sd.assigned_room_id IS NULL
-                AND sd.status IN ('available', 'working')
+                AND sd.status = 'available'
                 AND sd.station_doctor_id NOT IN ($in_list)
+                AND " . $pdo->quote($current_time) . " >= sd.work_start_time
+                AND (sd.work_end_time IS NULL OR " . $pdo->quote($current_time) . " < sd.work_end_time)
                 AND (
                     sd.break_start_time IS NULL
                     OR sd.break_end_time IS NULL
                     OR NOT (
-                        '" . $pdo->quote($current_time) . "' >= sd.break_start_time 
-                        AND '" . $pdo->quote($current_time) . "' < sd.break_end_time
+                        " . $pdo->quote($current_time) . " >= sd.break_start_time
+                        AND " . $pdo->quote($current_time) . " < sd.break_end_time
                     )
                 )
-            ORDER BY 
-                CASE 
-                    WHEN sd.status = 'available' THEN 1
-                    WHEN sd.status = 'working' THEN 2
-                END,
-                sd.doctor_name
+            ORDER BY sd.doctor_name
             LIMIT 1
         ";
 

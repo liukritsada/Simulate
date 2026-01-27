@@ -2413,21 +2413,98 @@ async function loadStationPatients(stationId, deptIds = null) {
       </div>
     `;
 
+    // Helper function to get gender emoji
+    const getGenderEmoji = (sex) => {
+      if (sex === 1 || sex === 'M' || sex === 'male') return '👨';
+      if (sex === 2 || sex === 'F' || sex === 'female') return '👩';
+      return '👤';
+    };
+
+    // Helper function to get waiting status emoji and color
+    const getWaitingStatus = (timeTarget, timeTargetWait, hasIncompletePrevious) => {
+      if (!timeTarget) {
+        return { emoji: '⏳', color: '#95a5a6', bgColor: 'rgba(149, 165, 166, 0.1)', text: 'ไม่ระบุ' };
+      }
+
+      const now = new Date();
+      const currentTime = now.toTimeString().split(' ')[0]; // HH:MM:SS
+
+      // 😡 รอเกินไป (สีแดง) - เวลาปัจจุบัน > time_target_wait
+      // ✅ ตรวจเชคนี้ก่อน เพราะเป็น priority สูงสุด - ต้องแสดงให้เห็นว่ารอนานเกินไปแล้ว
+      if (timeTargetWait && currentTime > timeTargetWait) {
+        return { emoji: '😡', color: '#e74c3c', bgColor: 'rgba(231, 76, 60, 0.1)', text: 'รอเกินไป' };
+      }
+
+      // ⏳ รอคิวก่อน - ถ้ามีคนคิวก่อนหน้ายังไม่เสร็จ
+      // ✅ ตรวจเชคหลังจาก "รอเกินไป" เพื่อไม่ให้ซ่อนเฉียบพลัน
+      if (hasIncompletePrevious == 1 || hasIncompletePrevious === true) {
+        return { emoji: '⏳', color: '#9b59b6', bgColor: 'rgba(155, 89, 182, 0.1)', text: 'รอคิวก่อน' };
+      }
+
+      // 😊 ได้ทำเลย (สีเขียว) - เวลาปัจจุบัน ≤ time_target
+      if (currentTime <= timeTarget) {
+        return { emoji: '😊', color: '#27ae60', bgColor: 'rgba(39, 174, 96, 0.1)', text: 'ได้ทำเลย' };
+      }
+
+      // 😐 รอไม่เกิน (สีเหลือง) - time_target < เวลาปัจจุบัน ≤ time_target_wait
+      if (timeTargetWait && currentTime <= timeTargetWait) {
+        return { emoji: '😐', color: '#f39c12', bgColor: 'rgba(243, 156, 18, 0.1)', text: 'รอไม่เกิน' };
+      }
+
+      // Default (ไม่ควรถึง)
+      return { emoji: '⏳', color: '#95a5a6', bgColor: 'rgba(149, 165, 166, 0.1)', text: 'ไม่ระบุ' };
+    };
+
     // Inprogress patients
     if (inprogressPatients.length > 0) {
       patientsHTML += '<h4 style="margin: 15px 0 10px 0; color: #0056B3;">⏳ กำลังรักษา</h4>';
       inprogressPatients.forEach(patient => {
+        // Debug log
+        console.log(`🔍 Patient: ${patient.patient_name}, has_incomplete_previous:`, patient.has_incomplete_previous, 'type:', typeof patient.has_incomplete_previous);
+
+        const genderEmoji = getGenderEmoji(patient.sex);
+        const waitStatus = getWaitingStatus(patient.time_target, patient.time_target_wait, patient.has_incomplete_previous);
         patientsHTML += `
-          <div style="background: rgba(0, 86, 179, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #0056B3;">
+          <div
+            onclick="openPatientModal(${patient.patient_id}, '${patient.patient_name.replace(/'/g, "\\'")}', '${patient.hn}', '${patient.appointment_date}', 0)"
+            style="
+              background: rgba(0, 86, 179, 0.1);
+              padding: 12px;
+              border-radius: 8px;
+              margin-bottom: 8px;
+              border-left: 3px solid #0056B3;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            "
+            onmouseover="this.style.background='rgba(0, 86, 179, 0.2)'; this.style.transform='translateX(4px)'"
+            onmouseout="this.style.background='rgba(0, 86, 179, 0.1)'; this.style.transform='translateX(0)'"
+          >
             <div style="display: flex; justify-content: space-between; align-items: start;">
-              <div>
-                <div style="font-weight: 600;">${patient.patient_name}</div>
-                <div style="font-size: 11px; color: #adb5bd;">HN: ${patient.hn}</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">${genderEmoji}</span>
+                  <span>${patient.patient_name}</span>
+                  <span style="font-size: 20px; margin-left: 4px;">${waitStatus.emoji}</span>
+                </div>
+                <div style="font-size: 11px; color: #adb5bd; margin-top: 4px; margin-left: 26px;">
+                  HN: ${patient.hn}
+                  <span style="
+                    margin-left: 8px;
+                    padding: 2px 8px;
+                    background: ${waitStatus.bgColor};
+                    color: ${waitStatus.color};
+                    border-radius: 4px;
+                    font-weight: 600;
+                  ">${waitStatus.text}</span>
+                </div>
               </div>
               <div style="text-align: right; font-size: 11px;">
                 <div>${patient.procedure || 'N/A'}</div>
                 <div style="color: #adb5bd;">คิว: ${patient.running_number || 'N/A'}</div>
               </div>
+            </div>
+            <div style="font-size: 10px; color: #999; margin-top: 8px; text-align: center;">
+              🔍 คลิกเพื่อดูหัตถการทั้งหมด
             </div>
           </div>
         `;
@@ -2438,17 +2515,49 @@ async function loadStationPatients(stationId, deptIds = null) {
     if (waitingPatients.length > 0) {
       patientsHTML += '<h4 style="margin: 15px 0 10px 0; color: #D35400;">⏰ รอรักษา</h4>';
       waitingPatients.forEach(patient => {
+        const genderEmoji = getGenderEmoji(patient.sex);
+        const waitStatus = getWaitingStatus(patient.time_target, patient.time_target_wait, patient.has_incomplete_previous);
         patientsHTML += `
-          <div style="background: rgba(255, 152, 0, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #D35400;">
+          <div
+            onclick="openPatientModal(${patient.patient_id}, '${patient.patient_name.replace(/'/g, "\\'")}', '${patient.hn}', '${patient.appointment_date}', 0)"
+            style="
+              background: rgba(255, 152, 0, 0.1);
+              padding: 12px;
+              border-radius: 8px;
+              margin-bottom: 8px;
+              border-left: 3px solid #D35400;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            "
+            onmouseover="this.style.background='rgba(255, 152, 0, 0.2)'; this.style.transform='translateX(4px)'"
+            onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.transform='translateX(0)'"
+          >
             <div style="display: flex; justify-content: space-between; align-items: start;">
-              <div>
-                <div style="font-weight: 600;">${patient.patient_name}</div>
-                <div style="font-size: 11px; color: #adb5bd;">HN: ${patient.hn}</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">${genderEmoji}</span>
+                  <span>${patient.patient_name}</span>
+                  <span style="font-size: 20px; margin-left: 4px;">${waitStatus.emoji}</span>
+                </div>
+                <div style="font-size: 11px; color: #adb5bd; margin-top: 4px; margin-left: 26px;">
+                  HN: ${patient.hn}
+                  <span style="
+                    margin-left: 8px;
+                    padding: 2px 8px;
+                    background: ${waitStatus.bgColor};
+                    color: ${waitStatus.color};
+                    border-radius: 4px;
+                    font-weight: 600;
+                  ">${waitStatus.text}</span>
+                </div>
               </div>
               <div style="text-align: right; font-size: 11px;">
                 <div>${patient.procedure || 'N/A'}</div>
                 <div style="color: #adb5bd;">คิว: ${patient.running_number || 'N/A'}</div>
               </div>
+            </div>
+            <div style="font-size: 10px; color: #999; margin-top: 8px; text-align: center;">
+              🔍 คลิกเพื่อดูหัตถการทั้งหมด
             </div>
           </div>
         `;

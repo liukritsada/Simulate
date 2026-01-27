@@ -6,10 +6,14 @@
 // ✅ Variables
 let autoAssignDoctorTimer = null;
 let autoUpdateStatusTimer = null;
+let autoUpdatePatientStatusTimer = null;
+let autoAssignPatientToRoomTimer = null;
 let resetCheckTimer = null;
 
 const AUTO_ASSIGN_DOCTOR_INTERVAL = 5 * 1000; // 5 seconds (เร็วขึ้น)
 const AUTO_UPDATE_STATUS_INTERVAL = 5 * 1000; // 5 seconds (เร็วขึ้น)
+const AUTO_UPDATE_PATIENT_STATUS_INTERVAL = 10 * 1000; // 10 seconds
+const AUTO_ASSIGN_PATIENT_TO_ROOM_INTERVAL = 15 * 1000; // 15 seconds
 const RESET_TIME = "00:00:00"; // Reset at midnight
 
 // 🔴 WebSocket Real-time Configuration (ยังไม่มี WebSocket server ให้ใช้ interval แล้ว)
@@ -198,6 +202,130 @@ async function autoUpdateStatus() {
 }
 
 /**
+ * ✅ Auto Update Patient Status
+ * อัปเดตสถานะผู้ป่วยอัตโนมัติตามเวลา
+ */
+async function autoUpdatePatientStatus() {
+    console.log("🏥 เริ่มอัพเดตสถานะผู้ป่วยอัตโนมัติ...");
+
+    try {
+        const response = await fetch(
+            getApiUrl("auto_update_patient_status.php"),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    current_date: new Date().toISOString().split("T")[0],
+                    current_time: new Date().toTimeString().split(" ")[0],
+                }),
+            }
+        );
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                const inProcess = result.data.updated_to_in_process;
+                const completed = result.data.updated_to_completed;
+
+                if (inProcess > 0 || completed > 0) {
+                    console.log(
+                        `✅ Patient status updated: ${inProcess} started, ${completed} completed at ${new Date().toLocaleTimeString()}`
+                    );
+
+                    // รีเฟรช patient list ถ้าอยู่หน้า patient management
+                    if (typeof refreshPatientList === 'function') {
+                        refreshPatientList();
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.warn("⚠️ Patient status update error:", error);
+    }
+}
+
+/**
+ * ✅ Auto Assign Patient to Room
+ * แอดคนไข้เข้าห้องอัตโนมัติ เมื่อห้องว่าง
+ */
+async function autoAssignPatientToRoom() {
+    try {
+        if (!currentStationId) {
+            console.log("⏭️ ยังไม่ได้เลือก Station - ข้ามการทำงาน");
+            return;
+        }
+
+        console.log("🏥 เริ่มแอดคนไข้เข้าห้องอัตโนมัติ...");
+
+        const response = await fetch(
+            getApiUrl("auto_assign_patient_to_room.php"),
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    station_id: currentStationId,
+                    current_date: new Date().toISOString().split("T")[0],
+                    current_time: new Date().toTimeString().split(" ")[0],
+                }),
+            }
+        );
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                const assigned = result.data.assigned_count;
+                if (assigned > 0) {
+                    console.log(
+                        `✅ Assigned ${assigned} patients to rooms at ${new Date().toLocaleTimeString()}`
+                    );
+
+                    // รีเฟรช patient list ถ้าอยู่หน้า patient management
+                    if (typeof refreshPatientList === 'function') {
+                        refreshPatientList();
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.warn("⚠️ Auto assign patient to room error:", error);
+    }
+}
+
+/**
+ * ✅ Start Auto Assign Patient to Room Timer
+ */
+function startAutoAssignPatientToRoomTimer() {
+    console.log("⏰ เปิดตัวจับเวลาแอดคนไข้เข้าห้องอัตโนมัติ");
+
+    if (autoAssignPatientToRoomTimer) {
+        clearInterval(autoAssignPatientToRoomTimer);
+    }
+
+    autoAssignPatientToRoom();
+
+    autoAssignPatientToRoomTimer = setInterval(() => {
+        autoAssignPatientToRoom();
+    }, AUTO_ASSIGN_PATIENT_TO_ROOM_INTERVAL);
+
+    console.log("✅ Interval auto assign patient to room ทำงาน (ทุก 15 วิ)");
+}
+
+/**
+ * ✅ Stop Auto Assign Patient to Room Timer
+ */
+function stopAutoAssignPatientToRoomTimer() {
+    if (autoAssignPatientToRoomTimer) {
+        clearInterval(autoAssignPatientToRoomTimer);
+        autoAssignPatientToRoomTimer = null;
+        console.log("⏹️ ตัวจับเวลาแอดคนไข้เข้าห้องหยุดแล้ว");
+    }
+}
+
+/**
  * ✅ Start Status Update Timer
  */
 function startAutoUpdateStatusTimer() {
@@ -223,6 +351,36 @@ function stopAutoUpdateStatusTimer() {
     if (autoUpdateStatusTimer) {
         clearInterval(autoUpdateStatusTimer);
         autoUpdateStatusTimer = null;
+    }
+}
+
+/**
+ * ✅ Start Patient Status Update Timer
+ */
+function startAutoUpdatePatientStatusTimer() {
+    console.log("⏰ เปิดตัวจับเวลาอัพเดตสถานะผู้ป่วย");
+
+    if (autoUpdatePatientStatusTimer) {
+        clearInterval(autoUpdatePatientStatusTimer);
+    }
+
+    autoUpdatePatientStatus();
+
+    autoUpdatePatientStatusTimer = setInterval(() => {
+        autoUpdatePatientStatus();
+    }, AUTO_UPDATE_PATIENT_STATUS_INTERVAL);
+
+    console.log("✅ Interval patient status update ทำงาน (ทุก 10 วิ)");
+}
+
+/**
+ * ✅ Stop Patient Status Update Timer
+ */
+function stopAutoUpdatePatientStatusTimer() {
+    if (autoUpdatePatientStatusTimer) {
+        clearInterval(autoUpdatePatientStatusTimer);
+        autoUpdatePatientStatusTimer = null;
+        console.log("⏹️ ตัวจับเวลาอัพเดตสถานะผู้ป่วยหยุดแล้ว");
     }
 }
 
@@ -343,10 +501,12 @@ function initializeSystem() {
 
     // 🔴 สั่ง WebSocket ถ้ามี (ยังไม่มี server)
     // initializeWebSocket();
-    
+
     checkResetTime();
     startAutoAssignDoctorTimer();
     startAutoUpdateStatusTimer();
+    startAutoUpdatePatientStatusTimer();
+    startAutoAssignPatientToRoomTimer();
 }
 
 /**
@@ -364,6 +524,8 @@ window.addEventListener("load", () => {
 window.addEventListener("beforeunload", () => {
     stopAutoAssignDoctorTimer();
     stopAutoUpdateStatusTimer();
+    stopAutoUpdatePatientStatusTimer();
+    stopAutoAssignPatientToRoomTimer();
     if (resetCheckTimer) {
         clearTimeout(resetCheckTimer);
     }
@@ -381,10 +543,14 @@ document.addEventListener("visibilitychange", () => {
         console.log("👁️ Page hidden - pausing updates");
         stopAutoAssignDoctorTimer();
         stopAutoUpdateStatusTimer();
+        stopAutoUpdatePatientStatusTimer();
+        stopAutoAssignPatientToRoomTimer();
     } else {
         console.log("👁️ กลับมาดูหน้าแล้ว - ตรวจสอบระบบอัตโนมัติ");
         checkResetTime();
         startAutoAssignDoctorTimer();
         startAutoUpdateStatusTimer();
+        startAutoUpdatePatientStatusTimer();
+        startAutoAssignPatientToRoomTimer();
     }
 });

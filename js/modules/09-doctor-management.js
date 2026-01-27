@@ -150,25 +150,47 @@ function displayStationDoctors(doctors) {
       borderColor = '#f5f5f5';
       borderLeftColor = '#6c757d';
     } else if (hasWorkStartTime && !hasWorkEndTime) {
-      // ✅ work_start_time มีค่า + work_end_time = null → กำลังตรวจ
+      // ✅ work_start_time มีค่า + work_end_time = null
       const workStart = doctor.work_start_time.substring(0, 5);
-      
-      statusSection = `
-        <div style="text-align: center;">
-          <div style="font-size: 10px; color: #666; margin-bottom: 4px; font-weight: 500;">เวลาเริ่มต้น</div>
-          <div style="background: #f0f4ff; color: #0066cc; padding: 6px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">
-            ${workStart}
-          </div>
-        </div>
 
-        <div>
-          <span style="background: #0066cc; color: white; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
-            <i class="fas fa-briefcase"></i>กำลังตรวจ
-          </span>
-        </div>
-      `;
-      borderColor = '#c6e0ff';
-      borderLeftColor = '#0066cc';
+      // ✅ FIX: เช็คว่าถูก assign เข้าห้องแล้วหรือยัง
+      if (hasAssignedRoom) {
+        // มีห้องแล้ว → กำลังตรวจ
+        statusSection = `
+          <div style="text-align: center;">
+            <div style="font-size: 10px; color: #666; margin-bottom: 4px; font-weight: 500;">เวลาเริ่มต้น</div>
+            <div style="background: #f0f4ff; color: #0066cc; padding: 6px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">
+              ${workStart}
+            </div>
+          </div>
+
+          <div>
+            <span style="background: #0066cc; color: white; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
+              <i class="fas fa-briefcase"></i>กำลังตรวจ
+            </span>
+          </div>
+        `;
+        borderColor = '#c6e0ff';
+        borderLeftColor = '#0066cc';
+      } else {
+        // ยังไม่มีห้อง → ว่าง (พร้อมเข้างาน)
+        statusSection = `
+          <div style="text-align: center;">
+            <div style="font-size: 10px; color: #666; margin-bottom: 4px; font-weight: 500;">เวลาเริ่มต้น</div>
+            <div style="background: #e8f5e9; color: #1E8449; padding: 6px 10px; border-radius: 8px; font-weight: 700; font-size: 12px;">
+              ${workStart}
+            </div>
+          </div>
+
+          <div>
+            <span style="background: #1E8449; color: white; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
+              <i class="fas fa-check-circle"></i>ว่าง
+            </span>
+          </div>
+        `;
+        borderColor = '#c8e6c9';
+        borderLeftColor = '#1E8449';
+      }
     } else if (hasWorkStartTime && hasWorkEndTime) {
       // ✅ work_start_time มีค่า + work_end_time มีค่า → ต้องตรวจสอบเวลาปัจจุบัน
       const workStart = doctor.work_start_time.substring(0, 5);

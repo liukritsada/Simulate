@@ -129,9 +129,10 @@ try {
 
     // ========================================
     // STEP 4: ดึง patient list (unique patients)
+    // ✅ ใช้ time_target และ time_target_wait จาก station_patients เลย
     // ========================================
     $sql = "
-        SELECT 
+        SELECT
             p.patient_id,
             p.patient_name,
             sp.hn,
@@ -142,13 +143,17 @@ try {
             p.status as patient_status,
             sp.doctor_code,
             sp.time_start,
+            sp.time_target,
+            sp.time_target_wait,
+            sp.arrival_time,
             sp.running_number,
             sp.station_id,
+            sp.procedure_id,
             COALESCE(current_station.station_name, '-') as current_station_name
         FROM station_patients sp
         LEFT JOIN patients p ON sp.hn = p.hn AND sp.appointment_date = p.appointment_date
         LEFT JOIN (
-            SELECT 
+            SELECT
                 sp_in.hn,
                 sp_in.appointment_date,
                 s.station_name
@@ -223,11 +228,14 @@ try {
             'gender' => $record['sex'] ?? null,
             'sex' => $record['sex'] ?? null,
             'appointment_date' => $record['appointment_date'],
+            'arrival_time' => $record['arrival_time'] ?? null,
             'room_id' => $record['room_id'],
             'status' => $record['station_status'] ?? $record['patient_status'] ?? '-',
             'doctor_code' => $doctorCodeValue ?? '-',
-            'doctor_name' => $doctorNameValue,  // ✅ ชื่อแพทย์ที่ถูกต้อง!
+            'doctor_name' => $doctorNameValue,
             'start_time' => $record['time_start'] ?? null,
+            'time_target' => $record['time_target'] ?? null,  // ✅ เวลาที่ต้องเสร็จ
+            'time_target_wait' => $record['time_target_wait'] ?? null,  // ✅ ช้าสุดที่ทำเสร็จได้
             'running_number' => $record['running_number'] ?? 0,
             'total_procedures' => (int)$totalProcedures,
             'procedure_count' => (int)$totalProcedures,
