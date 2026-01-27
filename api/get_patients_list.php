@@ -130,6 +130,7 @@ try {
     // ========================================
     // STEP 4: ดึง patient list (unique patients)
     // ✅ ใช้ time_target และ time_target_wait จาก station_patients เลย
+    // ✅ Include countdown timer data (procedure_time, countdown_exit_time)
     // ========================================
     $sql = "
         SELECT
@@ -149,9 +150,17 @@ try {
             sp.running_number,
             sp.station_id,
             sp.procedure_id,
-            COALESCE(current_station.station_name, '-') as current_station_name
+            COALESCE(current_station.station_name, '-') as current_station_name,
+            -- ✅ Countdown timer data
+            COALESCE(rp.procedure_time, 0) AS procedure_duration_minutes,
+            CASE
+                WHEN sp.arrival_time IS NOT NULL AND rp.procedure_time > 0 THEN
+                    DATE_ADD(sp.arrival_time, INTERVAL rp.procedure_time MINUTE)
+                ELSE NULL
+            END AS countdown_exit_time
         FROM station_patients sp
         LEFT JOIN patients p ON sp.hn = p.hn AND sp.appointment_date = p.appointment_date
+        LEFT JOIN room_procedures rp ON rp.room_id = sp.room_id AND rp.procedure_id = sp.procedure_id
         LEFT JOIN (
             SELECT
                 sp_in.hn,
@@ -240,7 +249,10 @@ try {
             'total_procedures' => (int)$totalProcedures,
             'procedure_count' => (int)$totalProcedures,
             'current_station' => $record['current_station_name'] ?? '-',
-            'phone' => null
+            'phone' => null,
+            // ✅ Countdown timer data
+            'procedure_duration_minutes' => !empty($record['procedure_duration_minutes']) ? (int)$record['procedure_duration_minutes'] : 0,
+            'countdown_exit_time' => $record['countdown_exit_time'] ?? null
         ];
         
         $patients[] = $patient;
