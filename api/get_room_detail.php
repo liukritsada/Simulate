@@ -235,6 +235,19 @@ try {
     $stmt->execute([':room_id' => $room_id, ':work_date' => $work_date]);
     $doctor_work_times = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // ✅ Debug: Check countdown data
+    $debug_countdown = [];
+    foreach ($patients as $p) {
+        $debug_countdown[] = [
+            'patient_id' => $p['patient_id'],
+            'hn' => $p['hn'],
+            'arrival_time' => $p['arrival_time'],
+            'procedure_time' => $p['procedure_duration_minutes'],
+            'countdown_exit_time' => $p['countdown_exit_time'],
+            'status' => $p['status']
+        ];
+    }
+
     // ✅ Send response
     http_response_code(200);
     echo json_encode([
@@ -255,7 +268,8 @@ try {
                 'equipment' => count($equipment),
                 'patients' => count($patients)
             ]
-        ]
+        ],
+        '_debug_countdown' => $debug_countdown
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {

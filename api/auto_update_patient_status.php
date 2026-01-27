@@ -72,9 +72,11 @@ try {
         // เช็คว่ามีห้องว่างหรือไม่ (ถ้ามี room_id กำหนดไว้แล้ว)
         if ($patient['room_id']) {
             // อัปเดตเป็น in_process
+            // ✅ Set arrival_time for countdown timer to work
             $update_sql = "
                 UPDATE station_patients
                 SET status = 'in_process',
+                    arrival_time = CURRENT_TIMESTAMP,
                     update_date = CURRENT_TIMESTAMP
                 WHERE id = ?
             ";

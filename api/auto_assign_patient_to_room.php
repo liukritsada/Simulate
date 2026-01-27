@@ -181,6 +181,7 @@ try {
                 room_id = :room_id,
                 status = 'in_process',
                 in_process = 1,
+                arrival_time = CURRENT_TIMESTAMP,
                 update_date = CURRENT_TIMESTAMP
             WHERE id = :patient_id
         ";
