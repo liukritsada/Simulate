@@ -447,8 +447,8 @@ function displayRoomProceduresVertical(procedures) {
 
 const countdownTimers = {}; // Store active timers
 
-function startCountdownTimer(patientId, timeTargetWait) {
-  if (!patientId || !timeTargetWait) return;
+function startCountdownTimer(patientId, countdownExitTime, procedureDuration) {
+  if (!patientId || !countdownExitTime) return;
 
   // Clear existing timer if any
   if (countdownTimers[patientId]) {
@@ -457,10 +457,13 @@ function startCountdownTimer(patientId, timeTargetWait) {
 
   const updateCountdown = () => {
     const now = new Date();
-    const targetTime = new Date();
-    const [hours, minutes, seconds] = timeTargetWait.split(':').map(Number);
-    targetTime.setHours(hours, minutes, seconds);
 
+    // Parse countdown_exit_time (format: YYYY-MM-DD HH:MM:SS)
+    const [datePart, timePart] = countdownExitTime.split(' ');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+
+    const targetTime = new Date(year, month - 1, day, hours, minutes, seconds);
     const diffMs = targetTime - now;
     const minutes_remaining = Math.ceil(diffMs / 60000);
 
@@ -622,7 +625,7 @@ function displayRoomPatientsModern(patients) {
               ${p.wait_duration}น
             </div>
             ${isOverdue ? '<div style="color: #ef4444; font-weight: 600; margin-top: 4px;">⚠️ เกินเวลา</div>' : ""}
-            ${isInProcess && p.time_target_wait ? `
+            ${isInProcess && p.countdown_exit_time ? `
               <div style="
                 margin-top: 8px;
                 padding: 8px;
@@ -650,10 +653,10 @@ function displayRoomPatientsModern(patients) {
   if (container) {
     container.innerHTML = html;
 
-    // Start countdown timers for in-process patients
+    // Start countdown timers for in-process patients (using procedure_time-based exit time)
     patients.forEach((p) => {
-      if (p.status === 'in_process' && p.time_target_wait) {
-        startCountdownTimer(p.patient_id, p.time_target_wait);
+      if (p.status === 'in_process' && p.countdown_exit_time) {
+        startCountdownTimer(p.patient_id, p.countdown_exit_time, p.procedure_duration_minutes);
       }
     });
   }

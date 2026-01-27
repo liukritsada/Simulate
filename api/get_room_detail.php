@@ -153,7 +153,7 @@ try {
     $stmt->execute([':room_id' => $room_id]);
     $procedures = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // ✅ Get patients in room - EXPANDED with countdown timer data
+    // ✅ Get patients in room - EXPANDED with countdown timer data (uses procedure_time)
     $patientsSql = "
         SELECT
             sp.patient_id,
@@ -169,9 +169,18 @@ try {
             sp.in_process,
             sp.procedure_code,
             sp.procedure_id,
+            sp.room_id,
             COALESCE(sp.procedure_code, 'ไม่ระบุ') AS procedure_name,
             sp.running_number,
-            -- Calculate wait duration
+            -- Get procedure duration from room_procedures
+            COALESCE(rp.procedure_time, 0) AS procedure_duration_minutes,
+            -- Calculate countdown exit time: arrival_time + procedure_time
+            CASE
+                WHEN sp.arrival_time IS NOT NULL AND rp.procedure_time > 0 THEN
+                    DATE_ADD(sp.arrival_time, INTERVAL rp.procedure_time MINUTE)
+                ELSE NULL
+            END AS countdown_exit_time,
+            -- Calculate wait duration from arrival time
             CASE
                 WHEN sp.arrival_time IS NOT NULL THEN
                     TIMEDIFF(CURRENT_TIME(), sp.arrival_time)
@@ -183,6 +192,7 @@ try {
                 ELSE 0
             END AS is_overdue
         FROM station_patients sp
+        LEFT JOIN room_procedures rp ON rp.room_id = sp.room_id AND rp.procedure_id = sp.procedure_id
         WHERE sp.room_id = :room_id
           AND sp.appointment_date = :work_date
         ORDER BY sp.in_process DESC, sp.running_number ASC
