@@ -190,7 +190,7 @@ try {
     ";
     
     $stmt = $pdo->prepare($patientsSql);
-    $stmt->execute([':room_id' => $room_id]);
+    $stmt->execute([':room_id' => $room_id, ':work_date' => $work_date]);
     $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // ✅ Get staff work times for room status
