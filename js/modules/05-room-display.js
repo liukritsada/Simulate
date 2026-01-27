@@ -435,6 +435,127 @@ function displayRoomProceduresVertical(procedures) {
 // ✅ PATIENTS
 // ========================================
 
+// ========================================
+// 🕐 COUNTDOWN TIMER MANAGEMENT
+// ========================================
+
+const countdownTimers = {}; // Store active timers
+
+function startCountdownTimer(patientId, timeTargetWait) {
+  if (!patientId || !timeTargetWait) return;
+
+  // Clear existing timer if any
+  if (countdownTimers[patientId]) {
+    clearInterval(countdownTimers[patientId]);
+  }
+
+  const updateCountdown = () => {
+    const now = new Date();
+    const targetTime = new Date();
+    const [hours, minutes, seconds] = timeTargetWait.split(':').map(Number);
+    targetTime.setHours(hours, minutes, seconds);
+
+    const diffMs = targetTime - now;
+    const minutes_remaining = Math.ceil(diffMs / 60000);
+
+    const element = document.getElementById(`countdown-${patientId}`);
+    if (!element) {
+      clearInterval(countdownTimers[patientId]);
+      delete countdownTimers[patientId];
+      return;
+    }
+
+    if (minutes_remaining <= 0) {
+      // Time's up - auto-complete patient
+      element.innerHTML = '⏱️ หมดเวลา';
+      element.style.color = '#ef4444';
+      element.style.fontWeight = '700';
+      clearInterval(countdownTimers[patientId]);
+      delete countdownTimers[patientId];
+
+      // Auto-complete patient
+      autoCompletePatient(patientId);
+    } else {
+      // Show remaining time
+      const color = minutes_remaining <= 5 ? '#ef4444' : (minutes_remaining <= 10 ? '#f59e0b' : '#10b981');
+      element.innerHTML = `⏱️ ${minutes_remaining}น`;
+      element.style.color = color;
+      element.style.fontWeight = minutes_remaining <= 5 ? '700' : '600';
+    }
+  };
+
+  updateCountdown(); // Initial update
+  countdownTimers[patientId] = setInterval(updateCountdown, 1000);
+}
+
+async function autoCompletePatient(patientId) {
+  try {
+    // Get patient details first
+    const patientElement = document.querySelector(`[data-patient-id="${patientId}"]`);
+    if (!patientElement) {
+      console.warn("Patient element not found");
+      return;
+    }
+
+    const hn = patientElement.getAttribute('data-patient-hn');
+    const appointmentDate = patientElement.getAttribute('data-appointment-date');
+
+    if (!hn || !appointmentDate) {
+      console.warn("Missing patient details for auto-complete");
+      return;
+    }
+
+    const payload = {
+      patient_id: patientId,
+      hn: hn,
+      appointment_date: appointmentDate,
+      status: 'completed'
+    };
+
+    console.log("🔄 Auto-completing patient:", payload);
+
+    const response = await fetch(getApiUrl("update_patient_status.php"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      console.log("✅ Patient auto-completed:", result.data);
+
+      // Show notification
+      Swal.fire({
+        icon: 'success',
+        title: 'เสร็จสิ้น',
+        text: `${result.data.hn} ถูกย้ายออกจากห้องแล้ว`,
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      // Refresh room detail
+      setTimeout(() => openRoomDetail(currentRoomId), 1500);
+    } else {
+      console.error("❌ Auto-complete failed:", result.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: result.message,
+        confirmButtonText: 'ตกลง'
+      });
+    }
+  } catch (error) {
+    console.error("❌ Error auto-completing patient:", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: error.message,
+      confirmButtonText: 'ตกลง'
+    });
+  }
+}
+
 function displayRoomPatientsModern(patients) {
   let html = `
     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
@@ -448,6 +569,7 @@ function displayRoomPatientsModern(patients) {
 
   patients.forEach((p) => {
     const isOverdue = p.is_overdue;
+    const isInProcess = p.status === 'in_process';
     const borderColor = isOverdue ? "#ef4444" : "#10b981";
     const bgColor = isOverdue ? "#fef2f2" : "#f0fdf4";
 
@@ -460,7 +582,10 @@ function displayRoomPatientsModern(patients) {
         border-left: 4px solid ${borderColor};
         border-radius: 8px;
         transition: all 0.2s ease;
-      " onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow=''; this.style.transform='';">
+      " onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow=''; this.style.transform='';"
+          data-patient-id="${p.patient_id}"
+          data-patient-hn="${p.hn}"
+          data-appointment-date="${p.appointment_date || new Date().toISOString().split('T')[0]}">
         <div style="display: flex; justify-content: space-between; align-items: start;">
           <div style="flex: 1;">
             <div style="font-weight: 600; color: #1a1a1a; font-size: 14px; margin-bottom: 4px;">
@@ -495,6 +620,20 @@ function displayRoomPatientsModern(patients) {
               ${p.wait_duration}น
             </div>
             ${isOverdue ? '<div style="color: #ef4444; font-weight: 600; margin-top: 4px;">⚠️ เกินเวลา</div>' : ""}
+            ${isInProcess && p.time_target_wait ? `
+              <div style="
+                margin-top: 8px;
+                padding: 8px;
+                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                border-radius: 6px;
+                font-weight: 700;
+                color: white;
+                font-size: 13px;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+              " id="countdown-${p.patient_id}">
+                ⏱️ นับถอยหลัง...
+              </div>
+            ` : ""}
           </div>
         </div>
       </div>
@@ -506,7 +645,16 @@ function displayRoomPatientsModern(patients) {
   }
 
   const container = document.getElementById("roomPatientContainer");
-  if (container) container.innerHTML = html;
+  if (container) {
+    container.innerHTML = html;
+
+    // Start countdown timers for in-process patients
+    patients.forEach((p) => {
+      if (p.status === 'in_process' && p.time_target_wait) {
+        startCountdownTimer(p.patient_id, p.time_target_wait);
+      }
+    });
+  }
 }
 
 // ========================================
