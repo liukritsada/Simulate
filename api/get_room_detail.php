@@ -181,8 +181,7 @@ try {
             CASE
                 WHEN sp.time_target IS NOT NULL AND CURRENT_TIME() > sp.time_target THEN 1
                 ELSE 0
-            END AS is_overdue,
-            sp.Procedurepdp_id
+            END AS is_overdue
         FROM station_patients sp
         WHERE sp.room_id = :room_id
           AND sp.appointment_date = :work_date

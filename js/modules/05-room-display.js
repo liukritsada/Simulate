@@ -601,10 +601,6 @@ function displayRoomPatientsModern(patients) {
               <div>HN: <strong>${p.hn}</strong></div>
               <div>
                 ${p.procedure_name || "ไม่ระบุ"}
-                <!-- ✅ PDP ID -->
-                <div style="font-size: 9px; color: #0066cc; font-weight: 600; margin-top: 2px;">
-                  🔗 PDP ID: ${p.Procedurepdp_id || 'N/A'}
-                </div>
               </div>
               <div style="margin-top: 4px;">
                 <span style="
