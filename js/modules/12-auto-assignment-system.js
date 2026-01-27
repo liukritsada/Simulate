@@ -204,10 +204,9 @@ async function autoUpdateStatus() {
 /**
  * ✅ Auto Update Patient Status
  * อัปเดตสถานะผู้ป่วยอัตโนมัติตามเวลา
+ * ✅ When countdown reaches 0 → auto-complete patient
  */
 async function autoUpdatePatientStatus() {
-    console.log("🏥 เริ่มอัพเดตสถานะผู้ป่วยอัตโนมัติ...");
-
     try {
         const response = await fetch(
             getApiUrl("auto_update_patient_status.php"),
@@ -230,13 +229,44 @@ async function autoUpdatePatientStatus() {
                 const completed = result.data.updated_to_completed;
 
                 if (inProcess > 0 || completed > 0) {
-                    console.log(
-                        `✅ Patient status updated: ${inProcess} started, ${completed} completed at ${new Date().toLocaleTimeString()}`
-                    );
+                    const timeStr = new Date().toLocaleTimeString('th-TH');
+
+                    // ✅ Log each completed patient
+                    if (completed > 0) {
+                        console.log(`✅ [${timeStr}] เสร็จสิ้น: ${completed} คนไข้ (ออกจากห้อง)`);
+                        result.data.completed_list?.forEach(p => {
+                            console.log(`   • ${p.patient_name} (HN: ${p.hn})`);
+                        });
+
+                        // 🔔 Show notification
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'ผู้ป่วยเสร็จสิ้น',
+                                html: `<strong>${completed}</strong> คนไข้ทำหัตถการเสร็จแล้ว<br><small>${timeStr}</small>`,
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (modal) => {
+                                    modal.style.zIndex = '100000';
+                                }
+                            });
+                        }
+                    }
+
+                    // ✅ Log each started patient
+                    if (inProcess > 0) {
+                        console.log(`✅ [${timeStr}] เริ่มต้น: ${inProcess} คนไข้ (เข้าห้อง)`);
+                        result.data.in_process_list?.forEach(p => {
+                            console.log(`   • ${p.patient_name} (HN: ${p.hn}) - เวลาเริ่ม: ${p.time_start}`);
+                        });
+                    }
 
                     // รีเฟรช patient list ถ้าอยู่หน้า patient management
-                    if (typeof refreshPatientList === 'function') {
-                        refreshPatientList();
+                    if (typeof loadPatientsList === 'function') {
+                        setTimeout(() => loadPatientsList(), 500);
                     }
                 }
             }
@@ -537,20 +567,23 @@ window.addEventListener("beforeunload", () => {
 
 /**
  * ✅ Handle visibility change
+ * ✅ IMPORTANT: ระบบต้องทำงานต่อแม้หน้าซ่อน
+ * - auto-update patient status ต้องกินเสมอ
+ * - auto-assign patient to room ต้องกินเสมอ
+ * - auto-assign doctor ต้องกินเสมอ
+ * ไม่ปัจจุบัน pause ให้มันทำงานต่อเสมอ
  */
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
-        console.log("👁️ Page hidden - pausing updates");
-        stopAutoAssignDoctorTimer();
-        stopAutoUpdateStatusTimer();
-        stopAutoUpdatePatientStatusTimer();
-        stopAutoAssignPatientToRoomTimer();
+        console.log("👁️ Page hidden - ระบบยังคงทำงานใน background");
+        // ❌ ไม่หยุดตัวจับเวลาแม้หน้าซ่อน
+        // ระบบต้องทำงานอยู่เบื้องหลัง
     } else {
-        console.log("👁️ กลับมาดูหน้าแล้ว - ตรวจสอบระบบอัตโนมัติ");
-        checkResetTime();
-        startAutoAssignDoctorTimer();
-        startAutoUpdateStatusTimer();
-        startAutoUpdatePatientStatusTimer();
-        startAutoAssignPatientToRoomTimer();
+        console.log("👁️ กลับมาดูหน้าแล้ว - ระบบออโต้ยังคงทำงาน");
+        // Ensure timers are still running
+        if (!autoAssignDoctorTimer) startAutoAssignDoctorTimer();
+        if (!autoUpdateStatusTimer) startAutoUpdateStatusTimer();
+        if (!autoUpdatePatientStatusTimer) startAutoUpdatePatientStatusTimer();
+        if (!autoAssignPatientToRoomTimer) startAutoAssignPatientToRoomTimer();
     }
 });
