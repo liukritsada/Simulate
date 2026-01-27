@@ -195,6 +195,7 @@ try {
         LEFT JOIN room_procedures rp ON rp.room_id = sp.room_id AND rp.procedure_id = sp.procedure_id
         WHERE sp.room_id = :room_id
           AND sp.appointment_date = :work_date
+          AND sp.status IN ('waiting', 'in_process')
         ORDER BY sp.in_process DESC, sp.running_number ASC
     ";
     
