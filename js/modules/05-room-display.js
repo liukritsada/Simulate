@@ -10,12 +10,18 @@
 async function openRoomDetail(roomId) {
   currentRoomId = roomId;
 
+  // ✅ Clean up old countdown timers before loading new room detail
+  Object.keys(countdownTimers).forEach(patientId => {
+    clearInterval(countdownTimers[patientId]);
+    delete countdownTimers[patientId];
+  });
+
   try {
     const today = new Date().toISOString().split("T")[0];
     const apiUrl = getApiUrl("get_room_detail.php") + `?room_id=${roomId}&work_date=${today}&t=${Date.now()}`;
 
     console.log("🔍 Fetching room detail...");
-    
+
     // ✅ FIXED: Add cache busting headers
     const response = await fetch(apiUrl, {
       cache: 'no-store',
@@ -666,6 +672,13 @@ function closeRoomDetail() {
   if (modal) {
     modal.style.display = "none";
   }
+
+  // ✅ Clean up countdown timers to prevent memory leaks
+  Object.keys(countdownTimers).forEach(patientId => {
+    clearInterval(countdownTimers[patientId]);
+    delete countdownTimers[patientId];
+  });
+
   currentRoomId = null;
 }
 
