@@ -153,9 +153,14 @@ try {
             COALESCE(current_station.station_name, '-') as current_station_name,
             -- ✅ Countdown timer data
             COALESCE(rp.procedure_time, 0) AS procedure_duration_minutes,
+            -- ✅ IMPROVED: Calculate countdown exit time with proper datetime format
             CASE
                 WHEN sp.arrival_time IS NOT NULL AND rp.procedure_time > 0 THEN
-                    DATE_ADD(sp.arrival_time, INTERVAL rp.procedure_time MINUTE)
+                    CONCAT(
+                        DATE_FORMAT(DATE_ADD(sp.arrival_time, INTERVAL rp.procedure_time MINUTE), '%Y-%m-%d'),
+                        ' ',
+                        DATE_FORMAT(DATE_ADD(sp.arrival_time, INTERVAL rp.procedure_time MINUTE), '%H:%i:%s')
+                    )
                 ELSE NULL
             END AS countdown_exit_time
         FROM station_patients sp

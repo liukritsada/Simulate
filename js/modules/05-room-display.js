@@ -450,6 +450,12 @@ const countdownTimers = {}; // Store active timers
 function startCountdownTimer(patientId, countdownExitTime, procedureDuration) {
   if (!patientId || !countdownExitTime) return;
 
+  // ✅ Defensive: Validate countdown_exit_time format
+  if (typeof countdownExitTime !== 'string' || countdownExitTime.trim() === '') {
+    console.warn(`⚠️ Invalid countdown_exit_time for patient ${patientId}:`, countdownExitTime);
+    return;
+  }
+
   // Clear existing timer if any
   if (countdownTimers[patientId]) {
     clearInterval(countdownTimers[patientId]);
@@ -458,8 +464,17 @@ function startCountdownTimer(patientId, countdownExitTime, procedureDuration) {
   const updateCountdown = () => {
     const now = new Date();
 
-    // Parse countdown_exit_time (format: YYYY-MM-DD HH:MM:SS)
-    const [datePart, timePart] = countdownExitTime.split(' ');
+    // ✅ Parse countdown_exit_time (format: YYYY-MM-DD HH:MM:SS or YYYY-MM-DD)
+    const parts = countdownExitTime.split(' ');
+    if (parts.length < 2) {
+      // If no time component, assume 00:00:00
+      console.warn(`⚠️ countdown_exit_time missing time component for patient ${patientId}:`, countdownExitTime);
+      return;
+    }
+
+    const datePart = parts[0];
+    const timePart = parts[1];
+
     const [year, month, day] = datePart.split('-').map(Number);
     const [hours, minutes, seconds] = timePart.split(':').map(Number);
 

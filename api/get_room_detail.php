@@ -174,10 +174,14 @@ try {
             sp.running_number,
             -- Get procedure duration from room_procedures
             COALESCE(rp.procedure_time, 0) AS procedure_duration_minutes,
-            -- Calculate countdown exit time: arrival_time + procedure_time
+            -- ✅ IMPROVED: Calculate countdown exit time with better format handling
             CASE
                 WHEN sp.arrival_time IS NOT NULL AND rp.procedure_time > 0 THEN
-                    DATE_ADD(sp.arrival_time, INTERVAL rp.procedure_time MINUTE)
+                    CONCAT(
+                        DATE_FORMAT(DATE_ADD(sp.arrival_time, INTERVAL rp.procedure_time MINUTE), '%Y-%m-%d'),
+                        ' ',
+                        DATE_FORMAT(DATE_ADD(sp.arrival_time, INTERVAL rp.procedure_time MINUTE), '%H:%i:%s')
+                    )
                 ELSE NULL
             END AS countdown_exit_time,
             -- Calculate wait duration from arrival time
@@ -202,6 +206,13 @@ try {
     $stmt = $pdo->prepare($patientsSql);
     $stmt->execute([':room_id' => $room_id, ':work_date' => $work_date]);
     $patients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // ✅ Log countdown data for debugging
+    error_log("🕐 Room $room_id - Countdown data check:");
+    foreach ($patients as $p) {
+        $msg = "  Patient {$p['hn']}: arrival_time={$p['arrival_time']}, procedure_time={$p['procedure_duration_minutes']}, countdown_exit_time={$p['countdown_exit_time']}";
+        error_log($msg);
+    }
 
     // ✅ Get staff work times for room status
     $staffWorkTimesSql = "
@@ -242,8 +253,12 @@ try {
             'patient_id' => $p['patient_id'],
             'hn' => $p['hn'],
             'arrival_time' => $p['arrival_time'],
+            'arrival_time_type' => gettype($p['arrival_time']),
             'procedure_time' => $p['procedure_duration_minutes'],
+            'procedure_time_type' => gettype($p['procedure_duration_minutes']),
             'countdown_exit_time' => $p['countdown_exit_time'],
+            'countdown_exit_time_type' => gettype($p['countdown_exit_time']),
+            'countdown_exit_time_strlen' => strlen((string)$p['countdown_exit_time']),
             'status' => $p['status']
         ];
     }
