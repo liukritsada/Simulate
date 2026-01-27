@@ -33,6 +33,10 @@ try {
     // ✅ Get parameters
     $station_id = isset($_GET['station_id']) ? intval($_GET['station_id']) : 0;
     $department_ids_param = isset($_GET['department_ids']) ? $_GET['department_ids'] : '';
+    
+    // 📅 Add date range filtering
+    $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : null;
+    $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : null;
 
     // ✅ Validate station_id
     if ($station_id <= 0) {
@@ -47,49 +51,87 @@ try {
         );
     }
 
+    // 📅 Validate and set date range
     $today = date('Y-m-d');
-    $currentTime = date('H:i:s');
+    if ($date_from && strtotime($date_from) !== false) {
+        $today = $date_from; // Use date_from as start
+    }
     
-    error_log("📍 [GET PATIENTS] Station: $station_id, Today: $today, Depts: " . implode(',', $department_ids));
+    $date_to_filter = $today;
+    if ($date_to && strtotime($date_to) !== false) {
+        $date_to_filter = $date_to; // Use date_to as end
+    }
+    
+    error_log("📍 [GET PATIENTS] Station: $station_id, Date Range: $today to $date_to_filter, Depts: " . implode(',', $department_ids));
 
     // ✅ SQL Query - FIX: ใช้ procedures แทน procedure
-    // ✅ ใช้ procedure_code โดยตรง หรือ procedures table
+    // ✅ กรองเฉพาะ status (waiting, in_process)
+    // ✅ แสดงเฉพาะคนไข้ที่ time_start <= เวลาปัจจุบัน
+    $currentTime = date('H:i:s');
+
     $sql = "
-        SELECT 
-            patient_id,
-            station_id,
-            patient_name,
-            sex,
-            hn,
-            appointmentno,
-            doctor_code,
-            department_id,
-            room_id,
-            running_number,
-            procedure_id,
-            procedure_code,
-            COALESCE(procedure_code, 'ไม่ระบุ') AS `procedure`,
-            appointment_date,
-            arrival_time,
-            time_target,
-            expected_wait_time,
-            Actual_Time,
-            Actual_wait,
-            in_process,
-            `status`,
-            flag,
-            completed_date,
-            create_date,
-            update_date
-        FROM station_patients
-        WHERE station_id = :station_id
-        AND appointment_date = :today
+        SELECT
+            sp.patient_id,
+            sp.station_id,
+            sp.patient_name,
+            sp.sex,
+            sp.hn,
+            sp.appointmentno,
+            sp.doctor_code,
+            sp.department_id,
+            sp.room_id,
+            sp.running_number,
+            sp.procedure_id,
+            sp.procedure_code,
+            sp.time_start,
+            COALESCE(sp.procedure_code, 'ไม่ระบุ') AS `procedure`,
+            sp.appointment_date,
+            sp.arrival_time,
+            sp.time_target,
+            sp.time_target_wait,
+            sp.expected_wait_time,
+            sp.Actual_Time,
+            sp.Actual_wait,
+            sp.in_process,
+            sp.`status`,
+            sp.flag,
+            sp.completed_date,
+            sp.create_date,
+            sp.update_date,
+            -- ✅ เช็คว่ามีคนคิวก่อนหน้า ANY PATIENT ในสถานีเดียวกัน (ไม่ว่าจะเป็นคนไข้คนไหน) ที่มี time_start ก่อนหน้าและยังไม่มี Actual_Time
+            EXISTS (
+                SELECT 1
+                FROM station_patients sp_prev
+                WHERE sp_prev.appointment_date = sp.appointment_date
+                AND sp_prev.station_id = sp.station_id
+                AND sp_prev.time_start < sp.time_start
+                AND sp_prev.Actual_Time IS NULL
+            ) as has_incomplete_previous,
+            -- ✅ Get procedure duration for countdown timer
+            COALESCE(rp.procedure_time, 0) AS procedure_duration_minutes,
+            -- ✅ Calculate countdown exit time: arrival_time + procedure_time
+            CASE
+                WHEN sp.arrival_time IS NOT NULL AND rp.procedure_time > 0 THEN
+                    DATE_ADD(sp.arrival_time, INTERVAL rp.procedure_time MINUTE)
+                ELSE NULL
+            END AS countdown_exit_time
+        FROM station_patients sp
+        LEFT JOIN room_procedures rp ON rp.room_id = sp.room_id AND rp.procedure_id = sp.procedure_id
+        WHERE sp.station_id = :station_id
+        AND sp.appointment_date BETWEEN :date_from AND :date_to
+        AND sp.status IN ('waiting', 'in_process')
+        AND (
+            sp.time_start IS NULL
+            OR sp.time_start <= :current_time
+        )
     ";
 
-    // ✅ Named parameters
+    // ✅ Named parameters with date range and current time
     $params = [
         ':station_id' => $station_id,
-        ':today' => $today
+        ':date_from' => $today,
+        ':date_to' => $date_to_filter,
+        ':current_time' => $currentTime
     ];
 
     // ✅ Filter by departments - ใช้ Named Parameters
@@ -104,11 +146,8 @@ try {
         $sql .= " AND department_id IN ($in_clause)";
     }
 
-    // ✅ Filter เฉพาะที่ active (ยังไม่เสร็จ)
-    $sql .= " AND (in_process = 1 OR flag IN ('W', 'P', 'N'))";
-    
-    // ✅ เรียงลำดับ: อยู่ระหว่างการรักษา -> เลขคิวน้อย -> มาก่อน
-    $sql .= " ORDER BY in_process DESC, running_number ASC, arrival_time ASC, create_date ASC";
+    // ✅ เรียงลำดับ: อยู่ระหว่างการรักษา -> เรียงตาม time_start -> เลขคิวน้อย -> มาก่อน
+    $sql .= " ORDER BY sp.in_process DESC, sp.time_start ASC, sp.running_number ASC, sp.arrival_time ASC, sp.create_date ASC";
 
     error_log("📄 SQL: " . str_replace(["\n", "\r", "\t"], " ", $sql));
     error_log("📦 Params: " . json_encode($params));
@@ -146,7 +185,6 @@ try {
         // ✅ Format ข้อมูล
         $formatted = [
             'patient_id' => (int)$patient['patient_id'],
-            'patient_id' => (int)$patient['patient_id'],
             'station_id' => (int)$patient['station_id'],
             'patient_name' => $patient['patient_name'] ?? 'ไม่ระบุ',
             'sex' => isset($patient['sex']) ? (int)$patient['sex'] : 0,
@@ -162,6 +200,7 @@ try {
             'appointment_date' => $patient['appointment_date'] ?? $today,
             'arrival_time' => $patient['arrival_time'] ?? $patient['create_date'] ?? null,
             'time_target' => $patient['time_target'] ?? null,
+            'time_target_wait' => $patient['time_target_wait'] ?? null,
             'expected_wait_time' => !empty($patient['expected_wait_time']) ? (int)$patient['expected_wait_time'] : 15,
             'Actual_Time' => $patient['Actual_Time'] ?? null,
             'Actual_wait' => $patient['Actual_wait'] ?? null,
@@ -170,7 +209,11 @@ try {
             'flag' => $patient['flag'] ?? 'W',
             'completed_date' => $patient['completed_date'] ?? null,
             'create_date' => $patient['create_date'] ?? null,
-            'update_date' => $patient['update_date'] ?? null
+            'update_date' => $patient['update_date'] ?? null,
+            'has_incomplete_previous' => (int)($patient['has_incomplete_previous'] ?? 0),
+            // ✅ Add countdown timer data for station level
+            'procedure_duration_minutes' => !empty($patient['procedure_duration_minutes']) ? (int)$patient['procedure_duration_minutes'] : 0,
+            'countdown_exit_time' => $patient['countdown_exit_time'] ?? null
         ];
         
         if ($formatted['in_process'] == 1) {
