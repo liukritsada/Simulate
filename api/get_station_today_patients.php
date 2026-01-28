@@ -187,7 +187,7 @@ try {
             'patient_id' => (int)$patient['patient_id'],
             'station_id' => (int)$patient['station_id'],
             'patient_name' => $patient['patient_name'] ?? 'ไม่ระบุ',
-            'sex' => isset($patient['sex']) ? (int)$patient['sex'] : 0,
+            'sex' => isset($patient['sex']) ? $patient['sex'] : null,  // ✅ Keep as string (M/F)
             'hn' => $patient['hn'] ?? 'N/A',
             'appointmentno' => $patient['appointmentno'] ?? 'APT-' . $patient['patient_id'],
             'doctor_code' => $patient['doctor_code'] ?? null,

@@ -2415,8 +2415,13 @@ async function loadStationPatients(stationId, deptIds = null) {
 
     // Helper function to get gender emoji and text
     const getGenderInfo = (sex) => {
-      if (sex === 1 || sex === 'M' || sex === 'male') return { emoji: '👨', text: 'ชาย', color: '#3498db' };
-      if (sex === 2 || sex === 'F' || sex === 'female') return { emoji: '👩', text: 'หญิง', color: '#e91e63' };
+      if (!sex && sex !== 0) return { emoji: '👤', text: 'ไม่ระบุ', color: '#95a5a6' };
+
+      // ✅ Handle both string and numeric values (M/F or 1/2)
+      let sexStr = String(sex).toUpperCase().trim();
+
+      if (sex === 1 || sexStr === 'M' || sexStr === 'MALE') return { emoji: '👨', text: 'ชาย', color: '#3498db' };
+      if (sex === 2 || sexStr === 'F' || sexStr === 'FEMALE') return { emoji: '👩', text: 'หญิง', color: '#e91e63' };
       return { emoji: '👤', text: 'ไม่ระบุ', color: '#95a5a6' };
     };
 

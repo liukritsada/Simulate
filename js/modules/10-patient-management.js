@@ -239,13 +239,14 @@ async function loadPatientsList() {
                 // 🎭 ฟังก์ชันแสดงเพศ
                 function getGenderIcon(gender) {
                     // ถ้าไม่มีข้อมูล ให้แสดง ?
-                    if (!gender) return { icon: '?', color: '#95a5a6', bgColor: '#ecf0f1', text: 'ไม่ระบุ' };
+                    if (!gender && gender !== 0) return { icon: '?', color: '#95a5a6', bgColor: '#ecf0f1', text: 'ไม่ระบุ' };
 
-                    const genderLower = gender.toLowerCase().trim();
+                    // ✅ Handle both string and numeric values
+                    let genderStr = String(gender).toLowerCase().trim();
 
-                    if (genderLower === 'm' || genderLower === 'male') {
+                    if (genderStr === 'm' || genderStr === 'male' || gender === 1) {
                         return { icon: 'M', color: '#3498db', bgColor: '#ebf5fb', text: 'ชาย' };
-                    } else if (genderLower === 'f' || genderLower === 'female') {
+                    } else if (genderStr === 'f' || genderStr === 'female' || gender === 2) {
                         return { icon: 'F', color: '#e91e63', bgColor: '#fce4ec', text: 'หญิง' };
                     }
 
