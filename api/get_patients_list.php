@@ -151,6 +151,8 @@ try {
             sp.station_id,
             sp.procedure_id,
             COALESCE(current_station.station_name, '-') as current_station_name,
+            COALESCE(current_station.procedure_code, sp.procedure_code) as current_procedure_code,
+            COALESCE(current_station.station_status, sp.status) as current_station_status,
             -- ✅ Countdown timer data
             COALESCE(rp.procedure_time, 0) AS procedure_duration_minutes,
             -- ✅ IMPROVED: Calculate countdown exit time with proper datetime format
@@ -167,14 +169,26 @@ try {
         LEFT JOIN patients p ON sp.hn = p.hn AND sp.appointment_date = p.appointment_date
         LEFT JOIN room_procedures rp ON rp.room_id = sp.room_id AND rp.procedure_id = sp.procedure_id
         LEFT JOIN (
+            -- ✅ Get the LATEST station where patient is waiting or in-process
             SELECT
-                sp_in.hn,
-                sp_in.appointment_date,
-                s.station_name
-            FROM station_patients sp_in
-            JOIN stations s ON sp_in.station_id = s.station_id
-            WHERE sp_in.status = 'in_process'
-            GROUP BY sp_in.hn, sp_in.appointment_date
+                sp_latest.hn,
+                sp_latest.appointment_date,
+                s.station_id,
+                s.station_name,
+                sp_latest.procedure_code,
+                sp_latest.status as station_status
+            FROM station_patients sp_latest
+            JOIN stations s ON sp_latest.station_id = s.station_id
+            WHERE sp_latest.status IN ('waiting', 'in_process')
+            AND sp_latest.Actual_Time IS NULL
+            AND sp_latest.running_number = (
+                SELECT MAX(sp_check.running_number)
+                FROM station_patients sp_check
+                WHERE sp_check.hn = sp_latest.hn
+                AND sp_check.appointment_date = sp_latest.appointment_date
+                AND sp_check.status IN ('waiting', 'in_process')
+            )
+            GROUP BY sp_latest.hn, sp_latest.appointment_date
         ) as current_station ON sp.hn = current_station.hn AND sp.appointment_date = current_station.appointment_date
         WHERE sp.appointment_date = ?
     ";
@@ -192,10 +206,28 @@ try {
         $sql .= " AND sp.doctor_code = ?";
         $params[] = $doctor_code;
     }
-    
-    // เรียงตาม start_time
-    $sql .= " GROUP BY sp.hn, sp.appointment_date
-        ORDER BY sp.time_start ASC, sp.running_number ASC, sp.station_id ASC";
+
+    // ✅ SEQUENTIAL FLOW: ต้องไม่มี procedures ก่อนหน้า (running_number ต่ำกว่า) ที่ยังไม่เสร็จ
+    $sql .= " AND NOT EXISTS (
+        SELECT 1
+        FROM station_patients sp_earlier
+        WHERE sp_earlier.hn = sp.hn
+        AND sp_earlier.appointment_date = sp.appointment_date
+        AND sp_earlier.running_number < sp.running_number
+        AND sp_earlier.Actual_Time IS NULL
+    )";
+
+    // ✅ IMPORTANT: Select ONLY the LATEST station record for each patient (highest running_number that's not completed)
+    // This ensures we display the CURRENT station's data, not all stations
+    $sql .= " AND sp.running_number = (
+        SELECT MAX(sp_max.running_number)
+        FROM station_patients sp_max
+        WHERE sp_max.hn = sp.hn
+        AND sp_max.appointment_date = sp.appointment_date
+        AND sp_max.status IN ('waiting', 'in_process')
+    )
+    GROUP BY sp.hn, sp.appointment_date
+    ORDER BY sp.time_start ASC, sp.running_number ASC, sp.station_id ASC";
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);

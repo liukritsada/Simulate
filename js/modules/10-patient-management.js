@@ -349,23 +349,33 @@ async function loadPatientsList() {
                     <td style="padding: 14px 12px; text-align: center; color: #666; font-size: 13px;">
                         ${patient.doctor_name || patient.doctor_code || '-'}
                     </td>
-                    <td style="padding: 14px 12px; text-align: center; color: #666; font-size: 13px;">
-                        ${patient.current_station || '-'}
+                    <!-- ✅ Current Station Name -->
+                    <td style="padding: 14px 12px; text-align: center; color: #1F4788; font-weight: 600; font-size: 13px;">
+                        ${patient.current_station_name || '-'}
                     </td>
+                    <!-- ✅ Station Status & Procedure -->
                     <td style="padding: 14px 12px; text-align: center;">
-                        <span style="
-                            background: ${status.color}22;
-                            color: ${status.color};
-                            padding: 6px 12px;
-                            border-radius: 20px;
-                            font-size: 12px;
-                            font-weight: 700;
-                            display: inline-block;
-                            border: 1px solid ${status.color}44;
-                            white-space: nowrap;
-                        ">
-                            ${status.icon} ${status.text}
-                        </span>
+                        ${patient.current_station_name ? `
+                            <div style="text-align: center;">
+                                <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px;">
+                                    ${patient.current_procedure_code || 'ไม่ระบุ'}
+                                </div>
+                                <span style="
+                                    background: ${patient.current_station_status === 'in_process' ? '#fff9e6' : '#e8f4f8'};
+                                    color: ${patient.current_station_status === 'in_process' ? '#f39c12' : '#0056b3'};
+                                    padding: 4px 10px;
+                                    border-radius: 12px;
+                                    font-size: 11px;
+                                    font-weight: 600;
+                                    display: inline-block;
+                                    border: 1px solid ${patient.current_station_status === 'in_process' ? '#f39c1244' : '#0056b344'};
+                                ">
+                                    ${patient.current_station_status === 'in_process' ? '⚕️ เข้าห้อง' : '⏳ รอคิว'}
+                                </span>
+                            </div>
+                        ` : `
+                            <span style="color: #999; font-size: 12px;">-</span>
+                        `}
                     </td>
                     <td style="padding: 14px 12px; text-align: center; font-weight: 700; color: #1F4788; font-size: 13px;">
                         ${patient.total_procedures || patient.procedure_count || 0}
@@ -502,8 +512,16 @@ async function openPatientModal(patientId, patientName, hn, appointmentDate, tot
         window.currentAppointmentDate = appointmentDate;
 
         // Create modal HTML with Drag & Drop support
-        const proceduresHtml = result.data.procedures.map((proc, idx) => `
-            <div 
+        const proceduresHtml = result.data.procedures.map((proc, idx) => {
+            // ✅ Determine completion status
+            const isCompleted = proc.Actual_Time !== null && proc.Actual_Time !== undefined;
+            const completionEmoji = isCompleted ? '✅' : '⏳';
+            const completionTime = isCompleted ? proc.Actual_Time : '-';
+            const borderColor = isCompleted ? '#10b981' : '#1F4788';
+            const backgroundColor = isCompleted ? 'rgba(16, 185, 129, 0.05)' : 'white';
+
+            return `
+            <div
                 draggable="true"
                 class="procedure-item"
                 data-procedure-id="${proc.id}"
@@ -511,8 +529,8 @@ async function openPatientModal(patientId, patientName, hn, appointmentDate, tot
                 data-procedure-name="${proc.procedure_name.replace(/"/g, '&quot;')}"
                 style="
                     padding: 16px;
-                    background: white;
-                    border-left: 4px solid #1F4788;
+                    background: ${backgroundColor};
+                    border-left: 4px solid ${borderColor};
                     margin-bottom: 12px;
                     border-radius: 8px;
                     display: flex;
@@ -536,16 +554,23 @@ async function openPatientModal(patientId, patientName, hn, appointmentDate, tot
                         </div>
                     </div>
                 </div>
-                <div style="text-align: right; min-width: 80px;">
-                    <div style="font-weight: 600; color: #1F4788; font-size: 14px;">
-                        ⏰ ${proc.time_start ? proc.time_start : '-'}
+                <div style="text-align: right; min-width: 140px;">
+                    <!-- Status Indicator -->
+                    <div style="font-weight: 700; font-size: 18px; margin-bottom: 6px; color: ${isCompleted ? '#10b981' : '#f59e0b'};">
+                        ${completionEmoji}
                     </div>
-                    <div style="font-size: 11px; color: #999; margin-top: 2px;">
-                        ${proc.status || 'รอ'}
+                    <!-- Scheduled Time -->
+                    <div style="font-weight: 600; color: #1F4788; font-size: 13px;">
+                        📅 ${proc.time_start ? proc.time_start : '-'}
+                    </div>
+                    <!-- Actual Completion Time -->
+                    <div style="font-size: 12px; color: ${isCompleted ? '#10b981' : '#999'}; margin-top: 4px; font-weight: ${isCompleted ? '600' : '400'};">
+                        ${isCompleted ? '✓ เสร็จ: ' + completionTime : 'รอ'}
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         const modalHtml = `
             <div style="

@@ -2695,38 +2695,6 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
                             </div>
                         </div>
 
-                        <!-- 📅 DATE FILTERING CONTROLS -->
-                        <div style="background: linear-gradient(135deg, #F0F7FF 0%, #E0EEFF 100%); border: 2px solid #B3D9FF; border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
-                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; width: 100%;">
-                                <!-- View Type Selection -->
-                                <div style="display: flex; gap: 4px;">
-                                    <button class="btn" onclick="setDashboardView('today')" id="btn-today" style="background: linear-gradient(135deg, #0056B3 0%, #003d82 100%); color: white; padding: 8px 16px; font-size: 12px;">📅 Today</button>
-                                    <button class="btn" onclick="setDashboardView('yesterday')" id="btn-yesterday" style="background: rgba(0,86,179,0.2); color: var(--text); padding: 8px 16px; font-size: 12px;">📅 Yesterday</button>
-                                    <button class="btn" onclick="setDashboardView('thisweek')" id="btn-thisweek" style="background: rgba(0,86,179,0.2); color: var(--text); padding: 8px 16px; font-size: 12px;">📅 This Week</button>
-                                    <button class="btn" onclick="setDashboardView('thismonth')" id="btn-thismonth" style="background: rgba(0,86,179,0.2); color: var(--text); padding: 8px 16px; font-size: 12px;">📅 This Month</button>
-                                    <button class="btn" onclick="setDashboardView('custom')" id="btn-custom" style="background: rgba(0,86,179,0.2); color: var(--text); padding: 8px 16px; font-size: 12px;">📅 Custom Range</button>
-                                </div>
-
-                                <!-- Date Range Inputs (Hidden by default) -->
-                                <div id="customDateRange" style="display: none; gap: 12px; flex-wrap: wrap; align-items: center; width: 100%;">
-                                    <label style="font-weight: 600; color: var(--text);">
-                                        <i class="fas fa-calendar"></i> From:
-                                        <input type="date" id="dashboardDateFrom" class="form-control" style="width: 180px; display: inline-block; margin-left: 8px;" value="">
-                                    </label>
-                                    <label style="font-weight: 600; color: var(--text);">
-                                        <i class="fas fa-calendar"></i> To:
-                                        <input type="date" id="dashboardDateTo" class="form-control" style="width: 180px; display: inline-block; margin-left: 8px;" value="">
-                                    </label>
-                                    <button class="btn btn-primary" onclick="applyCustomDateRange()" style="padding: 8px 16px; font-size: 12px;">Apply Filter</button>
-                                </div>
-
-                                <div style="margin-left: auto; font-size: 0.85rem; color: var(--text-light); font-weight: 600;">
-                                    Current View: <span id="currentViewLabel" style="color: var(--primary); font-weight: 700;">Today</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 🎮 CONTROL BUTTONS -->
                         <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
                             <button class="btn btn-primary" onclick="realtimeDashboard.startAllCharts()" style="display: inline-flex; align-items: center; gap: 8px;">
                                 <i class="fas fa-play"></i> Start All Charts
@@ -2752,31 +2720,31 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 40px; margin-bottom: 40px;">
                             <!-- Live Metrics -->
                             <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
-                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">📈 Station & Patient Metrics (Live)</div>
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">📈 Patient Metrics (Live)</div>
                                 <div id="metricsChart"></div>
                             </div>
 
                             <!-- Live Bar Chart -->
                             <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
-                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">📊 Patient Count by Wait Time (Live)</div>
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">📊 Station Occupancy (Live)</div>
                                 <div id="barChart"></div>
                             </div>
 
                             <!-- Live Donut Chart -->
                             <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
-                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">🍩 Wait Time Distribution (Live)</div>
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">🍩 Status Distribution (Live)</div>
                                 <div id="donutChart"></div>
                             </div>
 
                             <!-- Live Progress -->
                             <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08);">
-                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">⏳ Wait Time Monitoring (Live)</div>
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">⏳ Room Occupancy (Live)</div>
                                 <div id="progressChart"></div>
                             </div>
 
                             <!-- Live Stats Table -->
                             <div style="background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 102, 204, 0.08); grid-column: 1 / -1;">
-                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">📋 Stations with Highest Wait Times (Live)</div>
+                                <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text);">📋 Station Statistics (Live)</div>
                                 <div id="tableChart"></div>
                             </div>
                         </div>
@@ -6204,9 +6172,6 @@ async function loadAllFloorsEnhanced() {
         const totalRooms = allStations.reduce((sum, s) => sum + (parseInt(s.room_count) || 0), 0);
         const totalStaff = allStations.reduce((sum, s) => sum + (parseInt(s.staff_count) || 0), 0);
         const totalDoctors = allStations.reduce((sum, s) => sum + (parseInt(s.doctor_count) || 0), 0);
-        const totalPatients = allStations.reduce((sum, s) => sum + (parseInt(s.patient_count) || 0), 0);
-        const avgWaitTime = allStations.length > 0 ? allStations.reduce((sum, s) => sum + (parseFloat(s.avg_wait_time) || 0), 0) / allStations.length : 0;
-        const totalLongWait = allStations.reduce((sum, s) => sum + (parseInt(s.long_wait_count) || 0), 0);
 
         // Display stats
         if (statsContainer) {
@@ -6216,16 +6181,16 @@ async function loadAllFloorsEnhanced() {
                     <div style="font-size: 12px; color: var(--text-light);">สถานีทั้งหมด</div>
                 </div>
                 <div style="background: rgba(0, 71, 171, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid #0047AB; text-align: center;">
-                    <div style="font-size: 28px; font-weight: bold; color: #0047AB;">${totalPatients}</div>
-                    <div style="font-size: 12px; color: var(--text-light);">ผู้ป่วยทั้งหมด</div>
+                    <div style="font-size: 28px; font-weight: bold; color: #0047AB;">${totalRooms}</div>
+                    <div style="font-size: 12px; color: var(--text-light);">ห้องทั้งหมด</div>
                 </div>
                 <div style="background: rgba(214, 137, 16, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid #D35400; text-align: center;">
-                    <div style="font-size: 28px; font-weight: bold; color: #D35400;">${Math.round(avgWaitTime)}</div>
-                    <div style="font-size: 12px; color: var(--text-light);">เวลารอเฉลี่ย (นาที)</div>
+                    <div style="font-size: 28px; font-weight: bold; color: #D35400;">${totalStaff}</div>
+                    <div style="font-size: 12px; color: var(--text-light);">พนักงานทั้งหมด</div>
                 </div>
-                <div style="background: rgba(220, 53, 69, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid #DC3545; text-align: center;">
-                    <div style="font-size: 28px; font-weight: bold; color: #DC3545;">${totalLongWait}</div>
-                    <div style="font-size: 12px; color: var(--text-light);">รอเกิน 60 นาที</div>
+                <div style="background: rgba(0, 112, 192, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid #0070C0; text-align: center;">
+                    <div style="font-size: 28px; font-weight: bold; color: #0070C0;">${totalDoctors}</div>
+                    <div style="font-size: 12px; color: var(--text-light);">แพทย์ทั้งหมด</div>
                 </div>
             `;
         }
@@ -6266,24 +6231,6 @@ async function loadAllFloorsEnhanced() {
 }
 
 
-// ฟังก์ชันสร้างอิโมจิสำหรับแสดงจำนวนผู้ป่วย เปลี่ยนสีหน้าตามเวลารอ
-function getPatientEmojis(count, avgWaitTime = 0) {
-    let emoji = '😊'; // ยิ้ม - รอน้อย (ปกติ)
-    
-    if (avgWaitTime > 60) {
-        emoji = '😠'; // โกรธ - รอนานมาก
-    } else if (avgWaitTime > 30) {
-        emoji = '😐'; // เฉย - รอปานกลาง
-    }
-    
-    if (count === 0) return '0 คน';
-    if (count <= 10) {
-        return emoji.repeat(count) + ` (${count})`;
-    } else {
-        return emoji.repeat(5) + `... +${count - 5} คน`;
-    }
-}
-
 // FIX 3: createFloorSection()
 // ============================================
 async function createFloorSection(floor, stations, stats) {
@@ -6320,26 +6267,10 @@ async function createFloorSection(floor, stations, stats) {
                     stationStats = statsResult.data;
                 }
 
-                // ✅ เพิ่มข้อมูลเวลารอคอยจาก API หลัก
-                const avgWaitTime = station.avg_wait_time || 0;
-                const longWaitCount = station.long_wait_count || 0;
-                const patientCount = station.patient_count || 0;
-
-                // ✅ กำหนดสีตามเวลารอคอย
-                let statusColor = '#10B981'; // เขียว - ปกติ
-                let statusText = 'ปกติ';
-                if (avgWaitTime > 60) {
-                    statusColor = '#EF4444'; // แดง - รอมาก
-                    statusText = 'รอมาก';
-                } else if (avgWaitTime > 30) {
-                    statusColor = '#F59E0B'; // เหลือง - รอปานกลาง
-                    statusText = 'รอปานกลาง';
-                }
-
                 stationsHTML += `
-                    <div class="floor-station-item" onclick="openStationDetail(${station.station_id})" style="border-left: 4px solid ${statusColor}; background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(${statusColor === '#10B981' ? '16,185,129' : statusColor === '#F59E0B' ? '245,158,11' : '239,68,68'}, 0.1) 100%);">
+                    <div class="floor-station-item" onclick="openStationDetail(${station.station_id})">
                         <div class="floor-station-icon">
-                            <i class="fas fa-hospital" style="color: ${statusColor};"></i>
+                            <i class="fas fa-hospital"></i>
                         </div>
                         <div class="floor-station-info">
                             <div class="floor-station-name">${station.station_name}</div>
@@ -6347,10 +6278,10 @@ async function createFloorSection(floor, stations, stats) {
                                 ${station.station_code} • ${station.department_name || 'N/A'}
                             </div>
                             <div class="floor-station-stats">
-                                👥 ${getPatientEmojis(patientCount, avgWaitTime)} 
-                                ⏱️ ${Math.round(avgWaitTime)} นาที | 
-                                ⚠️ ${longWaitCount} รอเกิน | 
-                                <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span>
+                                👥 ${stationStats.total_patients} คน | 
+                                ✅ ${stationStats.completed_patients} | 
+                                ⏳ ${stationStats.pending_patients} | 
+                                🏨 ${station.room_count}
                             </div>
                         </div>
                         <div class="floor-station-action">
@@ -7050,9 +6981,6 @@ document.head.appendChild(allFloorsStyle);
         
         // เรียก Auto Refresh เมื่อหน้า load เสร็จ
         window.addEventListener('load', () => {
-            // 📅 Initialize dashboard date filter to Today
-            setDashboardView('today');
-            
             setTimeout(() => {
                 autoRefreshDashboard();
                 console.log("✅ Dashboard Auto Refresh Enabled (Every 10 seconds)");
@@ -7232,228 +7160,122 @@ document.head.appendChild(allFloorsStyle);
         const realDataTransformers = {
             // Patient metrics (waiting, in process, completed)
             patientMetrics(response) {
-                if (!response.success || !response.data || !response.data.stations) return [];
-                const stations = response.data.stations;
-                const totalStations = stations.length;
-                const totalPatients = stations.reduce((sum, s) => sum + (s.patient_count || 0), 0);
-                const avgWaitTime = stations.reduce((sum, s) => sum + (s.avg_wait_time || 0), 0) / stations.length;
-                const totalLongWait = stations.reduce((sum, s) => sum + (s.long_wait_count || 0), 0);
-                const activeStations = stations.filter(s => (s.patient_count || 0) > 0).length;
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const waiting = patients.filter(p => p.status === 'waiting').length;
+                const processing = patients.filter(p => p.status === 'in_process').length;
+                const completed = patients.filter(p => p.status === 'completed').length;
+                const total = patients.length;
                 
                 return [
-                    { label: 'Total Stations', value: totalStations, change: 0, icon: '🏥', color: '#0066CC' },
-                    { label: 'Total Patients', value: totalPatients, change: 0, icon: '👥', color: '#10B981' },
-                    { label: 'Active Stations', value: activeStations, change: 0, icon: '⚡', color: '#F59E0B' },
-                    { label: 'Avg Wait (min)', value: Math.round(avgWaitTime), change: 0, icon: '⏱️', color: avgWaitTime > 60 ? '#EF4444' : avgWaitTime > 30 ? '#F59E0B' : '#10B981' },
-                    { label: 'Long Wait (>60min)', value: totalLongWait, change: 0, icon: '⚠️', color: totalLongWait > 5 ? '#EF4444' : totalLongWait > 2 ? '#F59E0B' : '#10B981' },
-                    { label: 'Avg Patients/Stn', value: totalStations > 0 ? (totalPatients / totalStations).toFixed(1) : 0, change: 0, icon: '📊', color: '#8B5CF6' }
+                    { label: 'Total Patients', value: total, change: 0, icon: '👥', color: '#0066CC' },
+                    { label: 'Waiting', value: waiting, change: 0, icon: '⏳', color: '#F59E0B' },
+                    { label: 'In Process', value: processing, change: 0, icon: '🏥', color: '#3B82F6' },
+                    { label: 'Completed', value: completed, change: 0, icon: '✅', color: '#10B981' },
+                    { label: 'Avg Wait Time', value: patients.length > 0 ? Math.round(patients.reduce((sum, p) => sum + calculateWaitTime(p.arrival_time, '14:50:00'), 0) / patients.length) : 0, change: 0, icon: '⏱️', color: '#EC4899' },
+                    { label: 'Max Wait Time', value: patients.length > 0 ? Math.max(...patients.map(p => calculateWaitTime(p.arrival_time, '14:50:00'))) : 0, change: 0, icon: '⛔', color: '#EF4444' }
                 ];
             },
             
             // Station efficiency by procedure count
             stationEfficiency(response) {
-                if (!response.success || !response.data || !response.data.stations) return [];
-                return response.data.stations.map(station => {
-                    const waitTime = station.avg_wait_time || 0;
-                    let color = '#10B981'; // เขียว - รอน้อย
-                    if (waitTime > 60) color = '#EF4444'; // แดง - รอมาก
-                    else if (waitTime > 30) color = '#F59E0B'; // เหลือง - รอปานกลาง
-                    
-                    return {
-                        label: station.station_code + ' - ' + station.station_name,
-                        value: station.patient_count || 0,
-                        max: 50,
-                        color: color
-                    };
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const stationMap = {};
+                patients.forEach(p => {
+                    if (!stationMap[p.station_id]) {
+                        stationMap[p.station_id] = { name: p.station_id, count: 0, avgWait: 0, totalWait: 0 };
+                    }
+                    stationMap[p.station_id].count++;
+                    const wait = calculateWaitTime(p.arrival_time, '14:50:00');
+                    stationMap[p.station_id].totalWait += wait;
                 });
+                
+                return Object.values(stationMap)
+                    .map(s => ({
+                        label: 'Station ' + s.name,
+                        value: s.count,
+                        max: Math.max(...Object.values(stationMap).map(x => x.count)) + 5,
+                        color: s.count > 20 ? '#EF4444' : s.count > 10 ? '#F59E0B' : '#10B981'
+                    }))
+                    .slice(0, 10);
             },
             
-            // Waiting patients - stations with highest wait times
+            // Patient waiting status
             patientWaitingStatus(response) {
-                if (!response.success || !response.data || !response.data.stations) return [];
-                return response.data.stations
-                    .filter(s => (s.patient_count || 0) > 0)
-                    .map(station => ({
-                        patient_name: station.station_name,
-                        hn: station.station_code,
-                        wait_time: Math.round(station.avg_wait_time || 0),
-                        station: station.floor || '-',
-                        procedure: station.long_wait_count + ' รอเกิน'
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const waiting = patients
+                    .filter(p => p.status === 'waiting')
+                    .map(p => ({
+                        patient_name: p.patient_name || 'Unknown',
+                        hn: p.hn || '-',
+                        wait_time: calculateWaitTime(p.arrival_time, '14:50:00'),
+                        station: p.station_id,
+                        procedure: p.procedure_code || '-'
                     }))
                     .sort((a, b) => b.wait_time - a.wait_time)
                     .slice(0, 15);
+                
+                return waiting;
             },
             
             // Status distribution
             statusDistribution(response) {
-                if (!response.success || !response.data || !response.data.stations) return [];
-                const stations = response.data.stations;
-                const lowWait = stations.filter(s => (s.avg_wait_time || 0) < 30).length;
-                const mediumWait = stations.filter(s => (s.avg_wait_time || 0) >= 30 && (s.avg_wait_time || 0) <= 60).length;
-                const highWait = stations.filter(s => (s.avg_wait_time || 0) > 60).length;
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const waiting = patients.filter(p => p.status === 'waiting').length;
+                const processing = patients.filter(p => p.status === 'in_process').length;
+                const completed = patients.filter(p => p.status === 'completed').length;
                 
                 return [
-                    { label: 'Low Wait (<30min)', value: lowWait, color: '#10B981' },
-                    { label: 'Medium Wait (30-60min)', value: mediumWait, color: '#F59E0B' },
-                    { label: 'High Wait (>60min)', value: highWait, color: '#EF4444' }
+                    { label: 'Waiting', value: waiting, color: '#F59E0B' },
+                    { label: 'Processing', value: processing, color: '#3B82F6' },
+                    { label: 'Completed', value: completed, color: '#10B981' }
                 ];
             },
             
             // Service time progress
             serviceProgress(response) {
-                if (!response.success || !response.data || !response.data.stations) return [];
-                const stations = response.data.stations;
-                const avgWaitTime = stations.reduce((sum, s) => sum + (s.avg_wait_time || 0), 0) / stations.length;
-                const totalLongWait = stations.reduce((sum, s) => sum + (s.long_wait_count || 0), 0);
+                if (!response.success) return [];
+                const patients = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+                
+                const avgWait = patients.length > 0 ? Math.round(patients.reduce((sum, p) => sum + calculateWaitTime(p.arrival_time, '14:50:00'), 0) / patients.length) : 0;
+                const maxWait = patients.length > 0 ? Math.max(...patients.map(p => calculateWaitTime(p.arrival_time, '14:50:00'))) : 0;
+                const waiting = patients.filter(p => p.status === 'waiting').length;
                 
                 return [
-                    { label: 'Avg Wait Time (min)', value: Math.round(avgWaitTime), max: 120, color: avgWaitTime > 60 ? 'var(--danger)' : avgWaitTime > 30 ? 'var(--warning)' : 'var(--success)' },
-                    { label: 'Long Wait Patients (>60min)', value: totalLongWait, max: totalLongWait + 10, color: totalLongWait > 5 ? 'var(--danger)' : totalLongWait > 2 ? 'var(--warning)' : 'var(--success)' }
+                    {
+                        label: 'Avg Wait Time (min)',
+                        value: avgWait,
+                        max: 60,
+                        color: 'var(--warning)'
+                    },
+                    {
+                        label: 'Max Wait Time (min)',
+                        value: maxWait,
+                        max: 240,
+                        color: 'var(--danger)'
+                    },
+                    {
+                        label: 'Waiting Patients',
+                        value: waiting,
+                        max: Math.max(waiting + 10, 30),
+                        color: 'var(--primary)'
+                    }
                 ];
             }
         };
-        
-        // 📅 DASHBOARD DATE FILTERING FUNCTIONS
-        let dashboardCurrentView = 'today';
-        let dashboardDateFilter = {
-            startDate: new Date().toISOString().split('T')[0],
-            endDate: new Date().toISOString().split('T')[0]
-        };
-
-        function getDateRange(view) {
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            const weekStart = new Date(today);
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            
-            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-            
-            const formatDate = (date) => date.toISOString().split('T')[0];
-            
-            switch(view) {
-                case 'today':
-                    return {
-                        startDate: formatDate(today),
-                        endDate: formatDate(today),
-                        label: `📅 Today (${formatDate(today)})`
-                    };
-                case 'yesterday':
-                    return {
-                        startDate: formatDate(yesterday),
-                        endDate: formatDate(yesterday),
-                        label: `📅 Yesterday (${formatDate(yesterday)})`
-                    };
-                case 'thisweek':
-                    return {
-                        startDate: formatDate(weekStart),
-                        endDate: formatDate(today),
-                        label: `📅 This Week (${formatDate(weekStart)} to ${formatDate(today)})`
-                    };
-                case 'thismonth':
-                    return {
-                        startDate: formatDate(monthStart),
-                        endDate: formatDate(today),
-                        label: `📅 This Month (${formatDate(monthStart)} to ${formatDate(today)})`
-                    };
-                default:
-                    return {
-                        startDate: formatDate(today),
-                        endDate: formatDate(today),
-                        label: `📅 Today (${formatDate(today)})`
-                    };
-            }
-        }
-
-        function setDashboardView(view) {
-            dashboardCurrentView = view;
-            
-            // Update button styles
-            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
-                btn.style.background = 'rgba(0,86,179,0.2)';
-                btn.style.color = 'var(--text)';
-            });
-            
-            const activeBtn = document.getElementById(`btn-${view}`);
-            if (activeBtn) {
-                activeBtn.style.background = 'linear-gradient(135deg, #0056B3 0%, #003d82 100%)';
-                activeBtn.style.color = 'white';
-            }
-            
-            // Show/hide custom date range
-            const customRange = document.getElementById('customDateRange');
-            if (view === 'custom') {
-                customRange.style.display = 'flex';
-                // Set default range to today
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('dashboardDateFrom').value = today;
-                document.getElementById('dashboardDateTo').value = today;
-                return;
-            } else {
-                customRange.style.display = 'none';
-            }
-            
-            // Get date range and update dashboard
-            const range = getDateRange(view);
-            dashboardDateFilter = range;
-            document.getElementById('currentViewLabel').textContent = range.label;
-            
-            // Refresh dashboard with new date range
-            if (realtimeDashboard && realtimeDashboard.stopAllCharts) {
-                realtimeDashboard.stopAllCharts();
-                setTimeout(() => {
-                    realtimeDashboard.startAllCharts();
-                }, 300);
-            }
-        }
-
-        function applyCustomDateRange() {
-            const fromDate = document.getElementById('dashboardDateFrom').value;
-            const toDate = document.getElementById('dashboardDateTo').value;
-            
-            if (!fromDate || !toDate) {
-                alert('Please select both dates');
-                return;
-            }
-            
-            if (new Date(fromDate) > new Date(toDate)) {
-                alert('Start date must be before end date');
-                return;
-            }
-            
-            dashboardDateFilter = {
-                startDate: fromDate,
-                endDate: toDate,
-                label: `📅 Custom Range (${fromDate} to ${toDate})`
-            };
-            
-            document.getElementById('currentViewLabel').textContent = dashboardDateFilter.label;
-            
-            // Refresh dashboard with new date range
-            if (realtimeDashboard && realtimeDashboard.stopAllCharts) {
-                realtimeDashboard.stopAllCharts();
-                setTimeout(() => {
-                    realtimeDashboard.startAllCharts();
-                }, 300);
-            }
-        }
-
-        // Generate API URL with date filtering
-        function getDashboardAPIUrl(baseUrl, dateFilter = null) {
-            const filter = dateFilter || dashboardDateFilter;
-            if (filter.startDate && filter.endDate) {
-                return `${baseUrl}?date_from=${filter.startDate}&date_to=${filter.endDate}`;
-            }
-            return baseUrl;
-        }
         
         const realtimeDashboard = {
             charts: {},
             
             startAllCharts() {
                 console.log('🚀 Starting live patient + station + time dashboard...');
-                console.log('📅 Date Filter:', dashboardDateFilter);
                 
                 if (!liveChartManager) {
                     console.error('❌ liveChartManager not available');
@@ -7461,37 +7283,33 @@ document.head.appendChild(allFloorsStyle);
                 }
                 
                 try {
-                    // Generate API URLs with date filtering
-                    const baseUrl = 'get_stations.php';
-                    const filteredUrl = getDashboardAPIUrl(baseUrl);
-
                     // 1️⃣ Patient Metrics - Waiting, Processing, Completed
                     liveChartManager.createLiveMetrics(
                         'metricsChart',
-                        filteredUrl,
+                        'api/get_station_today_patients.php?station_id=60',
                         realDataTransformers.patientMetrics
                     );
 
                     // 2️⃣ Station Efficiency - Patient count per station
                     liveChartManager.createLiveBarChart(
                         'barChart',
-                        filteredUrl,
+                        'api/get_station_today_patients.php?station_id=60',
                         realDataTransformers.stationEfficiency,
-                        '📊 Patient Count by Wait Time'
+                        '📊 Patients per Station'
                     );
 
                     // 3️⃣ Status Distribution - Waiting vs Processing vs Completed
                     liveChartManager.createLiveDonut(
                         'donutChart',
-                        filteredUrl,
+                        'api/get_station_today_patients.php?station_id=60',
                         realDataTransformers.statusDistribution,
-                        '⏱️ Wait Time Distribution'
+                        '📈 Patient Status'
                     );
 
                     // 4️⃣ Service Progress - Wait times
                     liveChartManager.createLiveProgress(
                         'progressChart',
-                        filteredUrl,
+                        'api/get_station_today_patients.php?station_id=60',
                         realDataTransformers.serviceProgress
                     );
 
@@ -7499,20 +7317,20 @@ document.head.appendChild(allFloorsStyle);
                     const patientTable = realDataTransformers.patientWaitingStatus;
                     liveChartManager.createLiveTable(
                         'tableChart',
-                        filteredUrl,
+                        'api/get_station_today_patients.php?station_id=60',
                         [
-                            { title: 'Station Name', key: 'patient_name' },
-                            { title: 'Code', key: 'hn' },
-                            { title: 'Avg Wait (min)', key: 'wait_time' },
-                            { title: 'Floor', key: 'station' },
-                            { title: 'Long Wait', key: 'procedure' }
+                            { title: 'Patient Name', key: 'patient_name' },
+                            { title: 'HN', key: 'hn' },
+                            { title: 'Wait Time (min)', key: 'wait_time' },
+                            { title: 'Station', key: 'station' },
+                            { title: 'Procedure', key: 'procedure' }
                         ],
                         patientTable,
-                        '⏳ Stations with Highest Wait Times'
+                        '⏳ Longest Waiting Patients'
                     );
                     
                     this.updateChartCount();
-                    console.log('✅ All live patient/station/time charts initialized with date filtering');
+                    console.log('✅ All live patient/station/time charts initialized');
                 } catch (error) {
                     console.error('❌ Error starting charts:', error);
                 }

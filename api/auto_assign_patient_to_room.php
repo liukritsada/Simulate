@@ -6,11 +6,8 @@
  * Logic:
  * 1. หาห้องว่าง (ไม่มีคนไข้รายอื่น)
  * 2. หาคนไข้ waiting คนแรกในคิว (ตามลำดับ time_start)
- * 3. ตรวจเชค procedure ต้องตรงกับที่ห้องรองรับ (specific หรือ all_from_station)
- * 4. ตรวจเชค: ไม่มีคนคิวก่อนหน้า (has_incomplete_previous = 0)
- * 5. ตรวจเชค: ถ้า procedure ต้องเครื่องมือ → ห้องต้องมีเครื่องมือพร้อม
- * 6. ตรวจเชค: ถ้า procedure ต้องพนักงาน → สถานีต้องมีพนักงาน working
- * 7. แอดคนไข้เข้าห้อง + เปลี่ยน status เป็น in_process
+ * 3. ตรวจเชคว่าไม่มีคนคิวก่อนหน้า (has_incomplete_previous = 0)
+ * 4. แอดคนไข้เข้าห้อง + เปลี่ยน status เป็น in_process
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -55,8 +52,9 @@ try {
             r.room_id,
             r.room_name,
             r.station_id
-        FROM station_rooms r
+        FROM rooms r
         WHERE r.station_id = :station_id
+        AND r.is_active = 1
         AND r.room_id NOT IN (
             SELECT DISTINCT sp.room_id
             FROM station_patients sp
@@ -82,7 +80,10 @@ try {
     foreach ($empty_rooms as $room) {
         error_log("🔍 Processing room {$room['room_id']} ({$room['room_name']})");
 
-        // หาคนไข้ waiting ตัวแรก (ตรวจเชคจำนวน requirements หลังจาก fetch)
+        // หาคนไข้ waiting ตัวแรกในคิว
+        // ✅ ตรวจเชค has_incomplete_previous = 0 (ไม่มีคนคิวก่อน)
+        // ✅ ตรวจเชค procedure ต้องตรงกับที่ห้องรองรับ (room_procedures)
+        // ✅ ตรวจเชค sequential flow: คนไข้ต้องเสร็จ procedures ก่อนหน้า (running_number ต่ำกว่า) ก่อน
         $patient_sql = "
             SELECT
                 sp.id,
@@ -92,13 +93,15 @@ try {
                 sp.status,
                 sp.time_start,
                 sp.procedure_id,
-                sp.procedure_code
+                sp.procedure_code,
+                sp.has_incomplete_previous,
+                sp.running_number
             FROM station_patients sp
-            WHERE sp.station_id = ?
-            AND sp.appointment_date = ?
+            WHERE sp.station_id = :station_id
+            AND sp.appointment_date = :current_date
             AND sp.status = 'waiting'
             AND sp.room_id IS NULL
-            AND (sp.time_start IS NULL OR sp.time_start <= ?)
+            AND (sp.time_start IS NULL OR sp.time_start <= :current_time)
             AND NOT EXISTS (
                 SELECT 1
                 FROM station_patients sp_prev
@@ -107,66 +110,48 @@ try {
                 AND sp_prev.time_start < sp.time_start
                 AND sp_prev.Actual_Time IS NULL
             )
+            -- ✅ SEQUENTIAL FLOW CHECK: ต้องไม่มี procedures ก่อนหน้า (running_number ต่ำกว่า) ที่ยังไม่เสร็จ
+            AND NOT EXISTS (
+                SELECT 1
+                FROM station_patients sp_earlier
+                WHERE sp_earlier.hn = sp.hn
+                AND sp_earlier.appointment_date = sp.appointment_date
+                AND sp_earlier.running_number < sp.running_number
+                AND sp_earlier.Actual_Time IS NULL
+            )
+            AND (
+                -- ✅ ห้องรองรับ procedure ทั้งหมดของสถานี (all_from_station)
+                EXISTS (
+                    SELECT 1
+                    FROM room_procedures rp
+                    WHERE rp.room_id = :room_id
+                    AND rp.procedure_type = 'all_from_station'
+                )
+                OR
+                -- ✅ ห้องรองรับ procedure นี้โดยเฉพาะ (specific)
+                EXISTS (
+                    SELECT 1
+                    FROM room_procedures rp
+                    WHERE rp.room_id = :room_id
+                    AND rp.procedure_id = sp.procedure_id
+                    AND rp.procedure_type = 'specific'
+                )
+            )
             ORDER BY sp.time_start ASC, sp.running_number ASC
             LIMIT 1
         ";
 
         $stmt = $pdo->prepare($patient_sql);
         $stmt->execute([
-            $station_id,
-            $current_date,
-            $current_time
+            ':station_id' => $station_id,
+            ':current_date' => $current_date,
+            ':current_time' => $current_time,
+            ':room_id' => $room['room_id']
         ]);
         $patient = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$patient) {
-            error_log("   ℹ️ ไม่มีคนไข้ waiting ที่พร้อม");
-            continue;
-        }
-
-        // ✅ ตรวจเชค: ห้องรองรับ procedure นี้หรือไม่
-        $room_supports_stmt = $pdo->prepare("
-            SELECT COUNT(*) as cnt FROM room_procedures
-            WHERE room_id = ?
-            AND (procedure_type = 'all_from_station'
-                 OR (procedure_id = ? AND procedure_type = 'specific'))
-        ");
-        $room_supports_stmt->execute([$room['room_id'], $patient['procedure_id']]);
-        $supports = $room_supports_stmt->fetch(PDO::FETCH_ASSOC)['cnt'];
-
-        if (!$supports) {
-            error_log("   ℹ️ ห้องไม่รองรับ procedure นี้");
-            continue;
-        }
-
-        // ✅ ตรวจเชค: ถ้า procedure ต้องเครื่องมือ → ห้องมีเครื่องมือหรือไม่
-        $equipment_check = $pdo->prepare("
-            SELECT
-                (SELECT COUNT(*) FROM room_procedures WHERE room_id = ?
-                 AND procedure_id = ? AND equipment_required = 1) as needs_equipment,
-                (SELECT COUNT(*) FROM room_equipment WHERE room_id = ? AND is_active = 1) as has_equipment
-        ");
-        $equipment_check->execute([$room['room_id'], $patient['procedure_id'], $room['room_id']]);
-        $eq = $equipment_check->fetch(PDO::FETCH_ASSOC);
-
-        if ($eq['needs_equipment'] && !$eq['has_equipment']) {
-            error_log("   ℹ️ ห้องต้องการเครื่องมือแต่ไม่มี");
-            continue;
-        }
-
-        // ✅ ตรวจเชค: ถ้า procedure ต้องพนักงาน → ห้องมีพนักงาน working หรือไม่
-        $staff_check = $pdo->prepare("
-            SELECT
-                (SELECT COUNT(*) FROM room_procedures WHERE room_id = ?
-                 AND procedure_id = ? AND staff_required = 1) as needs_staff,
-                (SELECT COUNT(*) FROM station_staff WHERE station_id = ?
-                 AND status = 'working' AND assigned_room_id = ?) as has_staff
-        ");
-        $staff_check->execute([$room['room_id'], $patient['procedure_id'], $station_id, $room['room_id']]);
-        $st = $staff_check->fetch(PDO::FETCH_ASSOC);
-
-        if ($st['needs_staff'] && !$st['has_staff']) {
-            error_log("   ℹ️ ห้องต้องการพนักงานแต่ไม่มี");
+            error_log("   ℹ️ ไม่มีคนไข้ waiting ที่พร้อม (ตรวจเชค: ไม่มีคิวก่อน + เสร็จ procedures ก่อนหน้า + ห้องรองรับ procedure)");
             continue;
         }
 

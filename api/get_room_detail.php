@@ -203,6 +203,15 @@ try {
         WHERE sp.room_id = :room_id
           AND sp.appointment_date = :work_date
           AND sp.status IN ('waiting', 'in_process')
+          -- ✅ SEQUENTIAL FLOW: ต้องไม่มี procedures ก่อนหน้า (running_number ต่ำกว่า) ที่ยังไม่เสร็จ
+          AND NOT EXISTS (
+              SELECT 1
+              FROM station_patients sp_earlier
+              WHERE sp_earlier.hn = sp.hn
+              AND sp_earlier.appointment_date = sp.appointment_date
+              AND sp_earlier.running_number < sp.running_number
+              AND sp_earlier.Actual_Time IS NULL
+          )
         ORDER BY sp.in_process DESC, sp.running_number ASC
     ";
     

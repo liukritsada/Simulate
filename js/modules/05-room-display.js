@@ -669,6 +669,12 @@ function displayRoomPatientsModern(patients) {
             <div style="font-weight: 700; font-size: 16px; color: ${isOverdue ? "#ef4444" : "#10b981"};">
               ${p.wait_duration}น
             </div>
+            <!-- ✅ Show actual completion time if available -->
+            ${p.Actual_Time ? `
+              <div style="color: #10b981; font-weight: 600; margin-top: 4px;">
+                ✅ เสร็จ: ${p.Actual_Time}
+              </div>
+            ` : ""}
             ${isOverdue ? '<div style="color: #ef4444; font-weight: 600; margin-top: 4px;">⚠️ เกินเวลา</div>' : ""}
             ${isInProcess && p.countdown_exit_time ? `
               <div style="

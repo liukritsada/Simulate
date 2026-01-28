@@ -2505,8 +2505,14 @@ async function loadStationPatients(stationId, deptIds = null) {
                 </div>
               </div>
               <div style="text-align: right; font-size: 11px;">
-                <div>${patient.procedure || 'N/A'}</div>
-                <div style="color: #adb5bd;">คิว: ${patient.running_number || 'N/A'}</div>
+                <div style="font-weight: 600; margin-bottom: 4px;">${patient.procedure || 'N/A'}</div>
+                <div style="color: #adb5bd; margin-bottom: 2px;">คิว: ${patient.running_number || 'N/A'}</div>
+                <!-- ✅ Show actual completion time if available -->
+                ${patient.Actual_Time ? `
+                  <div style="font-weight: 600; color: #10b981; margin-top: 4px;">
+                    ✅ เสร็จ: ${patient.Actual_Time}
+                  </div>
+                ` : ''}
               </div>
             </div>
             <div style="font-size: 10px; color: #999; margin-top: 8px; text-align: center;">
@@ -2559,8 +2565,14 @@ async function loadStationPatients(stationId, deptIds = null) {
                 </div>
               </div>
               <div style="text-align: right; font-size: 11px;">
-                <div>${patient.procedure || 'N/A'}</div>
-                <div style="color: #adb5bd;">คิว: ${patient.running_number || 'N/A'}</div>
+                <div style="font-weight: 600; margin-bottom: 4px;">${patient.procedure || 'N/A'}</div>
+                <div style="color: #adb5bd; margin-bottom: 2px;">คิว: ${patient.running_number || 'N/A'}</div>
+                <!-- ✅ Show actual completion time if available -->
+                ${patient.Actual_Time ? `
+                  <div style="font-weight: 600; color: #10b981; margin-top: 4px;">
+                    ✅ เสร็จ: ${patient.Actual_Time}
+                  </div>
+                ` : ''}
               </div>
             </div>
             <div style="font-size: 10px; color: #999; margin-top: 8px; text-align: center;">

@@ -124,6 +124,15 @@ try {
             sp.time_start IS NULL
             OR sp.time_start <= :current_time
         )
+        -- ✅ SEQUENTIAL FLOW: ต้องเสร็จทั้งหมด procedures ก่อนหน้า (running_number ต่ำกว่า)
+        AND NOT EXISTS (
+            SELECT 1
+            FROM station_patients sp_earlier
+            WHERE sp_earlier.hn = sp.hn
+            AND sp_earlier.appointment_date = sp.appointment_date
+            AND sp_earlier.running_number < sp.running_number
+            AND sp_earlier.Actual_Time IS NULL
+        )
     ";
 
     // ✅ Named parameters with date range and current time
