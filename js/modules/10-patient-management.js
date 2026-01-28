@@ -192,20 +192,19 @@ async function loadPatientsList() {
             
             patients.forEach((patient, index) => {
                 const row = document.createElement('tr');
-                row.style.cssText = 'transition: all 0.2s ease; border-bottom: 1px solid #f0f0f0;';
-                
+
                 // 🎯 ฟังก์ชันคำนวณเวลารอ (ใช้ time_target และ time_target_wait จาก station_patients)
                 function getWaitingTimeStatus(appointmentDate, arrivalTime, startTime, timeTarget, timeTargetWait) {
-                    if (!appointmentDate) return { emoji: '⏳', color: '#3498db', text: 'ไม่ทราบ' };
+                    if (!appointmentDate) return { emoji: '⏳', color: '#3498db', text: 'ไม่ทราบ', bgColor: '#e8f4f8' };
 
                     // ถ้ากำลังทำหัตถการ (มี start_time แล้ว)
                     if (startTime) {
-                        return { emoji: '⚕️', color: '#f39c12', text: 'กำลังรักษา' };
+                        return { emoji: '⚕️', color: '#f39c12', text: 'กำลังรักษา', bgColor: '#fffaf0' };
                     }
 
                     // ถ้ายังไม่มาถึง (ไม่มี arrival_time)
                     if (!arrivalTime) {
-                        return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่มาถึง' };
+                        return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่มาถึง', bgColor: '#f5f0fa' };
                     }
 
                     // คำนวณเวลารอ (จาก arrival_time)
@@ -216,7 +215,7 @@ async function loadPatientsList() {
 
                     // ถ้ายังไม่ถึงเวลา
                     if (diffMinutes < 0) {
-                        return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่ถึงเวลา' };
+                        return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่ถึงเวลา', bgColor: '#f5f0fa' };
                     }
 
                     // ✅ เกณฑ์ใหม่: เปรียบเทียบเวลาปัจจุบันกับ time_target และ time_target_wait
@@ -225,41 +224,41 @@ async function loadPatientsList() {
 
                     // 😊 ได้ทำเลย = เวลาปัจจุบัน ≤ time_target (ยังไม่เกินเวลาที่ต้องเสร็จ)
                     if (timeTarget && currentTimeStr <= timeTarget) {
-                        return { emoji: '😊', color: '#27ae60', text: `รอ ${diffMinutes} นาที` };
+                        return { emoji: '😊', color: '#27ae60', text: `รอ ${diffMinutes} นาที`, bgColor: '#f0fdf4' };
                     }
                     // 😐 รอไม่เกิน = time_target < เวลาปัจจุบัน ≤ time_target_wait
                     else if (timeTargetWait && currentTimeStr <= timeTargetWait) {
-                        return { emoji: '😐', color: '#f39c12', text: `รอ ${diffMinutes} นาที` };
+                        return { emoji: '😐', color: '#f39c12', text: `รอ ${diffMinutes} นาที`, bgColor: '#fffbf0' };
                     }
                     // 😡 รอเกินไป = เวลาปัจจุบัน > time_target_wait
                     else {
-                        return { emoji: '😡', color: '#e74c3c', text: `รอ ${diffMinutes} นาที` };
+                        return { emoji: '😡', color: '#e74c3c', text: `รอ ${diffMinutes} นาที`, bgColor: '#fef2f2' };
                     }
                 }
-                
+
                 // 🎭 ฟังก์ชันแสดงเพศ
                 function getGenderIcon(gender) {
                     // ถ้าไม่มีข้อมูล ให้แสดง ?
                     if (!gender) return { icon: '?', color: '#95a5a6', bgColor: '#ecf0f1' };
-                    
+
                     const genderLower = gender.toLowerCase().trim();
-                    
+
                     if (genderLower === 'm' || genderLower === 'male') {
                         return { icon: 'M', color: '#3498db', bgColor: '#ebf5fb' };
                     } else if (genderLower === 'f' || genderLower === 'female') {
                         return { icon: 'F', color: '#e91e63', bgColor: '#fce4ec' };
                     }
-                    
+
                     return { icon: '?', color: '#95a5a6', bgColor: '#ecf0f1' };
                 }
-                
+
                 // สถานะ: สี และ ข้อความ
                 const statusConfig = {
                     'waiting': { color: '#3498db', text: 'รอคิว', icon: '⏳' },
                     'in_process': { color: '#f39c12', text: 'กำลังทำ', icon: '⚕️' },
                     'completed': { color: '#27ae60', text: 'เสร็จสิ้น', icon: '✅' }
                 };
-                
+
                 const status = statusConfig[patient.status] || { color: '#95a5a6', text: 'ไม่ทราบ', icon: '❓' };
                 const genderIcon = getGenderIcon(patient.gender);
                 const waitingTimeData = getWaitingTimeStatus(
@@ -269,6 +268,13 @@ async function loadPatientsList() {
                     patient.time_target,      // ✅ เวลาที่ต้องเสร็จ
                     patient.time_target_wait  // ✅ ช้าสุดที่ทำเสร็จได้
                 );
+
+                // ✅ Set row background color based on waiting time status
+                row.style.cssText = `
+                    background: ${waitingTimeData.bgColor};
+                    transition: all 0.2s ease;
+                    border-bottom: 1px solid #f0f0f0;
+                `;
                 
                 row.innerHTML = `
                     <td style="padding: 14px 12px; text-align: center; color: #333; font-weight: 700; font-size: 13px;">
