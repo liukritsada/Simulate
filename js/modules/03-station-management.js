@@ -2413,11 +2413,11 @@ async function loadStationPatients(stationId, deptIds = null) {
       </div>
     `;
 
-    // Helper function to get gender emoji
-    const getGenderEmoji = (sex) => {
-      if (sex === 1 || sex === 'M' || sex === 'male') return '👨';
-      if (sex === 2 || sex === 'F' || sex === 'female') return '👩';
-      return '👤';
+    // Helper function to get gender emoji and text
+    const getGenderInfo = (sex) => {
+      if (sex === 1 || sex === 'M' || sex === 'male') return { emoji: '👨', text: 'ชาย', color: '#3498db' };
+      if (sex === 2 || sex === 'F' || sex === 'female') return { emoji: '👩', text: 'หญิง', color: '#e91e63' };
+      return { emoji: '👤', text: 'ไม่ระบุ', color: '#95a5a6' };
     };
 
     // Helper function to get waiting status emoji and color
@@ -2462,7 +2462,7 @@ async function loadStationPatients(stationId, deptIds = null) {
         // Debug log
         console.log(`🔍 Patient: ${patient.patient_name}, has_incomplete_previous:`, patient.has_incomplete_previous, 'type:', typeof patient.has_incomplete_previous);
 
-        const genderEmoji = getGenderEmoji(patient.sex);
+        const genderInfo = getGenderInfo(patient.sex);
         const waitStatus = getWaitingStatus(patient.time_target, patient.time_target_wait, patient.has_incomplete_previous);
         patientsHTML += `
           <div
@@ -2482,7 +2482,8 @@ async function loadStationPatients(stationId, deptIds = null) {
             <div style="display: flex; justify-content: space-between; align-items: start;">
               <div style="flex: 1;">
                 <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 18px;">${genderEmoji}</span>
+                  <span style="font-size: 18px;">${genderInfo.emoji}</span>
+                  <span style="font-size: 11px; color: ${genderInfo.color}; font-weight: 600;">${genderInfo.text}</span>
                   <span>${patient.patient_name}</span>
                   <span style="font-size: 20px; margin-left: 4px;">${waitStatus.emoji}</span>
                 </div>
@@ -2515,7 +2516,7 @@ async function loadStationPatients(stationId, deptIds = null) {
     if (waitingPatients.length > 0) {
       patientsHTML += '<h4 style="margin: 15px 0 10px 0; color: #D35400;">⏰ รอรักษา</h4>';
       waitingPatients.forEach(patient => {
-        const genderEmoji = getGenderEmoji(patient.sex);
+        const genderInfo = getGenderInfo(patient.sex);
         const waitStatus = getWaitingStatus(patient.time_target, patient.time_target_wait, patient.has_incomplete_previous);
         patientsHTML += `
           <div
@@ -2535,7 +2536,8 @@ async function loadStationPatients(stationId, deptIds = null) {
             <div style="display: flex; justify-content: space-between; align-items: start;">
               <div style="flex: 1;">
                 <div style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 18px;">${genderEmoji}</span>
+                  <span style="font-size: 18px;">${genderInfo.emoji}</span>
+                  <span style="font-size: 11px; color: ${genderInfo.color}; font-weight: 600;">${genderInfo.text}</span>
                   <span>${patient.patient_name}</span>
                   <span style="font-size: 20px; margin-left: 4px;">${waitStatus.emoji}</span>
                 </div>
