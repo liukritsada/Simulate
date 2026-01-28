@@ -217,14 +217,14 @@ try {
         $params[] = $doctor_code;
     }
 
-    // ✅ IMPORTANT: Select ONLY the LATEST station record for each patient (highest running_number that's not completed)
-    // This ensures we display the CURRENT station's data, not all stations
+    // ✅ IMPORTANT: Select the FIRST INCOMPLETE procedure for each patient (MIN running_number where Actual_Time IS NULL)
+    // This ensures we show what the patient needs to do next, not the last procedure
     $sql .= " AND sp.running_number = (
-        SELECT MAX(sp_max.running_number)
-        FROM station_patients sp_max
-        WHERE sp_max.hn = sp.hn
-        AND sp_max.appointment_date = sp.appointment_date
-        AND sp_max.status IN ('waiting', 'in_process')
+        SELECT MIN(sp_min.running_number)
+        FROM station_patients sp_min
+        WHERE sp_min.hn = sp.hn
+        AND sp_min.appointment_date = sp.appointment_date
+        AND sp_min.Actual_Time IS NULL
     )
     GROUP BY sp.hn, sp.appointment_date
     ORDER BY COALESCE(first_proc.time_start, sp.time_start) ASC, sp.running_number ASC, sp.station_id ASC";
