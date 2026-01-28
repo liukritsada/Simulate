@@ -194,9 +194,12 @@ try {
             CASE
                 WHEN sp.time_target IS NOT NULL AND CURRENT_TIME() > sp.time_target THEN 1
                 ELSE 0
-            END AS is_overdue
+            END AS is_overdue,
+            -- ✅ Get gender/sex from patients table
+            p.sex
         FROM station_patients sp
         LEFT JOIN room_procedures rp ON rp.room_id = sp.room_id AND rp.procedure_id = sp.procedure_id
+        LEFT JOIN patients p ON sp.hn = p.hn AND sp.appointment_date = p.appointment_date
         WHERE sp.room_id = :room_id
           AND sp.appointment_date = :work_date
           AND sp.status IN ('waiting', 'in_process')

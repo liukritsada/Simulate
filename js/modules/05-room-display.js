@@ -442,6 +442,20 @@ function displayRoomProceduresVertical(procedures) {
 // ========================================
 
 // ========================================
+// 👥 GENDER HELPER FUNCTION
+// ========================================
+
+function getGenderInfo(sex) {
+  if (sex === 1 || sex === 'M' || sex === 'male') {
+    return { emoji: '👨', text: 'ชาย', color: '#3498db' };
+  }
+  if (sex === 2 || sex === 'F' || sex === 'female') {
+    return { emoji: '👩', text: 'หญิง', color: '#e91e63' };
+  }
+  return { emoji: '👤', text: 'ไม่ระบุ', color: '#95a5a6' };
+}
+
+// ========================================
 // 🕐 COUNTDOWN TIMER MANAGEMENT
 // ========================================
 
@@ -597,6 +611,9 @@ function displayRoomPatientsModern(patients) {
     const borderColor = isOverdue ? "#ef4444" : "#10b981";
     const bgColor = isOverdue ? "#fef2f2" : "#f0fdf4";
 
+    // ✅ Get gender info
+    const genderInfo = getGenderInfo(p.sex);
+
     html += `
       <div style="
         padding: 12px;
@@ -616,7 +633,13 @@ function displayRoomPatientsModern(patients) {
               ${isOverdue ? "🔴" : "🟢"} ${p.patient_name}
             </div>
             <div style="font-size: 12px; color: #6b7280;">
-              <div>HN: <strong>${p.hn}</strong></div>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <div>HN: <strong>${p.hn}</strong></div>
+                <div style="text-align: center;">
+                  <div style="font-size: 16px;">${genderInfo.emoji}</div>
+                  <div style="font-size: 10px; color: #666; margin-top: 2px;">${genderInfo.text}</div>
+                </div>
+              </div>
               <div>
                 ${p.procedure_name || "ไม่ระบุ"}
               </div>
