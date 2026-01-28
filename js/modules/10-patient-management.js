@@ -239,17 +239,17 @@ async function loadPatientsList() {
                 // 🎭 ฟังก์ชันแสดงเพศ
                 function getGenderIcon(gender) {
                     // ถ้าไม่มีข้อมูล ให้แสดง ?
-                    if (!gender) return { icon: '?', color: '#95a5a6', bgColor: '#ecf0f1' };
+                    if (!gender) return { icon: '?', color: '#95a5a6', bgColor: '#ecf0f1', text: 'ไม่ระบุ' };
 
                     const genderLower = gender.toLowerCase().trim();
 
                     if (genderLower === 'm' || genderLower === 'male') {
-                        return { icon: 'M', color: '#3498db', bgColor: '#ebf5fb' };
+                        return { icon: 'M', color: '#3498db', bgColor: '#ebf5fb', text: 'ชาย' };
                     } else if (genderLower === 'f' || genderLower === 'female') {
-                        return { icon: 'F', color: '#e91e63', bgColor: '#fce4ec' };
+                        return { icon: 'F', color: '#e91e63', bgColor: '#fce4ec', text: 'หญิง' };
                     }
 
-                    return { icon: '?', color: '#95a5a6', bgColor: '#ecf0f1' };
+                    return { icon: '?', color: '#95a5a6', bgColor: '#ecf0f1', text: 'ไม่ระบุ' };
                 }
 
                 // สถานะ: สี และ ข้อความ
@@ -281,19 +281,24 @@ async function loadPatientsList() {
                         ${index + 1}
                     </td>
                     <td style="padding: 14px 12px; text-align: center;">
-                        <span style="
-                            display: inline-block;
-                            width: 32px;
-                            height: 32px;
-                            line-height: 32px;
-                            border-radius: 50%;
-                            background: ${genderIcon.bgColor};
-                            color: ${genderIcon.color};
-                            font-weight: 700;
-                            font-size: 13px;
-                        ">
-                            ${genderIcon.icon}
-                        </span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <span style="
+                                display: inline-block;
+                                width: 32px;
+                                height: 32px;
+                                line-height: 32px;
+                                border-radius: 50%;
+                                background: ${genderIcon.bgColor};
+                                color: ${genderIcon.color};
+                                font-weight: 700;
+                                font-size: 13px;
+                            ">
+                                ${genderIcon.icon}
+                            </span>
+                            <span style="font-size: 11px; color: ${genderIcon.color}; font-weight: 600;">
+                                ${genderIcon.text}
+                            </span>
+                        </div>
                     </td>
                     <td style="padding: 14px 12px; color: #333; font-weight: 600; font-size: 13px;">
                         ${patient.patient_name}
