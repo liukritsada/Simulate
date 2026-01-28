@@ -9,7 +9,9 @@
       "Bash(php -l:*)",
       "Bash(git reset:*)",
       "Bash(tail:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "Bash(php -r:*)"
     ]
   }
 }

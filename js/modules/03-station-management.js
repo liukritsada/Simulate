@@ -2506,7 +2506,7 @@ async function loadStationPatients(stationId, deptIds = null) {
               </div>
               <div style="text-align: right; font-size: 11px;">
                 <div style="font-weight: 600; margin-bottom: 4px;">${patient.procedure || 'N/A'}</div>
-                <div style="color: #adb5bd; margin-bottom: 2px;">คิว: ${patient.running_number || 'N/A'}</div>
+                
                 <!-- ✅ Show actual completion time if available -->
                 ${patient.Actual_Time ? `
                   <div style="font-weight: 600; color: #10b981; margin-top: 4px;">
@@ -2566,7 +2566,7 @@ async function loadStationPatients(stationId, deptIds = null) {
               </div>
               <div style="text-align: right; font-size: 11px;">
                 <div style="font-weight: 600; margin-bottom: 4px;">${patient.procedure || 'N/A'}</div>
-                <div style="color: #adb5bd; margin-bottom: 2px;">คิว: ${patient.running_number || 'N/A'}</div>
+                <div style="color: #adb5bd; margin-bottom: 2px;">: ${patient.running_number || 'N/A'}</div>
                 <!-- ✅ Show actual completion time if available -->
                 ${patient.Actual_Time ? `
                   <div style="font-weight: 600; color: #10b981; margin-top: 4px;">

@@ -193,49 +193,6 @@ async function loadPatientsList() {
             patients.forEach((patient, index) => {
                 const row = document.createElement('tr');
 
-                // 🎯 ฟังก์ชันคำนวณเวลารอ (ใช้ time_target และ time_target_wait จาก station_patients)
-                function getWaitingTimeStatus(appointmentDate, arrivalTime, startTime, timeTarget, timeTargetWait) {
-                    if (!appointmentDate) return { emoji: '⏳', color: '#3498db', text: 'ไม่ทราบ', bgColor: '#e8f4f8' };
-
-                    // ถ้ากำลังทำหัตถการ (มี start_time แล้ว)
-                    if (startTime) {
-                        return { emoji: '⚕️', color: '#f39c12', text: 'กำลังรักษา', bgColor: '#fffaf0' };
-                    }
-
-                    // ถ้ายังไม่มาถึง (ไม่มี arrival_time)
-                    if (!arrivalTime) {
-                        return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่มาถึง', bgColor: '#f5f0fa' };
-                    }
-
-                    // คำนวณเวลารอ (จาก arrival_time)
-                    const arrivalDateTime = new Date(appointmentDate + 'T' + arrivalTime).getTime();
-                    const now = new Date().getTime();
-                    const diffMs = now - arrivalDateTime;
-                    const diffMinutes = Math.floor(diffMs / 60000);
-
-                    // ถ้ายังไม่ถึงเวลา
-                    if (diffMinutes < 0) {
-                        return { emoji: '📅', color: '#9b59b6', text: 'ยังไม่ถึงเวลา', bgColor: '#f5f0fa' };
-                    }
-
-                    // ✅ เกณฑ์ใหม่: เปรียบเทียบเวลาปัจจุบันกับ time_target และ time_target_wait
-                    const currentTime = new Date();
-                    const currentTimeStr = currentTime.toTimeString().split(' ')[0]; // HH:MM:SS
-
-                    // 😊 ได้ทำเลย = เวลาปัจจุบัน ≤ time_target (ยังไม่เกินเวลาที่ต้องเสร็จ)
-                    if (timeTarget && currentTimeStr <= timeTarget) {
-                        return { emoji: '😊', color: '#27ae60', text: `รอ ${diffMinutes} นาที`, bgColor: '#f0fdf4' };
-                    }
-                    // 😐 รอไม่เกิน = time_target < เวลาปัจจุบัน ≤ time_target_wait
-                    else if (timeTargetWait && currentTimeStr <= timeTargetWait) {
-                        return { emoji: '😐', color: '#f39c12', text: `รอ ${diffMinutes} นาที`, bgColor: '#fffbf0' };
-                    }
-                    // 😡 รอเกินไป = เวลาปัจจุบัน > time_target_wait
-                    else {
-                        return { emoji: '😡', color: '#e74c3c', text: `รอ ${diffMinutes} นาที`, bgColor: '#fef2f2' };
-                    }
-                }
-
                 // 🎭 ฟังก์ชันแสดงเพศ
                 function getGenderIcon(gender) {
                     // ถ้าไม่มีข้อมูล ให้แสดง ?
@@ -255,24 +212,50 @@ async function loadPatientsList() {
 
                 // สถานะ: สี และ ข้อความ
                 const statusConfig = {
-                    'waiting': { color: '#3498db', text: 'รอคิว', icon: '⏳' },
-                    'in_process': { color: '#f39c12', text: 'กำลังทำ', icon: '⚕️' },
-                    'completed': { color: '#27ae60', text: 'เสร็จสิ้น', icon: '✅' }
+                    'waiting': { color: '#3498db', text: 'รอคิว', icon: '⏳', bgColor: '#e8f4f8' },
+                    'in_process': { color: '#f39c12', text: 'กำลังทำ', icon: '⚕️', bgColor: '#fffaf0' },
+                    'completed': { color: '#27ae60', text: 'เสร็จสิ้น', icon: '✅', bgColor: '#f0fdf4' }
                 };
 
-                const status = statusConfig[patient.status] || { color: '#95a5a6', text: 'ไม่ทราบ', icon: '❓' };
+                const status = statusConfig[patient.status] || { color: '#95a5a6', text: 'ไม่ทราบ', icon: '❓', bgColor: 'white' };
                 const genderIcon = getGenderIcon(patient.gender);
-                const waitingTimeData = getWaitingTimeStatus(
-                    patient.appointment_date,
-                    patient.arrival_time,
-                    patient.start_time,
-                    patient.time_target,      // ✅ เวลาที่ต้องเสร็จ
-                    patient.time_target_wait  // ✅ ช้าสุดที่ทำเสร็จได้
-                );
 
-                // ✅ Set row background color based on waiting time status
+                // ✅ เริ่มต้นด้วย station status
+                let stationStatus = statusConfig[patient.current_station_status] || statusConfig['waiting'];
+
+                // ✅ คำนวณเวลารอและ exceeded status
+                let waitTimeDisplay = '-';
+
+                if (patient.current_station_status === 'waiting' && patient.arrival_time) {
+                    const arrivalDateTime = new Date(patient.appointment_date + 'T' + patient.arrival_time).getTime();
+                    const now = new Date().getTime();
+                    const diffMinutes = Math.floor((now - arrivalDateTime) / 60000);
+
+                    if (diffMinutes >= 0) {
+                        waitTimeDisplay = `รอ ${diffMinutes} นาที`;
+
+                        // 😡 PRIORITY 1: เช็คถ้าเกินเวลา (time_target_wait) - ตัวแปรว่าง "โกรธแล้ว"
+                        // ✅ ตรวจเช็คนี้ก่อน เพราะเป็น priority สูงสุด - ต้องแสดงให้เห็นว่ารอนานเกินไปแล้ว
+                        if (patient.time_target_wait && typeof patient.time_target_wait === 'string') {
+                            const currentTime = new Date().toTimeString().split(' ')[0]; // HH:MM:SS
+                            console.log(`⏰ ${patient.patient_name}: currentTime=${currentTime}, time_target_wait=${patient.time_target_wait}, exceed=${currentTime > patient.time_target_wait}`);
+
+                            if (currentTime > patient.time_target_wait) {
+                                // ✅ เกินเวลา - แสดงสถานะโกรธแดง
+                                stationStatus = {
+                                    color: '#e74c3c',
+                                    text: '😡 โกรธแล้ว',
+                                    icon: '😡',
+                                    bgColor: '#fef2f2'
+                                };
+                            }
+                        }
+                    }
+                }
+
+                // ✅ Set row background color based on station status
                 row.style.cssText = `
-                    background: ${waitingTimeData.bgColor};
+                    background: ${stationStatus.bgColor};
                     transition: all 0.2s ease;
                     border-bottom: 1px solid #f0f0f0;
                 `;
@@ -314,7 +297,7 @@ async function loadPatientsList() {
                         ${patient.start_time || '-'}
                     </td>
                     <td style="padding: 14px 12px; text-align: center;">
-                        ${patient.status === 'in_process' && patient.countdown_exit_time ? `
+                        ${patient.current_station_status === 'in_process' && patient.countdown_exit_time ? `
                             <span id="countdown_${patient.patient_id}" style="
                                 background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
                                 color: white;
@@ -329,20 +312,31 @@ async function loadPatientsList() {
                                 <span style="font-size: 14px;">⏱️</span> นับถอยหลัง...
                             </span>
                         ` : `
-                            <span style="
-                                background: ${waitingTimeData.color}22;
-                                color: ${waitingTimeData.color};
-                                padding: 6px 12px;
-                                border-radius: 20px;
-                                font-size: 12px;
-                                font-weight: 700;
-                                display: inline-block;
-                                border: 1px solid ${waitingTimeData.color}44;
-                                white-space: nowrap;
-                            ">
-                                <span style="font-size: 16px;">${waitingTimeData.emoji}</span>
-                                ${waitingTimeData.text}
-                            </span>
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                <span style="
+                                    background: ${stationStatus.color}22;
+                                    color: ${stationStatus.color};
+                                    padding: 6px 12px;
+                                    border-radius: 20px;
+                                    font-size: 12px;
+                                    font-weight: 700;
+                                    display: inline-block;
+                                    border: 1px solid ${stationStatus.color}44;
+                                    white-space: nowrap;
+                                ">
+                                    <span style="font-size: 16px;">${stationStatus.icon}</span>
+                                    ${stationStatus.text}
+                                </span>
+                                ${waitTimeDisplay !== '-' && stationStatus.icon !== '😡' ? `
+                                    <span style="
+                                        font-size: 11px;
+                                        color: #666;
+                                        font-weight: 600;
+                                    ">
+                                        ${waitTimeDisplay}
+                                    </span>
+                                ` : ''}
+                            </div>
                         `}
                     </td>
                     
@@ -459,6 +453,15 @@ async function loadPatientsList() {
 
         if (loading) loading.style.display = 'none';
         console.log(`✅ Loaded ${patients.length} patients`);
+
+        // ⏸️ Auto-refresh disabled to prevent flicker - User must click "ค้นหา" to refresh
+        // if (window.patientsListAutoRefreshInterval) {
+        //     clearInterval(window.patientsListAutoRefreshInterval);
+        // }
+        // window.patientsListAutoRefreshInterval = setInterval(() => {
+        //     console.log('🔄 Auto-refreshing patient list...');
+        //     loadPatientsList();
+        // }, 5000);
 
     } catch (error) {
         console.error('❌ Error loading patients:', error);
@@ -938,22 +941,39 @@ function createPatientTabUI() {
         <div class="stations-container">
             <div class="stations-header">
                 <div class="floor-title">👥 จัดการผู้ป่วย</div>
-                <button class="btn btn-success" onclick="loadPatientsList()" style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    padding: 10px 20px;
-                    background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
-                    border: none;
-                    color: white;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-weight: 600;
-                    transition: all 0.3s;
-                    box-shadow: 0 2px 8px rgba(81, 207, 102, 0.3);
-                ">
-                    <i class="fas fa-search"></i> ค้นหา
-                </button>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button class="btn btn-success" onclick="loadPatientsList()" style="
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 10px 20px;
+                        background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+                        border: none;
+                        color: white;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        transition: all 0.3s;
+                        box-shadow: 0 2px 8px rgba(81, 207, 102, 0.3);
+                    ">
+                        <i class="fas fa-search"></i> ค้นหา
+                    </button>
+                    <div id="autoRefreshStatus" style="
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        padding: 8px 12px;
+                        background: rgba(100, 116, 139, 0.1);
+                        border: 1px solid rgba(100, 116, 139, 0.3);
+                        border-radius: 6px;
+                        color: #64748b;
+                        font-size: 12px;
+                        font-weight: 600;
+                    ">
+                        <span style="font-size: 12px;">ℹ️</span>
+                        <span>กดค้นหาเพื่ออัปเดต</span>
+                    </div>
+                </div>
             </div>
             
             <div style="
@@ -1079,6 +1099,14 @@ function createPatientTabUI() {
                     transform: translateY(20px);
                 }
             }
+            @keyframes pulse {
+                0%, 100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+            }
         </style>
     `;
 
@@ -1197,3 +1225,12 @@ async function populateDoctorsDropdown(dateValue) {
         console.error('❌ Error populating doctors dropdown:', error);
     }
 }
+
+// ========================================
+// 🧹 Cleanup handlers
+// ========================================
+window.addEventListener('beforeunload', () => {
+    Object.keys(stationCountdownTimers).forEach(patientId => {
+        clearInterval(stationCountdownTimers[patientId]);
+    });
+});
