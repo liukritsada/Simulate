@@ -179,28 +179,26 @@ try {
             WHERE running_number = 1
         ) as first_proc ON sp.hn = first_proc.hn AND sp.appointment_date = first_proc.appointment_date
         LEFT JOIN (
-            -- ✅ Get the LATEST station for current patient
+            -- ✅ Get the CURRENT station (first incomplete procedure)
+            -- Find the procedure with smallest running_number that hasn't been completed yet
             SELECT
-                sp_latest.hn,
-                sp_latest.appointment_date,
+                sp_current.hn,
+                sp_current.appointment_date,
                 s.station_id,
                 s.station_name,
-                sp_latest.procedure_code,
-                sp_latest.status as station_status
-            FROM station_patients sp_latest
-            INNER JOIN stations s ON sp_latest.station_id = s.station_id
-            WHERE sp_latest.status IN ('waiting', 'in_process')
-            AND sp_latest.Actual_Time IS NULL
-            AND NOT EXISTS (
-                -- ✅ Ensure this is the latest running_number for this patient
-                SELECT 1 FROM station_patients sp_check
-                WHERE sp_check.hn = sp_latest.hn
-                AND sp_check.appointment_date = sp_latest.appointment_date
-                AND sp_check.running_number > sp_latest.running_number
-                AND sp_check.status IN ('waiting', 'in_process')
-                AND sp_check.Actual_Time IS NULL
+                sp_current.procedure_code,
+                sp_current.status as station_status
+            FROM station_patients sp_current
+            INNER JOIN stations s ON sp_current.station_id = s.station_id
+            WHERE sp_current.Actual_Time IS NULL
+            AND sp_current.running_number = (
+                -- Find the MIN running_number for this patient that hasn't been completed
+                SELECT MIN(sp_min.running_number)
+                FROM station_patients sp_min
+                WHERE sp_min.hn = sp_current.hn
+                AND sp_min.appointment_date = sp_current.appointment_date
+                AND sp_min.Actual_Time IS NULL
             )
-            GROUP BY sp_latest.hn, sp_latest.appointment_date
         ) as current_station ON sp.hn = current_station.hn AND sp.appointment_date = current_station.appointment_date
         WHERE sp.appointment_date = ?
     ";
