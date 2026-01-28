@@ -298,7 +298,7 @@ try {
             'appointment_date' => $record['appointment_date'],
             'arrival_time' => $record['arrival_time'] ?? null,
             'room_id' => $record['room_id'],
-            'status' => $record['station_status'] ?? $record['patient_status'] ?? '-',
+            'status' => $record['current_station_status'] ?? $record['patient_status'] ?? '-',
             'doctor_code' => $doctorCodeValue ?? '-',
             'doctor_name' => $doctorNameValue,
             'start_time' => $record['time_start'] ?? null,
