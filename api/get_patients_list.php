@@ -200,6 +200,7 @@ try {
                 AND sp_check.status IN ('waiting', 'in_process')
                 AND sp_check.Actual_Time IS NULL
             )
+            GROUP BY sp_latest.hn, sp_latest.appointment_date
         ) as current_station ON sp.hn = current_station.hn AND sp.appointment_date = current_station.appointment_date
         WHERE sp.appointment_date = ?
     ";
