@@ -169,7 +169,7 @@ try {
         LEFT JOIN patients p ON sp.hn = p.hn AND sp.appointment_date = p.appointment_date
         LEFT JOIN room_procedures rp ON rp.room_id = sp.room_id AND rp.procedure_id = sp.procedure_id
         LEFT JOIN (
-            -- ✅ Get the LATEST station where patient is waiting or in-process
+            -- ✅ Get the LATEST station for current patient
             SELECT
                 sp_latest.hn,
                 sp_latest.appointment_date,
@@ -178,17 +178,18 @@ try {
                 sp_latest.procedure_code,
                 sp_latest.status as station_status
             FROM station_patients sp_latest
-            JOIN stations s ON sp_latest.station_id = s.station_id
+            INNER JOIN stations s ON sp_latest.station_id = s.station_id
             WHERE sp_latest.status IN ('waiting', 'in_process')
             AND sp_latest.Actual_Time IS NULL
-            AND sp_latest.running_number = (
-                SELECT MAX(sp_check.running_number)
-                FROM station_patients sp_check
+            AND NOT EXISTS (
+                -- ✅ Ensure this is the latest running_number for this patient
+                SELECT 1 FROM station_patients sp_check
                 WHERE sp_check.hn = sp_latest.hn
                 AND sp_check.appointment_date = sp_latest.appointment_date
+                AND sp_check.running_number > sp_latest.running_number
                 AND sp_check.status IN ('waiting', 'in_process')
+                AND sp_check.Actual_Time IS NULL
             )
-            GROUP BY sp_latest.hn, sp_latest.appointment_date
         ) as current_station ON sp.hn = current_station.hn AND sp.appointment_date = current_station.appointment_date
         WHERE sp.appointment_date = ?
     ";
