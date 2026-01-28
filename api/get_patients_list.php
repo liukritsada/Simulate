@@ -143,7 +143,8 @@ try {
             sp.status as station_status,
             p.status as patient_status,
             sp.doctor_code,
-            sp.time_start,
+            -- ✅ Get first procedure start time (running_number = 1)
+            COALESCE(first_proc.time_start, sp.time_start) as time_start,
             sp.time_target,
             sp.time_target_wait,
             sp.arrival_time,
@@ -168,6 +169,15 @@ try {
         FROM station_patients sp
         LEFT JOIN patients p ON sp.hn = p.hn AND sp.appointment_date = p.appointment_date
         LEFT JOIN room_procedures rp ON rp.room_id = sp.room_id AND rp.procedure_id = sp.procedure_id
+        LEFT JOIN (
+            -- ✅ Get first procedure (running_number = 1) start time for ordering
+            SELECT
+                hn,
+                appointment_date,
+                time_start
+            FROM station_patients
+            WHERE running_number = 1
+        ) as first_proc ON sp.hn = first_proc.hn AND sp.appointment_date = first_proc.appointment_date
         LEFT JOIN (
             -- ✅ Get the LATEST station for current patient
             SELECT
@@ -218,7 +228,7 @@ try {
         AND sp_max.status IN ('waiting', 'in_process')
     )
     GROUP BY sp.hn, sp.appointment_date
-    ORDER BY sp.time_start ASC, sp.running_number ASC, sp.station_id ASC";
+    ORDER BY COALESCE(first_proc.time_start, sp.time_start) ASC, sp.running_number ASC, sp.station_id ASC";
 
     // ✅ SEQUENTIAL FLOW: ต้องไม่มี procedures ก่อนหน้า (running_number ต่ำกว่า) ที่ยังไม่เสร็จ
     // Apply ONLY after getting latest records
