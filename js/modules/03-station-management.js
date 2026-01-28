@@ -2468,16 +2468,16 @@ async function loadStationPatients(stationId, deptIds = null) {
           <div
             onclick="openPatientModal(${patient.patient_id}, '${patient.patient_name.replace(/'/g, "\\'")}', '${patient.hn}', '${patient.appointment_date}', 0)"
             style="
-              background: rgba(0, 86, 179, 0.1);
+              background: ${waitStatus.bgColor};
               padding: 12px;
               border-radius: 8px;
               margin-bottom: 8px;
-              border-left: 3px solid #0056B3;
+              border-left: 3px solid ${waitStatus.color};
               cursor: pointer;
               transition: all 0.2s ease;
             "
-            onmouseover="this.style.background='rgba(0, 86, 179, 0.2)'; this.style.transform='translateX(4px)'"
-            onmouseout="this.style.background='rgba(0, 86, 179, 0.1)'; this.style.transform='translateX(0)'"
+            onmouseover="this.style.background='${waitStatus.bgColor}'; this.style.transform='translateX(4px)'; this.style.opacity='0.8'"
+            onmouseout="this.style.background='${waitStatus.bgColor}'; this.style.transform='translateX(0)'; this.style.opacity='1'"
           >
             <div style="display: flex; justify-content: space-between; align-items: start;">
               <div style="flex: 1;">
@@ -2522,16 +2522,16 @@ async function loadStationPatients(stationId, deptIds = null) {
           <div
             onclick="openPatientModal(${patient.patient_id}, '${patient.patient_name.replace(/'/g, "\\'")}', '${patient.hn}', '${patient.appointment_date}', 0)"
             style="
-              background: rgba(255, 152, 0, 0.1);
+              background: ${waitStatus.bgColor};
               padding: 12px;
               border-radius: 8px;
               margin-bottom: 8px;
-              border-left: 3px solid #D35400;
+              border-left: 3px solid ${waitStatus.color};
               cursor: pointer;
               transition: all 0.2s ease;
             "
-            onmouseover="this.style.background='rgba(255, 152, 0, 0.2)'; this.style.transform='translateX(4px)'"
-            onmouseout="this.style.background='rgba(255, 152, 0, 0.1)'; this.style.transform='translateX(0)'"
+            onmouseover="this.style.background='${waitStatus.bgColor}'; this.style.transform='translateX(4px)'; this.style.opacity='0.8'"
+            onmouseout="this.style.background='${waitStatus.bgColor}'; this.style.transform='translateX(0)'; this.style.opacity='1'"
           >
             <div style="display: flex; justify-content: space-between; align-items: start;">
               <div style="flex: 1;">
