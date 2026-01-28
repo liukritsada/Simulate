@@ -207,16 +207,6 @@ try {
         $params[] = $doctor_code;
     }
 
-    // ✅ SEQUENTIAL FLOW: ต้องไม่มี procedures ก่อนหน้า (running_number ต่ำกว่า) ที่ยังไม่เสร็จ
-    $sql .= " AND NOT EXISTS (
-        SELECT 1
-        FROM station_patients sp_earlier
-        WHERE sp_earlier.hn = sp.hn
-        AND sp_earlier.appointment_date = sp.appointment_date
-        AND sp_earlier.running_number < sp.running_number
-        AND sp_earlier.Actual_Time IS NULL
-    )";
-
     // ✅ IMPORTANT: Select ONLY the LATEST station record for each patient (highest running_number that's not completed)
     // This ensures we display the CURRENT station's data, not all stations
     $sql .= " AND sp.running_number = (
@@ -228,10 +218,31 @@ try {
     )
     GROUP BY sp.hn, sp.appointment_date
     ORDER BY sp.time_start ASC, sp.running_number ASC, sp.station_id ASC";
+
+    // ✅ SEQUENTIAL FLOW: ต้องไม่มี procedures ก่อนหน้า (running_number ต่ำกว่า) ที่ยังไม่เสร็จ
+    // Apply ONLY after getting latest records
+    // $sql_with_sequential = $sql . " AND NOT EXISTS (
+    //     SELECT 1
+    //     FROM station_patients sp_earlier
+    //     WHERE sp_earlier.hn = sp.hn
+    //     AND sp_earlier.appointment_date = sp.appointment_date
+    //     AND sp_earlier.running_number < sp.running_number
+    //     AND sp_earlier.Actual_Time IS NULL
+    // )";
     
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $records = $stmt->fetchAll();
+
+    // ✅ DEBUG: Log query execution
+    error_log("🔍 GET_PATIENTS_LIST DEBUG:");
+    error_log("   Date: $date");
+    error_log("   Status Filter: " . ($status ?: 'none'));
+    error_log("   Doctor Filter: " . ($doctor_code ?: 'none'));
+    error_log("   Records found: " . count($records));
+    if (count($records) > 0) {
+        error_log("   First record HN: " . $records[0]['hn']);
+    }
 
     // ========================================
     // STEP 5: Transform data
